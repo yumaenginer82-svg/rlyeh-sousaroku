@@ -1,0 +1,1737 @@
+<title>ルルイエ捜索録</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ルルイエ捜索録">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap">
+<style>
+/* Layout: one-screen game. Header strip, then the active view:
+   merge view = requests + info panel + 7x9 board; search view = wanted cards + crowd scene.
+   Landscape iPad puts the panels in a left rail. Deliberately single dark theme. */
+:root{
+  --abyss:#0a1518;
+  --ink:#03090b;
+  --line:#3b6b62;
+  --bone:#e6dcc3;
+  --stripe:#c0353d;
+  --glow:#72e0b2;
+  --paper:#11242a;
+  --panel2:#0d1d21;
+  --tile-a:#16302e;
+  --tile-b:#122927;
+  --stone-a:#1b2327;
+  --stone-b:#161d21;
+  --wood:#4b3a2a;
+  --wood-dark:#1f160f;
+  --gold:#c9a34a;
+  --veil:rgba(2,7,9,.74);
+  --f-display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  color-scheme:dark;
+}
+html{height:100%;box-sizing:border-box;background:var(--abyss)}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+body{height:100%;margin:0;background:radial-gradient(ellipse 120% 70% at 50% 115%,#123b35 0%,var(--abyss) 65%) var(--abyss);color:var(--bone);
+  font-family:var(--f-body);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;touch-action:none}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px;
+  padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px));padding-block:10px}
+
+/* Header */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;background:var(--paper);border:2px solid var(--line);border-radius:16px;
+  padding:10px 14px;box-shadow:0 4px 0 var(--ink);position:relative;overflow:hidden}
+.top::before,.panel::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,transparent,var(--glow),transparent)}
+.brand{font-family:var(--f-display);font-weight:800;font-size:18px;color:var(--glow);letter-spacing:.08em;text-shadow:0 0 10px rgba(114,224,178,.4)}
+.chapter{display:flex;align-items:baseline;gap:8px;min-width:0}
+.chapter span{font-size:12px;opacity:.7;letter-spacing:.08em}
+.chapter b{font-family:var(--f-display);font-size:17px;white-space:nowrap}
+.prog{display:flex;align-items:center;gap:8px;flex:1 1 140px;min-width:120px}
+.pbar{flex:1;height:12px;border-radius:999px;background:#071012;border:1px solid var(--line);overflow:hidden}
+.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#8a6d2a,var(--gold));transition:width .4s}
+.prog span{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--gold)}
+.res{display:flex;gap:8px}
+.pill{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.hbtns{display:flex;gap:6px;margin-left:auto}
+
+/* Buttons */
+.btn{font-family:var(--f-body);font-weight:700;font-size:15px;color:var(--bone);background:#173238;border:2px solid var(--line);border-radius:12px;
+  padding:8px 14px;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 3px 0 var(--ink);touch-action:manipulation;cursor:pointer;white-space:nowrap}
+.btn:active{transform:translateY(3px);box-shadow:0 0 0 var(--ink)}
+.btn:disabled{opacity:.38;cursor:default;transform:none;box-shadow:0 3px 0 var(--ink)}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.btn.small{padding:6px 10px;font-size:14px}
+.btn.tiny{padding:4px 10px;font-size:13px;border-radius:10px}
+.btn.gold{background:var(--gold);color:var(--ink);border-color:#e3c77a}
+.btn.danger{background:#5a1a1e;border-color:var(--stripe)}
+.btn.primary{background:var(--stripe);color:#fff;border-color:#e0646b;font-family:var(--f-display);font-size:19px;padding:12px 26px;letter-spacing:.08em}
+.btn b{font-variant-numeric:tabular-nums}
+
+/* Views */
+.view{min-height:0;min-width:0;display:grid;gap:10px}
+.merge{grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"orders" "board" "info"}
+.search{grid-template-rows:auto minmax(0,1fr);grid-template-areas:"orders" "board"}
+.side{grid-area:orders;display:flex;flex-direction:column;gap:8px;min-width:0}
+.wrap{grid-area:board;position:relative;min-width:0;min-height:0;display:grid;place-items:center}
+.info{grid-area:info}
+
+/* Orders */
+.orders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.order{position:relative;background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:8px 10px;display:flex;flex-direction:column;gap:6px;min-width:0;
+  box-shadow:0 3px 0 var(--ink);transition:border-color .2s,box-shadow .2s}
+.order.ready{border-color:var(--gold);box-shadow:0 3px 0 var(--ink),0 0 16px rgba(201,163,74,.35)}
+.npc{display:flex;align-items:center;gap:6px;min-width:0}
+.npc .face{font-size:22px}
+.npc .nm{font-size:12px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.needs{display:flex;gap:6px}
+.need{position:relative;width:44px;height:44px;display:grid;place-items:center;font-size:28px;background:var(--panel2);border:1px solid var(--line);border-radius:10px}
+.need i{position:absolute;right:-5px;top:-5px;width:18px;height:18px;border-radius:50%;background:var(--glow);color:var(--ink);font-size:12px;font-style:normal;font-weight:700;display:grid;place-items:center}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.rew{font-size:13px;font-weight:700;color:var(--gold);white-space:nowrap}
+.investigate{animation:beckon 2.2s ease-in-out infinite}
+.empty-orders{grid-column:1/-1;font-size:13px;opacity:.7;padding:8px}
+
+/* Info panel */
+.info{display:flex;align-items:center;gap:12px;background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:10px 14px;min-height:84px;box-shadow:0 3px 0 var(--ink)}
+.info .big{font-size:44px;line-height:1;width:56px;text-align:center;flex:none}
+.info .txt{flex:1;min-width:0}
+.info .txt b{font-family:var(--f-display);font-size:17px}
+.info .txt small{font-family:var(--f-body);font-size:12px;color:var(--gold);margin-left:4px}
+.info p{margin:2px 0 0;font-size:13px;line-height:1.55}
+.info .acts{display:flex;flex-direction:column;gap:6px;flex:none}
+.muted{opacity:.7}
+
+/* Boards */
+.board{position:relative;display:grid;grid-template-columns:repeat(var(--cols,7),var(--cell,48px));grid-auto-rows:var(--cell,48px);
+  border:2px solid var(--line);border-radius:16px;box-shadow:0 5px 0 var(--ink),0 0 40px rgba(114,224,178,.1);touch-action:none;
+  background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,0,0,.45) 100%),
+    repeating-conic-gradient(var(--tile-a) 0 25%,var(--tile-b) 0 50%) 0 0/calc(var(--cell,48px)*2) calc(var(--cell,48px)*2)}
+.board.scene{background:radial-gradient(ellipse at 50% 40%,rgba(114,224,178,.06),rgba(0,0,0,.55) 100%),
+    repeating-conic-gradient(var(--stone-a) 0 25%,var(--stone-b) 0 50%) 0 0/calc(var(--cell,48px)*2) calc(var(--cell,48px)*2)}
+.cell{position:relative;display:grid;place-items:center;font-size:calc(var(--cell,48px)*.66);line-height:1}
+.cell .p{display:grid;place-items:center;width:100%;height:100%;position:relative}
+.cell .e{display:block;transform:rotate(var(--r,0deg));filter:drop-shadow(0 2px 1px rgba(0,0,0,.6))}
+.cell .t3 .e,.cell .t4 .e{filter:drop-shadow(0 0 4px var(--gold))}
+.cell .t5 .e{filter:drop-shadow(0 0 7px var(--glow)) drop-shadow(0 0 2px var(--glow))}
+.cell .gen::before{content:"";position:absolute;inset:8%;border-radius:50%;background:radial-gradient(circle,rgba(114,224,178,.28),rgba(114,224,178,.04) 70%);
+  border:2px solid rgba(114,224,178,.5);animation:breathe 3s ease-in-out infinite}
+.cell .lv{position:absolute;right:4%;bottom:4%;font-size:calc(var(--cell,48px)*.18);font-family:var(--f-body);font-weight:700;background:var(--gold);color:var(--ink);
+  border-radius:6px;padding:1px 4px;line-height:1.2}
+.cell .prop{opacity:.75;font-size:.85em}
+.cell .cover{font-size:1.12em;animation:sway 4.2s ease-in-out infinite}
+.card{cursor:pointer}
+.order.special{border-color:var(--stripe);background:linear-gradient(160deg,#2a1418,var(--paper) 60%)}
+.order.special.ready{box-shadow:0 3px 0 var(--ink),0 0 18px rgba(192,53,61,.55)}
+.sp-tag{font-size:11px;font-weight:700;color:#fff;background:var(--stripe);border-radius:6px;padding:1px 6px;margin-left:auto;white-space:nowrap}
+.seal{width:88%;height:88%;border:2px solid #000;border-radius:6px;position:relative;
+  background:repeating-linear-gradient(0deg,var(--wood) 0 30%,var(--wood-dark) 30% 34%);box-shadow:inset 0 0 8px rgba(0,0,0,.7)}
+.seal::after{content:"✴";position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--cell,48px)*.4);color:var(--glow);opacity:.5;
+  text-shadow:0 0 6px var(--glow);animation:sigil 3.5s ease-in-out infinite}
+.cell.want{background:radial-gradient(circle,rgba(201,163,74,.32),transparent 62%)}
+.cell.sel::after{content:"";position:absolute;inset:3%;border:3px solid var(--glow);border-radius:14px;box-shadow:0 0 10px var(--glow);pointer-events:none}
+.cell::before{content:"";position:absolute;inset:6%;border-radius:50%;pointer-events:none;opacity:0;transition:opacity .12s}
+.cell.match::before{opacity:1;background:rgba(114,224,178,.22)}
+.cell.hover::before{opacity:1;background:rgba(230,220,195,.3)}
+.cell.can::before{opacity:1;background:var(--gold)}
+.cell.lift .p{opacity:.2}
+.cell.found::after{content:"";position:absolute;inset:2%;border:4px solid var(--stripe);border-radius:50%;pointer-events:none;box-shadow:0 0 10px var(--stripe)}
+.cell.got::after{animation:ring .5s ease-out}
+.cell.pop .p{animation:pop .4s cubic-bezier(.3,1.6,.5,1)}
+.cell.land .p{animation:land .2s ease-out}
+.cell.shake .p{animation:shake .4s}
+.cell.wiggle .p{animation:wiggle .35s}
+.dust{position:absolute;inset:8%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,var(--glow) 0 18%,rgba(114,224,178,.25) 40%,transparent 65%);animation:dust .6s ease-out forwards}
+.ghost{position:fixed;left:0;top:0;z-index:50;pointer-events:none;line-height:1;filter:drop-shadow(0 8px 6px rgba(0,0,0,.6))}
+.spark{position:absolute;z-index:12;width:8px;height:8px;border-radius:50%;pointer-events:none;background:var(--glow);box-shadow:0 0 8px var(--glow);
+  transform:translate(-50%,-50%);animation:spark .6s ease-out forwards}
+.spark.gold{background:var(--gold);box-shadow:0 0 10px var(--gold);width:10px;height:10px}
+.float{position:absolute;z-index:20;pointer-events:none;transform:translate(-50%,-50%);white-space:nowrap;font-family:var(--f-display);font-weight:800;
+  font-size:18px;color:var(--bone);text-shadow:2px 0 var(--ink),-2px 0 var(--ink),0 2px var(--ink),0 -2px var(--ink);animation:float 1.1s ease-out forwards}
+.float.ok{color:var(--glow)}
+.float.gold{color:var(--gold)}
+.float.bad{color:#ff8a8f}
+.scope{position:absolute;z-index:15;pointer-events:none;border-radius:50%;transform:translate(-50%,-50%);border:3px solid var(--glow);
+  background:radial-gradient(circle,rgba(114,224,178,.16),transparent 70%);box-shadow:0 0 18px var(--glow),0 0 0 9999px rgba(0,0,0,.5);animation:scope 3.4s ease-out forwards}
+
+/* Search header */
+.mission{background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:10px 14px;box-shadow:0 3px 0 var(--ink);display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.mission h2{margin:0;font-family:var(--f-display);font-size:18px;letter-spacing:.06em;flex:1 1 100%}
+.mission h2 small{display:block;font-family:var(--f-body);font-size:12px;opacity:.7;letter-spacing:.1em}
+.cards{display:flex;flex-wrap:wrap;gap:8px;flex:1 1 auto}
+.card{position:relative;width:58px;height:58px;border:2px solid var(--gold);border-radius:6px;background:#d9cba6;box-shadow:inset 0 0 12px rgba(80,50,20,.55),0 3px 0 var(--ink);
+  display:grid;place-items:center;font-size:36px;line-height:1}
+.card.got span{opacity:.45}
+.card.got::after{content:"";position:absolute;inset:2px;border:4px solid var(--stripe);border-radius:50%;animation:ring .45s ease-out}
+.mbtns{display:flex;gap:8px;flex-wrap:wrap}
+
+/* Painted item art */
+img.ic{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;-webkit-user-drag:none;user-select:none}
+.cell .e{width:92%;height:92%}
+.cell .e .ic{width:100%;height:100%}
+.need .ic{width:40px;height:40px}
+.info .big .ic,.disc .big .ic{width:56px;height:56px;margin:0 auto}
+.dexitem .ic{width:46px;height:46px;margin:0 auto}
+.how li > span .ic{width:32px;height:32px;margin:0 auto}
+.muted .ic,.rewards .ic,.info p .ic{display:inline-block;width:1.6em;height:1.6em;vertical-align:middle}
+img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
+.ghost .ic{width:100%;height:100%}
+
+/* Hidden-object scene */
+.sview{grid-area:board;position:relative;min-width:0;min-height:0;overflow:hidden;border:2px solid var(--line);border-radius:16px;background:#050b0d;
+  touch-action:none;box-shadow:0 5px 0 var(--ink)}
+.sview::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 60px rgba(0,0,0,.55);border-radius:14px}
+.slayer{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;--inv:1}
+.slayer.glide{transition:transform .45s ease}
+.slayer canvas{display:block}
+.mark{position:absolute;transform:translate(-50%,-50%);border:calc(5px * var(--inv)) solid var(--stripe);border-radius:50%;pointer-events:none;
+  box-shadow:0 0 0 calc(2px * var(--inv)) rgba(255,255,255,.7);animation:ring .45s ease-out}
+.miss{position:absolute;transform:translate(-50%,-50%);color:var(--stripe);font-weight:700;pointer-events:none;font-size:calc(34px * var(--inv));
+  text-shadow:0 0 4px #fff;animation:missfade .7s forwards}
+.hintring{position:absolute;transform:translate(-50%,-50%);border:calc(5px * var(--inv)) dashed var(--glow);border-radius:50%;pointer-events:none;
+  box-shadow:0 0 30px var(--glow),inset 0 0 30px rgba(114,224,178,.4);animation:scope 3.4s ease-out forwards}
+.float.sfloat{font-size:calc(20px * var(--inv))}
+.zoombar{position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;gap:6px;z-index:2}
+.zoombar .btn{width:44px;height:44px;padding:0;font-size:22px}
+.ptip{position:absolute;left:10px;bottom:10px;margin:0;font-size:12px;background:rgba(3,9,11,.75);padding:5px 12px;border-radius:999px;pointer-events:none;z-index:2}
+.sload{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-display);font-size:18px;letter-spacing:.1em;background:rgba(5,11,13,.88);z-index:3}
+.finds{display:flex;flex-wrap:wrap;gap:6px}
+.find{display:inline-flex;align-items:center;gap:4px;background:#d9cba6;color:#2b2118;border:2px solid var(--gold);border-radius:8px;padding:2px 8px 2px 4px;
+  font-size:13px;font-weight:700;white-space:nowrap;box-shadow:inset 0 0 8px rgba(80,50,20,.4)}
+.find img{width:30px;height:30px;mix-blend-mode:multiply}
+.find.got{opacity:.5;text-decoration:line-through;text-decoration-color:var(--stripe);text-decoration-thickness:2px}
+@keyframes missfade{0%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+
+/* Discovery banner, toast */
+.disc{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:65;display:flex;align-items:center;gap:12px;
+  background:var(--paper);border:2px solid var(--gold);border-radius:16px;padding:10px 18px;box-shadow:0 0 24px rgba(201,163,74,.4),0 4px 0 var(--ink);
+  animation:drop .4s cubic-bezier(.3,1.5,.5,1);pointer-events:none;max-width:calc(100% - 32px)}
+.disc .big{font-size:42px;line-height:1}
+.disc small{display:block;font-size:12px;color:var(--gold);letter-spacing:.12em;font-weight:700}
+.disc b{font-family:var(--f-display);font-size:19px}
+.disc em{font-style:normal;color:var(--gold);font-weight:700;margin-left:8px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:70;background:var(--ink);color:var(--bone);
+  border:1px solid var(--line);font-weight:700;padding:10px 18px;border-radius:999px;font-size:15px;max-width:calc(100% - 32px);text-align:center}
+
+/* Overlay */
+.overlay{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:var(--veil);touch-action:auto;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.panel{position:relative;width:min(560px,100%);max-height:100%;overflow:auto;background:var(--paper);border:2px solid var(--line);border-radius:20px;
+  box-shadow:0 6px 0 var(--ink),0 0 60px rgba(114,224,178,.15);padding:28px 24px 22px;display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center;touch-action:pan-y}
+.panel h1,.panel h2{font-family:var(--f-display);font-weight:800;margin:0;color:var(--glow);letter-spacing:.08em;text-shadow:0 0 14px rgba(114,224,178,.5),3px 3px 0 var(--ink);
+  text-wrap:balance;line-height:1.2}
+.panel h1{font-size:clamp(32px,7vw,46px)}
+.panel h2{font-size:clamp(24px,5.5vw,34px)}
+.panel p{margin:0;line-height:1.75;max-width:34em}
+.kicker{font-size:13px;letter-spacing:.2em;color:var(--gold);font-weight:700}
+.lore{font-family:var(--f-display);font-size:16px}
+.how{list-style:none;margin:0;padding:0;display:grid;gap:8px;text-align:left;width:100%}
+.how li{display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:start;line-height:1.6;font-size:15px}
+.how li > span{font-size:24px;line-height:1.2;text-align:center}
+.rewards{list-style:none;margin:0;padding:12px 16px;display:grid;gap:6px;width:100%;background:var(--panel2);border:1px solid var(--gold);border-radius:12px;text-align:left;font-weight:700}
+.dex{display:grid;gap:12px;width:100%;text-align:left}
+.dex h3{margin:0 0 6px;font-size:14px;letter-spacing:.06em}
+.dexrow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.dexitem{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 2px;text-align:center;font-size:28px;line-height:1.1}
+.dexitem small{display:block;font-size:10px;margin-top:4px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dexitem.unknown{color:#4d6a64;font-family:var(--f-display)}
+
+@keyframes pop{0%{transform:scale(.3)}60%{transform:scale(1.28)}100%{transform:scale(1)}}
+@keyframes land{0%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-14%)}40%{transform:translateX(12%)}60%{transform:translateX(-8%)}80%{transform:translateX(5%)}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}30%{transform:rotate(-12deg)}70%{transform:rotate(10deg)}}
+@keyframes ring{0%{transform:scale(1.8);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes dust{0%{transform:scale(.5);opacity:1}100%{transform:scale(1.9);opacity:0}}
+@keyframes spark{to{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.2);opacity:0}}
+@keyframes float{0%{opacity:0;margin-top:0}15%{opacity:1}100%{opacity:0;margin-top:-56px}}
+@keyframes sway{0%,100%{transform:rotate(var(--r,0deg))}50%{transform:rotate(calc(var(--r,0deg) + 6deg)) translateY(-3%)}}
+@keyframes sigil{0%,100%{opacity:.3}50%{opacity:.75}}
+@keyframes breathe{0%,100%{transform:scale(.94);opacity:.7}50%{transform:scale(1.02);opacity:1}}
+@keyframes beckon{0%,100%{box-shadow:0 3px 0 var(--ink),0 0 0 rgba(192,53,61,0)}50%{box-shadow:0 3px 0 var(--ink),0 0 22px rgba(192,53,61,.7)}}
+@keyframes drop{0%{transform:translate(-50%,-30px);opacity:0}100%{transform:translate(-50%,0);opacity:1}}
+@keyframes scope{0%{opacity:0;transform:translate(-50%,-50%) scale(1.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
+
+@media (max-width:620px){
+  .brand{display:none}
+  .orders{gap:6px}
+  .order{padding:6px}
+  .npc .nm{display:none}
+  .need{width:36px;height:36px;font-size:22px}
+  .needs{gap:4px}
+  .info .big{font-size:34px;width:42px}
+  .card{width:44px;height:44px;font-size:28px}
+}
+@media (orientation:landscape) and (min-width:860px){
+  .merge{grid-template-columns:330px minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;grid-template-areas:"orders board" "info board"}
+  .search{grid-template-columns:300px minmax(0,1fr);grid-template-rows:minmax(0,1fr);grid-template-areas:"orders board"}
+  .side{overflow-y:auto;overflow-x:hidden}
+  .orders{grid-template-columns:1fr}
+  .info{flex-wrap:wrap;align-items:flex-start}
+  .info .acts{flex-direction:row}
+  .mission{flex-direction:column;align-items:stretch}
+  .mission h2,.finds{flex:none}
+  .finds{display:grid;grid-template-columns:1fr 1fr}
+  .mbtns{flex-direction:column}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">ルルイエ捜索録</div>
+    <div class="chapter"><span id="chNo">第1章</span><b id="chTitle">霧の港町</b></div>
+    <div class="prog" title="依頼をこなすと★がたまる"><div class="pbar"><i id="pfill"></i></div><span id="ptext">★ 0 / 4</span></div>
+    <div class="res"><span class="pill">🪙 <b id="coins">0</b></span><span class="pill">👁️ <b id="eyes">3</b></span></div>
+    <div class="hbtns">
+      <button id="inboxBtn" class="btn small" type="button" aria-label="もらったアイテムを出す">🎁 <b id="inboxN">0</b></button>
+      <button id="dexBtn" class="btn small" type="button">📖 図鑑</button>
+      <button id="mute" class="btn small" type="button" aria-label="音のオン・オフ">🔊</button>
+    </div>
+  </header>
+
+  <section class="view merge" id="mergeView">
+    <div class="side">
+      <div class="orders" id="orders"></div>
+      <button id="goSearch" class="btn primary investigate" type="button" hidden>🔎 現場検証へ</button>
+    </div>
+    <div class="wrap" id="mwrap"><div class="board" id="mboard"></div></div>
+    <div class="info" id="info"></div>
+  </section>
+
+  <section class="view search" id="searchView" hidden>
+    <div class="side">
+      <div class="mission">
+        <h2><small>現場検証 ―― リストの品を探しだせ</small><span id="mTitle"></span></h2>
+        <div class="finds" id="finds"></div>
+        <div class="mbtns">
+          <button id="eyeBtn" class="btn" type="button">👁️ 千里眼 ×<b id="eyesS">0</b></button>
+          <button id="backBtn" class="btn" type="button">← 依頼にもどる</button>
+        </div>
+      </div>
+    </div>
+    <div class="sview" id="sview">
+      <div class="slayer" id="slayer"><canvas id="scv"></canvas></div>
+      <div class="zoombar">
+        <button class="btn small" id="zin" type="button" aria-label="拡大">＋</button>
+        <button class="btn small" id="zout" type="button" aria-label="縮小">−</button>
+        <button class="btn small" id="zfit" type="button" aria-label="全体を表示">⤢</button>
+      </div>
+      <p class="ptip" id="ptip">ピンチで拡大・ドラッグで移動・タップで発見</p>
+      <div class="sload" id="sload" hidden>情景を描いています…</div>
+    </div>
+  </section>
+</div>
+<div class="overlay" id="overlay" hidden><div class="panel" id="panel"></div></div>
+<div class="disc" id="disc" hidden></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+/* ================= data ================= */
+const CHAINS = [
+  { name: '深海', gen: { e: '🎣', n: '漁網' }, items: [
+    ['🐟', '小魚', '港でとれた魚。目がにごっている。'],
+    ['🐡', 'ふぐ', 'ふくらむたび、背に奇妙な模様が浮かぶ。'],
+    ['🦀', '大ガニ', '甲羅に、読めない文字が刻まれている。'],
+    ['🦑', 'イカ', '吐いた墨は、乾いても動きつづける。'],
+    ['🐙', '大ダコ', 'その目は、人より多くを知っている。'],
+    ['🐋', '深きクジラ', '海の底から、低い歌が聞こえる。'],
+  ]},
+  { name: '書物', gen: { e: '🗄️', n: '古書棚' }, items: [
+    ['✒️', '羽根ペン', 'インクは、なぜか潮の香りがする。'],
+    ['📄', 'メモ', '失踪した記者の走り書き。'],
+    ['📜', '古文書', '港の古い記録。ある年から急に豊漁がつづく。'],
+    ['📖', '写本', '禁じられた書物の、不完全な写し。'],
+    ['📚', '禁書の山', '読むほどに、夢が深くなる。'],
+    ['🔮', '水晶玉', 'のぞきこむと、沈んだ都が見える。'],
+  ]},
+  { name: '儀式', gen: { e: '🛐', n: '祭壇' }, items: [
+    ['🕯️', 'ろうそく', '黒い蝋でできている。'],
+    ['🏮', '提灯', '灯りは緑色にゆらめく。'],
+    ['🔥', 'かがり火', '海に向かって焚かれる火。'],
+    ['⚱️', '祭壺', '中には海水と、何かのうろこ。'],
+    ['🗿', '石像', '海底から引き上げられた、名もなき像。'],
+    ['🌕', '赤い月', '儀式の夜、月は血の色に染まる。'],
+  ]},
+];
+// Item art: assets/m-<chain>-<tier>.png and generators assets/g-<chain>.png, white backgrounds already cut out.
+const ICON = src => `<img class="ic" src="${src}" alt="" draggable="false">`;
+CHAINS.forEach((ch, c) => {
+  ch.gen.e = ICON(`assets/g-${c}.png`);
+  ch.items.forEach((it, t) => { it[0] = ICON(`assets/m-${c}-${t}.png`); });
+});
+const CHEST = ICON('assets/x-chest.png');
+const MAXT = 5;
+const COLS = 7, ROWS = 9;
+const SELL = [1, 2, 4, 8, 16, 32];
+// Generator level → chance of producing tier 0 / 1 / 2.
+const GEN_LV = [null, [1, 0, 0], [.8, .2, 0], [.62, .33, .05], [.5, .4, .1], [.4, .42, .18]];
+const GEN_COST = [0, 0, 30, 90, 240, 600];
+const NPCS = [
+  { e: '🕵️‍♂️', n: '探偵ダニエル' },
+  { e: '👩‍🔬', n: 'アーミテッジ教授' },
+  { e: '🧓', n: '老漁師ザドック' },
+  { e: '👮‍♀️', n: '保安官マーシュ' },
+  { e: '🧑‍🎨', n: '画家ウィルコックス' },
+  { e: '👩‍⚕️', n: '町医者ハリエット' },
+];
+const STORY = [
+  { title: '霧の港町',
+    intro: '行方不明になった記者を追って、あなたは寂れた港町インスマスへやって来た。町の人々はよそ者に冷たい。まずは依頼をこなして、信頼を集めよう。',
+    mission: '酒場の証拠品', missionText: '記者が最後に立ち寄った酒場。がらくただらけの店内に、密売人の手がかりがまぎれている。',
+    outro: '密売人の荷から、奇妙な金の冠が見つかった。人の頭には合わない、いびつな形だ。' },
+  { title: '金の冠',
+    intro: '冠の出どころを調べるうち、町はずれの古い教会が浮かんできた。老漁師ザドックは、酒が入ると昔話を始める。',
+    mission: '朝市の落とし物', missionText: '教会の使い走りが、朝市で荷をばらまいて逃げた。散らばった品を探しだせ。',
+    outro: '使い走りは「ダゴン秘密教団」の名を口にして、逃げていった。' },
+  { title: 'ダゴン秘密教団',
+    intro: '教団は、海の底の「何か」に祈りを捧げているという。教授は古い文献に、よく似た儀式の記録を見つけた。',
+    mission: '夜の集会所', missionText: '集会が終わったあとの集会所。祭具の山から、儀式の証拠を見つけだせ。',
+    outro: '祈りの言葉は、どの国の言葉でもなかった。何人もが、沖の暗礁を指さしていた。' },
+  { title: '悪魔の暗礁',
+    intro: '沖に黒く浮かぶ岩礁。満月の夜になると、そこへ舟を出す者たちがいる。',
+    mission: '満月の波止場', missionText: '波止場に積まれた荷の中に、暗礁へ運ばれる品がまぎれている。',
+    outro: '暗礁の上で、人ではない影が泳いでいるのを見た。' },
+  { title: '深きものども',
+    intro: '町の人々の顔つきが、少しずつ魚に似ていく理由が、わかりかけてきた。',
+    mission: '仮面の祭り', missionText: '祭りのにぎわいの中に、「深きもの」が残した品がまぎれている。',
+    outro: '仮面の下の顔は、もう人のものではなかった。そしてそこに、記者の手帳が落ちていた。' },
+  { title: 'ルルイエの夢',
+    intro: '手帳の最後のページには、海に沈んだ都の地図が描かれていた。その夜から、あなたも同じ夢を見る。',
+    mission: '夢の都', missionText: 'ゆがんだ夢の都に、行方不明の記者の持ち物が散らばっている。',
+    outro: '記者の手を引いた瞬間、目が覚めた。机の上には、濡れた海藻が残っていた。物語はまだ終わらない…' },
+];
+function story(ch) {
+  if (ch < STORY.length) return STORY[ch];
+  const n = ch - STORY.length + 1;
+  return { title: `終わらない調査 ${n}`, intro: '夢と現実の境目で、調査はつづく。依頼は、より深いものを求めはじめた。',
+    mission: `霧の中の遺留品 ${n}`, missionText: '霧の向こうの情景に、闇の手がかりがまぎれている。', outro: 'また一つ、闇の糸がほどけた。' };
+}
+// Hidden-object scenes: engraved find sprites (assets/f-<id>.png, white paper, drawn with multiply)
+// and one illustrated backdrop per chapter (assets/bg-<n>.jpg). ground = where the floor starts, as a fraction of height.
+const FINDS = {
+  key:'鍵', oldkey:'古い鍵', anchor:'いかり', candle:'ろうそく', oillamp:'油ランプ', scroll:'巻物', letter:'手紙', book:'本', crystal:'水晶玉',
+  octopus:'タコ', squid:'イカ', fish:'魚', crab:'カニ', lobster:'ロブスター', shell:'貝', tankard:'ジョッキ', wine:'ワイングラス', violin:'バイオリン',
+  cards:'トランプ', dice:'サイコロ', skull:'ドクロ', bone:'骨', clock:'置き時計', watch:'懐中時計', bell:'ベル', beads:'数珠', urn:'壺', idol:'石像',
+  eye:'目玉', feather:'羽根', compass:'コンパス', telescope:'望遠鏡', hook:'フック', flask:'フラスコ', mask:'仮面', coin:'金貨', ring:'指輪', crown:'冠',
+  tophat:'シルクハット', bowler:'山高帽', glasses:'めがね', boot:'ブーツ', cat:'黒猫', bat:'コウモリ', spider:'クモ', rat:'ネズミ', frog:'カエル', owl:'フクロウ',
+  apple:'りんご', bread:'パン', cheese:'チーズ', snail:'カタツムリ', axe:'おの', hammer:'ハンマー', scissors:'はさみ', hourglass:'砂時計', moon:'三日月',
+  trumpet:'ラッパ', drum:'太鼓', mushroom:'キノコ', rose:'バラ', jellyfish:'クラゲ', lantern:'提灯', barrel:'樽', crate:'木箱', basket:'かご', bucket:'バケツ',
+  scales:'天秤', teapot:'ティーポット', pipe:'パイプ',
+};
+// When an item is on the list, its lookalike is scattered as clutter, so details have to be checked.
+const LOOKALIKE = { key:'oldkey', oldkey:'key', octopus:'squid', squid:'octopus', candle:'oillamp', oillamp:'candle', tophat:'bowler', bowler:'tophat',
+  clock:'watch', watch:'clock', crab:'lobster', lobster:'crab', scroll:'letter', letter:'scroll', tankard:'teapot', bell:'lantern' };
+const THEMES = [
+  { name: '酒場', bg: 'bg-0', ground: .56,
+    items: ['tankard','wine','violin','cards','dice','candle','oillamp','barrel','crate','bread','cheese','apple','key','oldkey','coin','tophat','bowler','glasses','boot','rat','pipe','teapot','clock','watch','bell','letter'] },
+  { name: '朝市', bg: 'bg-1', ground: .58,
+    items: ['fish','crab','lobster','apple','bread','cheese','basket','crate','bucket','scales','shell','jellyfish','mushroom','rose','snail','frog','axe','hammer','scissors','coin','barrel','cat','hook','boot','squid','octopus'] },
+  { name: '集会所', bg: 'bg-2', ground: .58,
+    items: ['candle','oillamp','beads','book','scroll','skull','bone','urn','idol','eye','crystal','bat','spider','hourglass','flask','bell','key','oldkey','feather','moon','crown','ring','rat','letter'] },
+  { name: '波止場', bg: 'bg-3', ground: .6,
+    items: ['anchor','hook','barrel','crate','fish','octopus','squid','crab','lobster','shell','jellyfish','compass','telescope','basket','bucket','cat','owl','boot','key','oldkey','coin','scroll','pipe','lantern'] },
+  { name: '仮面の祭り', bg: 'bg-4', ground: .6,
+    items: ['mask','lantern','drum','trumpet','cards','dice','apple','rose','candle','oillamp','crown','tophat','bowler','ring','bell','frog','bat','moon','coin','wine','glasses','teapot'] },
+  { name: '夢の都', bg: 'bg-5', ground: .6,
+    items: ['eye','octopus','squid','jellyfish','shell','idol','crystal','moon','hourglass','clock','watch','oldkey','key','scroll','book','candle','bone','skull','feather','fish','crab','compass','anchor','rose'] },
+];
+const theme = ch => THEMES[ch % THEMES.length];
+// Where things can sit in each backdrop, in 0..1 image coordinates (traced from the pictures):
+//   floor = open ground, items lie there, bigger nearer the viewer
+//   shelf = a ledge line (y0) things stand on        hang = wall area things hang on
+//   busy  = already-cluttered parts of the picture, where an item blends in
+//   edge  = blind spots: under beams, along borders, where wall meets floor
+//   sky   = only for things that could plausibly float or fly
+const SPOTS = {
+  'bg-0': [
+    { k: 'floor', x0: .08, x1: .9, y0: .67, y1: .9 },
+    { k: 'shelf', x0: .34, x1: .43, y0: .345 }, { k: 'shelf', x0: .58, x1: .68, y0: .345 },
+    { k: 'shelf', x0: .34, x1: .43, y0: .405 }, { k: 'shelf', x0: .58, x1: .68, y0: .405 },
+    { k: 'shelf', x0: .36, x1: .73, y0: .53 }, { k: 'shelf', x0: .27, x1: .33, y0: .535 },
+    { k: 'hang', x0: .14, x1: .25, y0: .3, y1: .6 }, { k: 'hang', x0: .78, x1: .87, y0: .3, y1: .6 },
+    { k: 'busy', x0: .25, x1: .33, y0: .3, y1: .5 }, { k: 'busy', x0: .7, x1: .76, y0: .3, y1: .5 },
+    { k: 'busy', x0: .34, x1: .43, y0: .3, y1: .52 }, { k: 'busy', x0: .58, x1: .69, y0: .3, y1: .52 },
+    { k: 'edge', x0: .1, x1: .88, y0: .62, y1: .67 }, { k: 'edge', x0: .14, x1: .86, y0: .08, y1: .14 },
+    { k: 'edge', x0: .05, x1: .1, y0: .2, y1: .8 },
+  ],
+  'bg-1': [
+    { k: 'floor', x0: .08, x1: .72, y0: .64, y1: .9 },
+    { k: 'floor', x0: .12, x1: .5, y0: .53, y1: .62 },
+    { k: 'shelf', x0: .58, x1: .66, y0: .53 }, { k: 'shelf', x0: .67, x1: .76, y0: .56 }, { k: 'shelf', x0: .8, x1: .93, y0: .58 },
+    { k: 'hang', x0: .58, x1: .94, y0: .39, y1: .46 },
+    { k: 'busy', x0: .58, x1: .95, y0: .48, y1: .66 }, { k: 'busy', x0: .05, x1: .17, y0: .5, y1: .64 },
+    { k: 'busy', x0: .8, x1: .96, y0: .62, y1: .78 },
+    { k: 'edge', x0: .05, x1: .08, y0: .2, y1: .85 }, { k: 'edge', x0: .12, x1: .55, y0: .5, y1: .54 },
+    { k: 'sky', x0: .12, x1: .85, y0: .1, y1: .32 },
+  ],
+  'bg-2': [
+    { k: 'floor', x0: .08, x1: .92, y0: .6, y1: .9 },
+    { k: 'shelf', x0: .1, x1: .2, y0: .48 }, { k: 'shelf', x0: .1, x1: .2, y0: .565 }, { k: 'shelf', x0: .24, x1: .31, y0: .47 },
+    { k: 'shelf', x0: .7, x1: .77, y0: .48 }, { k: 'shelf', x0: .8, x1: .91, y0: .5 }, { k: 'shelf', x0: .8, x1: .91, y0: .58 },
+    { k: 'shelf', x0: .43, x1: .57, y0: .445 }, { k: 'shelf', x0: .09, x1: .17, y0: .43 }, { k: 'shelf', x0: .83, x1: .9, y0: .43 },
+    { k: 'busy', x0: .32, x1: .4, y0: .12, y1: .4 }, { k: 'busy', x0: .6, x1: .68, y0: .12, y1: .4 },
+    { k: 'busy', x0: .04, x1: .09, y0: .38, y1: .66 }, { k: 'busy', x0: .91, x1: .96, y0: .38, y1: .66 },
+    { k: 'hang', x0: .2, x1: .3, y0: .2, y1: .42 }, { k: 'hang', x0: .7, x1: .8, y0: .2, y1: .42 },
+    { k: 'edge', x0: .1, x1: .9, y0: .56, y1: .6 }, { k: 'edge', x0: .2, x1: .8, y0: .07, y1: .12 },
+  ],
+  'bg-3': [
+    { k: 'floor', x0: .06, x1: .8, y0: .64, y1: .9 },
+    { k: 'shelf', x0: .58, x1: .75, y0: .53 }, { k: 'shelf', x0: .05, x1: .18, y0: .58 },
+    { k: 'busy', x0: .74, x1: .95, y0: .42, y1: .68 }, { k: 'busy', x0: .56, x1: .74, y0: .45, y1: .55 },
+    { k: 'hang', x0: .7, x1: .93, y0: .3, y1: .4 },
+    { k: 'edge', x0: .06, x1: .7, y0: .6, y1: .64 }, { k: 'edge', x0: .05, x1: .08, y0: .3, y1: .85 },
+    { k: 'sky', x0: .1, x1: .62, y0: .1, y1: .38 },
+  ],
+  'bg-4': [
+    { k: 'floor', x0: .08, x1: .9, y0: .66, y1: .9 },
+    { k: 'shelf', x0: .05, x1: .17, y0: .6 }, { k: 'shelf', x0: .18, x1: .24, y0: .56 }, { k: 'shelf', x0: .86, x1: .93, y0: .6 },
+    { k: 'busy', x0: .05, x1: .17, y0: .44, y1: .6 }, { k: 'busy', x0: .78, x1: .94, y0: .45, y1: .62 },
+    { k: 'busy', x0: .18, x1: .82, y0: .1, y1: .35 },
+    { k: 'hang', x0: .05, x1: .16, y0: .14, y1: .34 },
+    { k: 'edge', x0: .08, x1: .9, y0: .61, y1: .66 }, { k: 'edge', x0: .05, x1: .08, y0: .3, y1: .85 },
+    { k: 'sky', x0: .2, x1: .85, y0: .08, y1: .32 },
+  ],
+  'bg-5': [
+    { k: 'floor', x0: .06, x1: .92, y0: .7, y1: .9 },
+    { k: 'shelf', x0: .02, x1: .2, y0: .69 }, { k: 'shelf', x0: .8, x1: .97, y0: .69 },
+    { k: 'busy', x0: .02, x1: .14, y0: .48, y1: .68 }, { k: 'busy', x0: .86, x1: .98, y0: .48, y1: .68 },
+    { k: 'busy', x0: .3, x1: .8, y0: .38, y1: .65 },
+    { k: 'hang', x0: .05, x1: .25, y0: .15, y1: .4 }, { k: 'hang', x0: .82, x1: .96, y0: .15, y1: .4 },
+    { k: 'edge', x0: .05, x1: .95, y0: .66, y1: .7 },
+    { k: 'sky', x0: .3, x1: .7, y0: .05, y1: .28 },
+  ],
+};
+// Things that may be up in the sky, and long things that can lie along floorboards and posts.
+const FLY = new Set(['bat', 'feather', 'owl', 'moon', 'letter', 'jellyfish', 'eye', 'lantern']);
+const LONG = new Set(['bone', 'axe', 'hammer', 'telescope', 'feather', 'pipe', 'hook', 'scissors', 'key', 'oldkey', 'candle', 'trumpet']);
+// Seek-and-find pictures: the items are drawn into the illustration itself (assets/hs-<n>.jpg).
+// Each entry records where every copy of an item is, in image pixels [x, y, radius] (tools/scenes/*.json).
+const HIDDEN = {
+  'hs-0b': { w: 1264, h: 848, items: [
+    { id: 'skull', ja: 'ドクロ', at: [[130,128,22],[200,370,22]] },
+    { id: 'cap', ja: '船長帽', at: [[230,155,28],[172,531,28],[783,531,28]] },
+    { id: 'rat', ja: 'ネズミ', at: [[258,268,18],[215,778,28]] },
+    { id: 'teapot', ja: 'ティーポット', at: [[100,365,25]] },
+    { id: 'spyglass', ja: '望遠鏡', at: [[160,92,40],[561,408,25]] },
+    { id: 'netbag', ja: '網袋', at: [[318,240,26]] },
+    { id: 'pan', ja: 'フライパン', at: [[370,315,26],[452,300,24]] },
+    { id: 'cobweb', ja: 'クモの巣', at: [[350,140,20]] },
+    { id: 'ship', ja: '帆船の模型', at: [[616,250,45]] },
+    { id: 'lantern', ja: 'カンテラ', at: [[698,250,25]] },
+    { id: 'strawhat', ja: '麦わら帽子', at: [[771,248,28]] },
+    { id: 'ladder', ja: 'はしご', at: [[766,350,40]] },
+    { id: 'watch', ja: '懐中時計', at: [[446,420,20]] },
+    { id: 'owl', ja: 'フクロウ', at: [[987,150,25]] },
+    { id: 'chest', ja: '宝箱', at: [[1189,118,30]] },
+    { id: 'grinder', ja: 'コーヒーミル', at: [[1072,252,25],[87,506,28]] },
+    { id: 'clock', ja: '置き時計', at: [[1162,235,30]] },
+    { id: 'cheese', ja: 'チーズ', at: [[1062,367,22]] },
+    { id: 'violin', ja: 'バイオリン', at: [[990,420,40],[678,599,35],[821,644,40]] },
+    { id: 'cat', ja: 'ねこ', at: [[666,466,25]] },
+    { id: 'blocks', ja: '積み木', at: [[563,634,35]] },
+    { id: 'accordion', ja: 'アコーディオン', at: [[701,704,40],[1162,494,35]] },
+    { id: 'dice', ja: 'サイコロ', at: [[548,794,15]] },
+    { id: 'horn', ja: 'ラッパ', at: [[813,734,25],[912,786,25]] },
+    { id: 'hammer', ja: 'ハンマー', at: [[716,656,20],[1192,611,25]] },
+    { id: 'quill', ja: '羽根ペン', at: [[1105,520,35]] },
+    { id: 'coins', ja: '金貨', at: [[1067,549,30]] },
+    { id: 'boots', ja: 'ブーツ', at: [[1032,744,45]] },
+    { id: 'harmonica', ja: 'ハーモニカ', at: [[1162,539,25]] },
+    { id: 'candlestick', ja: '燭台', at: [[874,604,25]] },
+    { id: 'bone', ja: '骨', at: [[280,621,15]] },
+    { id: 'sack', ja: '袋', at: [[90,704,45],[551,509,30]] },
+    { id: 'rope', ja: 'ロープ', at: [[390,762,40]] },
+  ] },
+  'hs-1': { w: 1264, h: 848, items: [
+    { id: 'fish', ja: '吊るし魚', at: [[478,205,20],[505,205,20],[535,205,20],[560,205,20],[728,210,20],[757,210,20],[780,210,20],[850,210,22]] },
+    { id: 'netbag', ja: '網袋', at: [[197,237,32]] },
+    { id: 'pan', ja: 'フライパン', at: [[340,213,22]] },
+    { id: 'lobster', ja: 'ロブスター', at: [[635,205,22]] },
+    { id: 'scale', ja: '吊りばかり', at: [[699,183,20]] },
+    { id: 'hat', ja: '帽子', at: [[470,297,25]] },
+    { id: 'ship', ja: '帆船の模型', at: [[540,537,32]] },
+    { id: 'doll', ja: '人形', at: [[590,544,15]] },
+    { id: 'clock', ja: '置き時計', at: [[447,481,16],[875,474,18]] },
+    { id: 'barrow', ja: '手押し車', at: [[347,724,35]] },
+    { id: 'bucket', ja: 'バケツ', at: [[437,691,32],[742,621,30]] },
+    { id: 'map', ja: '地図', at: [[460,771,22]] },
+    { id: 'watch', ja: '懐中時計', at: [[73,704,18]] },
+    { id: 'dice', ja: 'サイコロ', at: [[400,507,10],[480,501,10],[752,687,10]] },
+    { id: 'shoes', ja: '革靴', at: [[802,724,38]] },
+    { id: 'sack', ja: '袋', at: [[992,591,32]] },
+    { id: 'anchor', ja: 'いかり', at: [[1079,507,30]] },
+    { id: 'onion', ja: 'たまねぎ', at: [[1099,777,20]] },
+    { id: 'carrot', ja: 'にんじん', at: [[1052,771,30]] },
+    { id: 'shovel', ja: 'スコップ', at: [[645,655,28]] },
+    { id: 'jug', ja: '水差し', at: [[467,347,22]] },
+    { id: 'bottle', ja: 'ワインの瓶', at: [[375,455,22],[410,455,22]] },
+    { id: 'float', ja: '浮き', at: [[403,153,22]] },
+    { id: 'garlic', ja: 'ニンニク', at: [[410,267,28]] },
+    { id: 'pot', ja: '鍋', at: [[590,293,22]] },
+    { id: 'basket', ja: '編みかご', at: [[433,611,38]] },
+    { id: 'bread', ja: 'パンかご', at: [[315,430,32]] },
+  ] },
+  'hs-2': { w: 1264, h: 848, items: [
+    { id: 'skull', ja: 'ドクロ', at: [[153,207,20],[1132,257,22],[677,395,20]] },
+    { id: 'hourglass', ja: '砂時計', at: [[263,230,25],[77,454,25],[799,373,20]] },
+    { id: 'bell', ja: 'ベル', at: [[220,247,15],[117,574,15],[213,737,25]] },
+    { id: 'keys', ja: '鍵束', at: [[340,220,25],[93,313,25],[233,584,20]] },
+    { id: 'feather', ja: '羽根', at: [[413,187,25]] },
+    { id: 'quill', ja: '羽根ペン', at: [[895,671,35]] },
+    { id: 'herbs', ja: '薬草の束', at: [[507,160,25]] },
+    { id: 'cobweb', ja: 'クモの巣', at: [[580,127,20],[1185,73,20]] },
+    { id: 'spider', ja: 'クモ', at: [[367,100,12]] },
+    { id: 'owl', ja: 'フクロウ', at: [[802,160,30]] },
+    { id: 'bat', ja: 'コウモリ', at: [[775,80,30],[879,80,30]] },
+    { id: 'astro', ja: '羅針盤', at: [[719,257,25]] },
+    { id: 'clock', ja: '置き時計', at: [[1112,410,35]] },
+    { id: 'eyejar', ja: '目玉のびん', at: [[992,347,25]] },
+    { id: 'dagger', ja: '短剣', at: [[905,273,25]] },
+    { id: 'sack', ja: '袋', at: [[979,557,25]] },
+    { id: 'tarot', ja: 'タロットカード', at: [[792,597,25]] },
+    { id: 'ink', ja: 'インク壺', at: [[849,734,15]] },
+    { id: 'portrait', ja: '肖像画', at: [[959,651,40]] },
+    { id: 'cat', ja: 'ねこ', at: [[1165,717,30],[73,584,20]] },
+    { id: 'flask', ja: 'フラスコ', at: [[1085,744,25]] },
+    { id: 'crystal', ja: '水晶', at: [[852,517,30]] },
+    { id: 'globe', ja: '天球儀', at: [[153,721,30]] },
+    { id: 'candle', ja: 'ろうそく', at: [[513,524,25],[739,711,25],[333,343,22]] },
+    { id: 'coins', ja: 'コイン', at: [[507,757,25]] },
+    { id: 'rat', ja: 'ネズミ', at: [[353,577,25],[607,617,25]] },
+    { id: 'chest', ja: '宝箱', at: [[470,430,40]] },
+    { id: 'scroll', ja: '巻物', at: [[127,487,25]] },
+    { id: 'octobook', ja: 'タコの本', at: [[692,564,30]] },
+    { id: 'beast', ja: '動物の頭骨', at: [[739,451,20]] },
+    { id: 'potion', ja: '薬びん', at: [[879,604,22]] },
+  ] },
+  'hs-3': { w: 1264, h: 848, items: [
+    { id: 'gull', ja: 'カモメ', at: [[353,267,25],[979,93,22]] },
+    { id: 'cat', ja: 'ねこ', at: [[257,287,22],[463,307,18]] },
+    { id: 'owl', ja: 'フクロウ', at: [[603,360,22],[657,671,22]] },
+    { id: 'anchor', ja: 'いかり', at: [[63,347,30],[320,373,35],[453,644,35],[527,624,30],[177,574,25]] },
+    { id: 'barrel', ja: 'たる', at: [[143,360,35],[1179,691,40]] },
+    { id: 'boots', ja: '長靴', at: [[197,367,30],[1085,717,40],[530,467,25]] },
+    { id: 'hook', ja: 'クレーンのフック', at: [[187,210,18]] },
+    { id: 'lantern', ja: 'カンテラ', at: [[772,320,22],[240,541,28]] },
+    { id: 'pipe', ja: 'パイプ', at: [[809,340,15]] },
+    { id: 'hat', ja: '帽子', at: [[972,343,28],[260,611,35]] },
+    { id: 'fish', ja: '干し魚', at: [[1045,247,25],[1176,250,25],[1000,235,22]] },
+    { id: 'rope', ja: 'ロープの束', at: [[1172,120,35],[147,517,30]] },
+    { id: 'bottle', ja: '瓶', at: [[732,393,22],[1205,751,30]] },
+    { id: 'saw', ja: 'のこぎり', at: [[320,464,35]] },
+    { id: 'spyglass', ja: '望遠鏡', at: [[500,717,35],[825,601,25]] },
+    { id: 'crab', ja: 'カニ', at: [[655,557,25]] },
+    { id: 'star', ja: 'ヒトデ', at: [[909,704,30],[417,353,20],[600,757,25]] },
+    { id: 'shell', ja: 'ホタテ貝', at: [[340,751,20]] },
+    { id: 'bucket', ja: 'バケツ', at: [[387,611,30],[593,657,30]] },
+    { id: 'compass', ja: '羅針盤', at: [[540,771,22],[362,425,18]] },
+    { id: 'buoy', ja: 'ブイ', at: [[765,691,40],[732,531,22]] },
+    { id: 'hammer', ja: 'ハンマー', at: [[999,764,25]] },
+    { id: 'sack', ja: '袋', at: [[932,614,30]] },
+  ] },
+  'hs-4': { w: 1264, h: 848, items: [
+    { id: 'paperlamp', ja: 'ちょうちん', at: [[417,90,30],[480,127,25],[557,150,20]] },
+    { id: 'hanglamp', ja: '吊りランプ', at: [[719,100,25],[635,130,25]] },
+    { id: 'drum', ja: '太鼓', at: [[280,180,30],[732,514,30],[805,534,30]] },
+    { id: 'horn', ja: 'ラッパ', at: [[320,167,25],[447,707,35],[879,407,25]] },
+    { id: 'tambourine', ja: 'タンバリン', at: [[353,207,25]] },
+    { id: 'tophat', ja: 'シルクハット', at: [[705,237,25],[440,654,28],[865,197,25]] },
+    { id: 'crown', ja: '王冠', at: [[779,177,22],[705,734,30]] },
+    { id: 'bat', ja: 'コウモリ', at: [[649,220,20]] },
+    { id: 'mirror', ja: '手鏡', at: [[989,243,30],[77,484,22]] },
+    { id: 'spyglass', ja: '望遠鏡', at: [[882,313,30],[692,627,30]] },
+    { id: 'candle', ja: 'ろうそく', at: [[775,367,20],[1015,343,20]] },
+    { id: 'mug', ja: 'マグカップ', at: [[1205,313,18]] },
+    { id: 'feather', ja: '羽根', at: [[1185,200,30]] },
+    { id: 'beakmask', ja: '長い鼻の仮面', at: [[110,280,25]] },
+    { id: 'skull', ja: 'ドクロの飾り', at: [[945,177,18]] },
+    { id: 'dice', ja: 'サイコロ', at: [[287,674,15],[603,614,15]] },
+    { id: 'cards', ja: 'トランプ', at: [[527,667,22],[383,774,25]] },
+    { id: 'cane', ja: '杖', at: [[133,591,35]] },
+    { id: 'chest', ja: '宝箱', at: [[367,584,50],[985,644,55]] },
+    { id: 'vase', ja: '花びん', at: [[130,471,20]] },
+    { id: 'boots', ja: 'ブーツ', at: [[785,604,35]] },
+    { id: 'clock', ja: '置き時計', at: [[1189,724,25]] },
+    { id: 'goblet', ja: 'さかずき', at: [[1089,691,22]] },
+    { id: 'cat', ja: 'ねこ', at: [[575,480,22],[630,468,22]] },
+    { id: 'lantern', ja: 'ランタン', at: [[500,551,25],[63,370,25]] },
+  ] },
+  'hs-5': { w: 1264, h: 848, items: [
+    { id: 'scallop', ja: 'ホタテ貝', at: [[67,67,25],[413,60,22],[417,624,25],[1209,571,22]] },
+    { id: 'conch', ja: '巻き貝', at: [[133,73,30],[63,751,25]] },
+    { id: 'star', ja: 'ヒトデ', at: [[397,107,25],[253,123,12],[872,47,12]] },
+    { id: 'eye', ja: '目玉', at: [[547,70,15],[298,407,15],[417,567,15],[1095,50,15]] },
+    { id: 'jelly', ja: 'クラゲ', at: [[480,133,25],[695,130,25],[899,477,25]] },
+    { id: 'octopus', ja: 'タコ', at: [[550,167,30],[809,487,18]] },
+    { id: 'hourglass', ja: '砂時計', at: [[293,213,28],[692,257,25],[140,497,30],[889,584,22]] },
+    { id: 'idol', ja: '石像', at: [[437,243,30]] },
+    { id: 'crystal', ja: '水晶', at: [[490,273,25],[1212,697,30]] },
+    { id: 'key', ja: '鍵', at: [[273,373,18],[197,504,15]] },
+    { id: 'candle', ja: 'ろうそく', at: [[363,547,25],[965,110,25],[263,451,20]] },
+    { id: 'watch', ja: '懐中時計', at: [[273,707,25],[573,544,18]] },
+    { id: 'compass', ja: '羅針盤', at: [[227,774,22]] },
+    { id: 'skull', ja: 'ドクロ', at: [[1112,477,25]] },
+    { id: 'quill', ja: '羽根ペン', at: [[1099,711,30]] },
+    { id: 'book', ja: '本', at: [[725,784,30],[320,451,20]] },
+    { id: 'fish', ja: '魚', at: [[1115,237,25],[1049,283,22],[752,70,18]] },
+    { id: 'rose', ja: 'バラ', at: [[1192,47,18],[962,644,15]] },
+    { id: 'locket', ja: 'ペンダント', at: [[1175,157,25],[879,704,25]] },
+    { id: 'bone', ja: '骨', at: [[163,347,15],[1172,564,15]] },
+    { id: 'ring', ja: '指輪', at: [[527,751,15],[792,611,20]] },
+    { id: 'anchor', ja: 'いかり', at: [[1015,377,20]] },
+  ] },
+};
+THEMES[0].hs = 'hs-0b';
+[1, 2, 3, 4, 5].forEach(n => { THEMES[n].hs = 'hs-' + n; });
+
+// Pick this play's list from the picture's recorded items; any drawn copy of an item counts.
+function layoutHidden(s, th) {
+  const H = HIDDEN[th.hs], R = mulberry(s.seed);
+  const k = Math.max(SW / H.w, SH / H.h), ox = (SW - H.w * k) / 2, oy = (SH - H.h * k) / 2;
+  const pool = H.items.slice();
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const T = pool.slice(0, Math.min(findCount(s.ch), pool.length)).map((it, n) => {
+    const at = it.at.map(([x, y, r]) => ({ x: x * k + ox, y: y * k + oy, s: r * k / .55, src: [x, y, r] }));
+    return Object.assign({ t: n, e: it.id, ja: it.ja, at }, at[0]);
+  });
+  return { seed: s.seed, th, items: [], T, hidden: true };
+}
+
+// Watercolour used when a found item is coloured in.
+const WASH = ['rgba(201,141,48,', 'rgba(64,140,120,', 'rgba(170,62,58,', 'rgba(70,104,160,', 'rgba(128,92,150,', 'rgba(110,140,60,'];
+const SW = 2400, SH = 1600, SRES = 1.25;   // scene size in world px, and canvas pixels per world px
+const findCount = ch => Math.min(8 + ch, 12);
+const findSrc = id => `assets/f-${id}.png`;
+
+/* ================= helpers ================= */
+const $ = id => document.getElementById(id);
+const rnd = n => Math.floor(Math.random() * n);
+const pick = a => a[rnd(a.length)];
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const rot = () => rnd(25) - 12;
+const key = (c, t) => `${c}-${t}`;
+const ITEM = (c, t) => CHAINS[c].items[t];
+const goal = ch => Math.min(4 + ch * 2, 12);
+
+const SAVE_KEY = 'rlyeh-merge-v2';
+function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); return s && s.v === 2 ? s : null; } catch (e) { return null; } }
+let saveTimer = 0;
+function save() { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }, 250); }
+let muted = false;
+try { muted = localStorage.getItem('rlyeh-muted') === '1'; } catch (e) {}
+
+/* ================= sound ================= */
+let ac = null;
+function tone(freq, dur = .12, type = 'sine', vol = .14, slide = 1, delay = 0) {
+  if (muted) return;
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
+    const t0 = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t0);
+    if (slide !== 1) o.frequency.exponentialRampToValueAtTime(freq * slide, t0 + dur);
+    g.gain.setValueAtTime(vol, t0);
+    g.gain.exponentialRampToValueAtTime(.001, t0 + dur);
+    o.connect(g).connect(ac.destination);
+    o.start(t0); o.stop(t0 + dur + .02);
+  } catch (e) {}
+}
+const sfx = {
+  move: () => tone(520, .06, 'sine', .07),
+  bump: () => tone(180, .1, 'square', .05),
+  spawn: () => tone(660, .08, 'triangle', .1, 1.3),
+  merge: t => { tone(330 + t * 110, .18, 'triangle', .16, 1.5); if (t >= 3) tone(660 + t * 110, .25, 'sine', .1, 1.2, .08); },
+  discover: () => [659, 784, 988, 1318].forEach((f, i) => tone(f, .2, 'sine', .12, 1, i * .07)),
+  coin: () => { tone(988, .08, 'square', .06); tone(1318, .12, 'square', .06, 1, .07); },
+  found: () => [784, 988, 1318].forEach((f, i) => tone(f, .16, 'sine', .16, 1, i * .08)),
+  wrong: () => tone(220, .2, 'sine', .07, .7),
+  eye: () => tone(880, .3, 'sine', .1, .5),
+  seal: () => tone(110, .4, 'sawtooth', .07, .5),
+};
+
+/* ================= state ================= */
+let S = null;
+let sel = -1, sellArm = false;
+let wantSet = new Set();
+let mEls = [], sEls = [];
+
+function freshState() {
+  const cells = Array(COLS * ROWS).fill(null);
+  for (let r = 6; r < ROWS; r++) for (let c = 0; c < COLS; c++) cells[r * COLS + c] = { k: 'lock' };
+  cells[2 * COLS + 1] = { k: 'gen', g: 0, lv: 1 };
+  cells[2 * COLS + 5] = { k: 'gen', g: 1, lv: 1 };
+  const st = { v: 2, ch: 0, stars: 0, coins: 0, eyes: 3, cells, orders: [], dex: {}, inbox: [], gens: [true, true, false],
+    search: null, view: 'merge', introCh: -1, nextId: 1 };
+  const free = shuffle(cells.map((c, i) => c ? -1 : i).filter(i => i >= 0 && i < 6 * COLS));
+  [[0, 0], [0, 0], [0, 1], [1, 0], [1, 0], [1, 1]].forEach(([c, t], n) => {
+    cells[free[n]] = { k: 'item', c, t };
+    st.dex[key(c, t)] = true;
+  });
+  S = st;
+  while (S.orders.length < 3) S.orders.push(makeOrder());
+  return st;
+}
+
+function makeOrder() {
+  const avail = [0, 1, 2].filter(g => S.gens[g]);
+  const maxT = Math.min(MAXT, 2 + S.ch), minT = Math.max(1, maxT - 2);
+  const n = S.ch >= 1 && Math.random() < .35 ? 2 : 1;
+  const need = [];
+  for (let k = 0; k < n; k++) {
+    let t = minT + rnd(maxT - minT + 1);
+    if (k === 1) t = Math.max(1, t - 1);
+    need.push({ c: pick(avail), t });
+  }
+  const used = S.orders.map(o => o.npc.n);
+  const npc = pick(NPCS.filter(p => !used.includes(p.n)));
+  // Occasional special request: one high-tier item, big payout.
+  if (S.ch >= 1 && Math.random() < .18 && !S.orders.some(o => o.sp)) {
+    const t = Math.min(MAXT, maxT + 1);
+    return { id: S.nextId++, npc, need: [{ c: pick(avail), t }], coins: 10 * 2 ** t + 20, stars: 3, eyes: 1, sp: true };
+  }
+  const coins = need.reduce((s, x) => s + 5 * 2 ** x.t, 5);
+  return { id: S.nextId++, npc, need, coins, stars: n };
+}
+
+/* ================= layout ================= */
+function fitBoard(wrap, board, cols, rows) {
+  const r = wrap.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  const cell = Math.max(18, Math.floor(Math.min((r.width - 6) / cols, (r.height - 10) / rows)));
+  board.style.setProperty('--cols', cols);
+  board.style.setProperty('--cell', cell + 'px');
+}
+function fitAll() {
+  if (!S) return;
+  fitBoard($('mwrap'), $('mboard'), COLS, ROWS);
+  if (S.view === 'search') onSviewResize();
+}
+if (window.ResizeObserver) { const ro = new ResizeObserver(fitAll); ro.observe($('mwrap')); ro.observe($('sview')); }
+else window.addEventListener('resize', fitAll);
+
+function cellCenter(board, cols, i) {
+  const size = board.clientWidth / cols;
+  return { x: (i % cols + .5) * size, y: (Math.floor(i / cols) + .5) * size, size };
+}
+function floater(board, cols, i, text, cls = '') {
+  const { x, y } = cellCenter(board, cols, i);
+  const f = document.createElement('div');
+  f.className = 'float ' + cls;
+  f.textContent = text;
+  f.style.left = x + 'px'; f.style.top = y + 'px';
+  board.appendChild(f);
+  setTimeout(() => f.remove(), 1200);
+}
+function burst(board, cols, i, t) {
+  const { x, y, size } = cellCenter(board, cols, i);
+  const n = 6 + t * 2;
+  for (let k = 0; k < n; k++) {
+    const s = document.createElement('span');
+    s.className = 'spark' + (t >= 3 && k % 2 ? ' gold' : '');
+    const a = k / n * Math.PI * 2, d = size * (.55 + Math.random() * .45 + t * .08);
+    s.style.left = x + 'px'; s.style.top = y + 'px';
+    s.style.setProperty('--dx', Math.cos(a) * d + 'px');
+    s.style.setProperty('--dy', Math.sin(a) * d + 'px');
+    board.appendChild(s);
+    setTimeout(() => s.remove(), 700);
+  }
+}
+let toastTimer = 0;
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 2400);
+}
+let discTimer = 0;
+function showDiscovery(it, bonus) {
+  const d = $('disc');
+  d.innerHTML = `<span class="big">${it[0]}</span><div><small>新発見！</small><b>${it[1]}</b><em>+🪙${bonus}</em></div>`;
+  d.hidden = false;
+  d.style.animation = 'none'; void d.offsetWidth; d.style.animation = '';
+  clearTimeout(discTimer);
+  discTimer = setTimeout(() => { d.hidden = true; }, 2300);
+}
+
+/* ================= header ================= */
+function renderTop() {
+  const st = story(S.ch), g = goal(S.ch);
+  $('chNo').textContent = `第${S.ch + 1}章`;
+  $('chTitle').textContent = st.title;
+  $('pfill').style.width = Math.min(1, S.stars / g) * 100 + '%';
+  $('ptext').textContent = `★ ${Math.min(S.stars, g)} / ${g}`;
+  $('coins').textContent = S.coins;
+  $('eyes').textContent = S.eyes;
+  $('eyesS').textContent = S.eyes;
+  $('eyeBtn').disabled = S.eyes <= 0;
+  $('inboxN').textContent = S.inbox.length;
+  $('inboxBtn').disabled = !S.inbox.length;
+  $('mute').textContent = muted ? '🔇' : '🔊';
+  const ready = S.stars >= g || S.search;
+  $('goSearch').hidden = !ready;
+  $('goSearch').textContent = S.search ? '🔎 現場検証のつづき' : '🔎 現場検証へ';
+}
+
+/* ================= merge board ================= */
+function buildMerge() {
+  const b = $('mboard');
+  b.innerHTML = '';
+  mEls = S.cells.map(() => { const d = document.createElement('div'); d.className = 'cell'; b.appendChild(d); return d; });
+  fitAll();
+  S.cells.forEach((_, i) => paintM(i));
+}
+
+function paintM(i, anim) {
+  const el = mEls[i], c = S.cells[i];
+  let html = '';
+  if (c && c.k === 'item') html = `<div class="p t${c.t}"><span class="e">${ITEM(c.c, c.t)[0]}</span></div>`;
+  else if (c && c.k === 'gen') html = `<div class="p gen"><span class="e">${CHAINS[c.g].gen.e}</span><b class="lv">Lv${c.lv}</b></div>`;
+  else if (c && c.k === 'chest') html = `<div class="p gen"><span class="e">${CHEST}</span><b class="lv">×${c.n}</b></div>`;
+  else if (c && c.k === 'lock') html = `<div class="p"><div class="seal"></div></div>`;
+  if (anim === 'puff') html += '<span class="dust"></span>';
+  el.innerHTML = html;
+  el.className = 'cell' + (sel === i ? ' sel' : '') + (wantSet.has(i) ? ' want' : '') + (anim && anim !== 'puff' ? ' ' + anim : '') + (anim === 'puff' && c ? ' pop' : '');
+}
+
+function select(i) {
+  const prev = sel;
+  sel = i; sellArm = false;
+  if (prev >= 0 && mEls[prev]) mEls[prev].classList.remove('sel');
+  if (i >= 0) mEls[i].classList.add('sel');
+  renderInfo();
+}
+
+function renderInfo() {
+  const c = sel >= 0 ? S.cells[sel] : null, box = $('info');
+  if (!c) {
+    box.innerHTML = `<div class="big">🗝️</div><div class="txt"><b>調査メモ</b><p>光る輪の<b>道具</b>をタップすると素材が出る。同じものを重ねると合体し、依頼の品に近づく。</p></div>`;
+    return;
+  }
+  if (c.k === 'item') {
+    const it = ITEM(c.c, c.t);
+    const next = c.t < MAXT ? (S.dex[key(c.c, c.t + 1)] ? `${ITEM(c.c, c.t + 1)[0]} ${ITEM(c.c, c.t + 1)[1]}` : '？？？（まだ見ぬもの）') : 'これが最終段階';
+    box.innerHTML = `<div class="big">${it[0]}</div><div class="txt"><b>${it[1]}<small>Lv${c.t + 1}</small></b><p>${it[2]}</p><p class="muted">2つ重ねると → ${next}</p></div>
+      <div class="acts"><button class="btn tiny${sellArm ? ' danger' : ''}" data-act="sell" type="button">${sellArm ? '本当に売る？' : '売る'} 🪙${SELL[c.t]}</button></div>`;
+  } else if (c.k === 'gen') {
+    const g = CHAINS[c.g].gen, odds = GEN_LV[c.lv];
+    const oddsText = odds.map((p, t) => p ? `${ITEM(c.g, t)[0]}${Math.round(p * 100)}%` : '').filter(Boolean).join('　');
+    const up = c.lv < 5 ? `<button class="btn tiny gold" data-act="upgrade" type="button" ${S.coins < GEN_COST[c.lv + 1] ? 'disabled' : ''}>強化 🪙${GEN_COST[c.lv + 1]}</button>` : '<span class="muted">最大まで強化ずみ</span>';
+    box.innerHTML = `<div class="big">${g.e}</div><div class="txt"><b>${g.n}<small>Lv${c.lv}</small></b><p>タップで「${CHAINS[c.g].name}」の素材が出る。強化すると、はじめから上の段階が出やすくなる。</p><p class="muted">${oddsText}</p></div>
+      <div class="acts">${up}</div>`;
+  } else if (c.k === 'chest') {
+    box.innerHTML = `<div class="big">${CHEST}</div><div class="txt"><b>宝箱<small>あと${c.n}回</small></b><p>タップすると中身が飛び出す。高い段階の合体で、ときどき見つかる。</p></div>`;
+  } else {
+    box.innerHTML = `<div class="big">✴</div><div class="txt"><b>封印されたマス</b><p>現場検証を解決するたびに、封印が一列ずつ解ける。</p></div>`;
+  }
+}
+
+$('info').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || sel < 0) return;
+  const c = S.cells[sel];
+  if (b.dataset.act === 'sell' && c && c.k === 'item') {
+    if (!sellArm) { sellArm = true; renderInfo(); return; }
+    S.coins += SELL[c.t];
+    S.cells[sel] = null;
+    floater($('mboard'), COLS, sel, `🪙+${SELL[c.t]}`, 'gold');
+    paintM(sel, 'puff');
+    sfx.coin();
+    select(-1);
+    afterChange();
+  } else if (b.dataset.act === 'upgrade' && c && c.k === 'gen' && c.lv < 5 && S.coins >= GEN_COST[c.lv + 1]) {
+    S.coins -= GEN_COST[c.lv + 1];
+    c.lv++;
+    paintM(sel, 'pop');
+    burst($('mboard'), COLS, sel, 4);
+    sfx.discover();
+    toast(`${CHAINS[c.g].gen.n}が Lv${c.lv} になった`);
+    renderInfo();
+    afterChange();
+  }
+});
+
+function discover(c, t) {
+  const k = key(c, t);
+  if (S.dex[k]) return;
+  S.dex[k] = true;
+  const bonus = 5 * (t + 1) ** 2;
+  S.coins += bonus;
+  showDiscovery(ITEM(c, t), bonus);
+  setTimeout(sfx.discover, 120);
+}
+
+function emptyCellsNear(i) {
+  const cx = i % COLS, cy = Math.floor(i / COLS);
+  return S.cells.map((c, j) => c ? -1 : j).filter(j => j >= 0)
+    .sort((a, b) => {
+      const da = Math.max(Math.abs(a % COLS - cx), Math.abs(Math.floor(a / COLS) - cy)) * 10 + Math.abs(a % COLS - cx) + Math.abs(Math.floor(a / COLS) - cy);
+      const db = Math.max(Math.abs(b % COLS - cx), Math.abs(Math.floor(b / COLS) - cy)) * 10 + Math.abs(b % COLS - cx) + Math.abs(Math.floor(b / COLS) - cy);
+      return da - db;
+    });
+}
+
+function produce(i) {
+  const g = S.cells[i];
+  const empties = emptyCellsNear(i);
+  if (!empties.length) { toast('空きマスがない。合体させるか、売って場所をつくろう'); sfx.bump(); paintM(i, 'shake'); return; }
+  const odds = GEN_LV[g.lv];
+  let x = Math.random(), t = 0;
+  while (t < 2 && x > odds[t]) { x -= odds[t]; t++; }
+  const j = empties[0];
+  S.cells[j] = { k: 'item', c: g.g, t };
+  paintM(i, 'land');
+  paintM(j, 'pop');
+  sfx.spawn();
+  discover(g.g, t);
+  afterChange();
+}
+
+const sameItem = (a, b) => a && b && a.k === 'item' && b.k === 'item' && a.c === b.c && a.t === b.t;
+
+function drop(a, b) {
+  const C = S.cells;
+  if (b < 0 || a === b) { paintM(a); return; }
+  const s = C[a], d = C[b];
+  const moveSel = () => { if (sel === a) sel = b; else if (sel === b) sel = a; };
+  if (d && d.k === 'lock') { paintM(a); sfx.bump(); return; }
+  if (!d) {
+    C[b] = s; C[a] = null; moveSel();
+    paintM(a); paintM(b, 'land'); sfx.move();
+    afterChange(); renderInfo();
+    return;
+  }
+  if (sameItem(s, d)) {
+    if (s.t >= MAXT) { paintM(a); toast('これ以上は合体できない。依頼に使おう'); sfx.bump(); return; }
+    const group = cluster(b, a);
+    const n = group.length + 1;
+    C[a] = null;
+    sel = b;
+    paintM(a);
+    if (n >= 5) {
+      // Big merge: 5+ at once yields one extra piece (pairs would leave one over).
+      const made = Math.floor(n / 2) + 1;
+      group.forEach((j, k) => { C[j] = k < made ? { k: 'item', c: s.c, t: s.t + 1 } : null; });
+      group.forEach((j, k) => paintM(j, k < made ? 'pop' : 'puff'));
+      burst($('mboard'), COLS, b, s.t + 4);
+      floater($('mboard'), COLS, b, `大合体！ ×${made}`, 'gold');
+      sfx.merge(s.t + 2);
+      setTimeout(sfx.coin, 150);
+    } else {
+      C[b] = { k: 'item', c: s.c, t: s.t + 1 };
+      paintM(b, 'pop');
+      burst($('mboard'), COLS, b, s.t + 1);
+      sfx.merge(s.t + 1);
+    }
+    discover(s.c, s.t + 1);
+    maybeChest(b, s.t + 1);
+    afterChange(); renderInfo();
+    return;
+  }
+  C[a] = d; C[b] = s; moveSel();
+  paintM(a, 'land'); paintM(b, 'land'); sfx.move();
+  afterChange(); renderInfo();
+}
+
+// Orthogonally connected identical items starting at b (b first, nearest first), ignoring the dragged cell.
+function cluster(b, skip) {
+  const ref = S.cells[b], seen = new Set([b]), out = [b];
+  for (let q = 0; q < out.length; q++) {
+    const i = out[q], x = i % COLS, y = Math.floor(i / COLS);
+    [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => {
+      const nx = x + dx, ny = y + dy, j = ny * COLS + nx;
+      if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS || seen.has(j) || j === skip) return;
+      seen.add(j);
+      if (sameItem(ref, S.cells[j])) out.push(j);
+    });
+  }
+  return out;
+}
+
+const CHEST_ODDS = [0, 0, 0, .2, .35, .6];
+function maybeChest(i, t) {
+  if (Math.random() >= CHEST_ODDS[t]) return;
+  const chest = { k: 'chest', n: t, lv: t };
+  const j = emptyCellsNear(i)[0];
+  if (j === undefined) { S.inbox.push(chest); toast('宝箱が出た！ 🎁 に入れておいた'); }
+  else { S.cells[j] = chest; paintM(j, 'pop'); }
+  setTimeout(() => { sfx.discover(); floater($('mboard'), COLS, j === undefined ? i : j, '宝箱！', 'gold'); }, 250);
+}
+
+function openChest(i) {
+  const c = S.cells[i];
+  const avail = [0, 1, 2].filter(g => S.gens[g]);
+  const t = Math.min(MAXT, rnd(2) + (c.lv - 3) + rnd(2));
+  const item = { k: 'item', c: pick(avail), t: Math.max(0, t) };
+  c.n--;
+  if (c.n <= 0) {
+    S.cells[i] = item;
+    sel = -1;
+    paintM(i, 'pop');
+  } else {
+    const j = emptyCellsNear(i)[0];
+    if (j === undefined) { c.n++; toast('空きマスがない。場所をあけてから開けよう'); sfx.bump(); paintM(i, 'shake'); return; }
+    S.cells[j] = item;
+    paintM(i, 'land');
+    paintM(j, 'pop');
+  }
+  sfx.spawn();
+  discover(item.c, item.t);
+  renderInfo();
+  afterChange();
+}
+
+function tapM(i) {
+  const c = S.cells[i];
+  if (c && c.k === 'gen') { select(i); produce(i); }
+  else if (c && c.k === 'chest') { select(i); openChest(i); }
+  else if (c) select(i);
+  else select(-1);
+}
+
+function afterChange() {
+  renderOrders();
+  renderTop();
+  save();
+}
+
+/* ================= orders ================= */
+function itemIndex() {
+  const m = {};
+  S.cells.forEach((c, i) => { if (c && c.k === 'item') (m[key(c.c, c.t)] = m[key(c.c, c.t)] || []).push(i); });
+  return m;
+}
+
+function renderOrders() {
+  const idx = itemIndex();
+  wantSet = new Set();
+  const html = S.orders.map(o => {
+    const used = {};
+    let ready = true;
+    const needs = o.need.map(n => {
+      const k = key(n.c, n.t), have = (idx[k] || []).length - (used[k] || 0);
+      used[k] = (used[k] || 0) + 1;
+      const ok = have > 0;
+      if (!ok) ready = false;
+      (idx[k] || []).forEach(i => wantSet.add(i));
+      return `<span class="need" title="${ITEM(n.c, n.t)[1]}">${ITEM(n.c, n.t)[0]}${ok ? '<i>✓</i>' : ''}</span>`;
+    }).join('');
+    return `<div class="order${ready ? ' ready' : ''}${o.sp ? ' special' : ''}" data-oid="${o.id}">
+      <div class="npc"><span class="nm">${o.npc.n}</span>${o.sp ? '<span class="sp-tag">特別</span>' : ''}</div>
+      <div class="needs">${needs}</div>
+      <div class="foot"><span class="rew">🪙${o.coins} ★${o.stars}${o.eyes ? ' 👁️' + o.eyes : ''}</span><button class="btn tiny gold" type="button" data-deliver="${o.id}" ${ready ? '' : 'disabled'}>納品</button></div>
+    </div>`;
+  }).join('');
+  $('orders').innerHTML = html || '<div class="empty-orders">新しい依頼を待っている…</div>';
+  mEls.forEach((el, i) => el.classList.toggle('want', wantSet.has(i)));
+}
+
+$('orders').addEventListener('click', e => {
+  const b = e.target.closest('[data-deliver]');
+  if (b && !b.disabled) deliver(+b.dataset.deliver);
+});
+
+function deliver(id) {
+  const o = S.orders.find(x => x.id === id);
+  if (!o) return;
+  const taken = [];
+  for (const n of o.need) {
+    const j = S.cells.findIndex((c, i) => !taken.includes(i) && c && c.k === 'item' && c.c === n.c && c.t === n.t);
+    if (j < 0) return;
+    taken.push(j);
+  }
+  taken.forEach(j => { S.cells[j] = null; if (sel === j) sel = -1; paintM(j, 'puff'); });
+  const g = goal(S.ch), before = S.stars;
+  S.coins += o.coins;
+  S.stars += o.stars;
+  if (o.eyes) S.eyes += o.eyes;
+  S.orders = S.orders.filter(x => x.id !== id);
+  sfx.coin();
+  toast(`${o.npc.n}「助かったよ」 🪙+${o.coins} ★+${o.stars}`);
+  renderInfo();
+  afterChange();
+  if (before < g && S.stars >= g) setTimeout(() => { sfx.discover(); toast('手がかりがそろった。現場検証へ向かおう'); }, 900);
+  setTimeout(() => { while (S.orders.length < 3) S.orders.push(makeOrder()); renderOrders(); save(); }, 900);
+}
+
+/* ================= gifts, seals ================= */
+function placeGift() {
+  if (!S.inbox.length) return;
+  const empties = emptyCellsNear(3 * COLS + 3);
+  if (!empties.length) { toast('空きマスがない。場所をあけてからもう一度'); sfx.bump(); return; }
+  const g = S.inbox.shift(), j = empties[0];
+  S.cells[j] = g;
+  paintM(j, 'pop');
+  burst($('mboard'), COLS, j, 3);
+  sfx.spawn();
+  if (g.k === 'item') discover(g.c, g.t);
+  select(j);
+  afterChange();
+}
+$('inboxBtn').addEventListener('click', placeGift);
+
+function unlockRow() {
+  const row = [...Array(ROWS).keys()].find(r => S.cells.slice(r * COLS, r * COLS + COLS).some(c => c && c.k === 'lock'));
+  if (row === undefined) return false;
+  for (let c = 0; c < COLS; c++) { const i = row * COLS + c; if (S.cells[i] && S.cells[i].k === 'lock') S.cells[i] = null; }
+  return row;
+}
+
+/* ================= merge input ================= */
+let drag = null;
+function idxAt(board, cols, rows, x, y) {
+  const r = board.getBoundingClientRect(), size = r.width / cols;
+  const cx = Math.floor((x - r.left) / size), cy = Math.floor((y - r.top) / size);
+  if (cx < 0 || cy < 0 || cx >= cols || cy >= rows) return -1;
+  return cy * cols + cx;
+}
+const mb = $('mboard');
+mb.addEventListener('pointerdown', e => {
+  if (!S || S.view !== 'merge' || drag || !$('overlay').hidden) return;
+  const i = idxAt(mb, COLS, ROWS, e.clientX, e.clientY);
+  if (i < 0) return;
+  e.preventDefault();
+  try { mb.setPointerCapture(e.pointerId); } catch (err) {}
+  drag = { i, x: e.clientX, y: e.clientY, id: e.pointerId, moving: false, dead: false, ghost: null, over: -1 };
+});
+mb.addEventListener('pointermove', e => {
+  if (!drag || e.pointerId !== drag.id || drag.dead) return;
+  if (!drag.moving) {
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 9) return;
+    const c = S.cells[drag.i];
+    if (!c || c.k === 'lock') { drag.dead = true; return; }
+    drag.moving = true;
+    const g = document.createElement('div');
+    g.className = 'ghost';
+    g.innerHTML = c.k === 'item' ? ITEM(c.c, c.t)[0] : c.k === 'chest' ? CHEST : CHAINS[c.g].gen.e;
+    g.style.width = g.style.height = (mb.clientWidth / COLS) * 1.05 + 'px';
+    document.body.appendChild(g);
+    drag.ghost = g;
+    mEls[drag.i].classList.add('lift');
+    if (c.k === 'item') S.cells.forEach((o, j) => { if (j !== drag.i && sameItem(c, o)) mEls[j].classList.add('match'); });
+  }
+  drag.ghost.style.transform = `translate(${e.clientX}px,${e.clientY}px) translate(-50%,-70%) scale(1.15)`;
+  const over = idxAt(mb, COLS, ROWS, e.clientX, e.clientY);
+  if (over !== drag.over) {
+    (drag.hl || []).forEach(j => mEls[j].classList.remove('hover', 'can'));
+    drag.hl = [];
+    drag.over = over;
+    const oc = over >= 0 ? S.cells[over] : null;
+    if (over >= 0 && over !== drag.i && !(oc && oc.k === 'lock')) {
+      const s = S.cells[drag.i];
+      if (sameItem(s, oc) && s.t < MAXT) {
+        const g = cluster(over, drag.i);
+        drag.hl = g.length + 1 >= 5 ? g : [over];
+      } else drag.hl = [over];
+      drag.hl.forEach(j => mEls[j].classList.add(sameItem(s, oc) && s.t < MAXT ? 'can' : 'hover'));
+    }
+  }
+});
+function endDrag(e, cancelled) {
+  if (!drag || e.pointerId !== drag.id) return;
+  const d = drag;
+  drag = null;
+  if (d.ghost) d.ghost.remove();
+  mEls.forEach(el => el.classList.remove('match', 'hover', 'can', 'lift'));
+  if (cancelled) { paintM(d.i); return; }
+  if (d.moving) drop(d.i, idxAt(mb, COLS, ROWS, e.clientX, e.clientY));
+  else if (!d.dead) tapM(d.i);
+  else select(d.i);
+}
+mb.addEventListener('pointerup', e => endDrag(e, false));
+mb.addEventListener('pointercancel', e => endDrag(e, true));
+
+/* ================= search (hidden-object scene) ================= */
+function mulberry(seed) {
+  return () => {
+    seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+const newSearch = ch => ({ seed: (Math.random() * 1e9) | 0, ch, found: [] });
+
+// Everything about a scene comes from its seed, so a saved search redraws identically.
+// Listed items are hidden with hidden-object tricks: blending into busy areas, odd sizes,
+// odd angles, lining up with boards and posts, blind spots, and being partly covered.
+function layoutScene(s) {
+  if (theme(s.ch).hs && HIDDEN[theme(s.ch).hs]) return layoutHidden(s, theme(s.ch));
+  // Until a chapter has its own drawn-in picture, use one that does.
+  const drawn = THEMES.find(t => t.hs && HIDDEN[t.hs]);
+  if (drawn) return layoutHidden(s, drawn);
+  const R = mulberry(s.seed), th = theme(s.ch), spots = SPOTS[th.bg];
+  const rp = a => a[Math.floor(R() * a.length)];
+  const rr = (a, b) => a + R() * (b - a);
+  const sh = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  let targets = sh(th.items.filter(e => FINDS[e])).slice(0, findCount(s.ch));
+  const clutter = th.items.filter(e => !targets.includes(e));
+  targets.forEach(e => { const l = LOOKALIKE[e]; if (l && !targets.includes(l)) clutter.push(l, l); });
+
+  const spotOf = (kinds, id) => {
+    const c = spots.filter(p => kinds.includes(p.k) && (p.k !== 'sky' || FLY.has(id)));
+    return c.length ? rp(c) : rp(spots.filter(p => p.k === 'floor'));
+  };
+  // Natural size for a spot, before any trick changes it.
+  const place = (id, p) => {
+    const x = rr(p.x0, p.x1) * SW;
+    let y, s, r = rr(-12, 12);
+    if (p.k === 'shelf') { s = rr(66, 90); y = p.y0 * SH - s * .36; r = rr(-6, 6); }
+    else {
+      y = rr(p.y0, p.y1) * SH;
+      if (p.k === 'floor') { const d = (y / SH - p.y0) / Math.max(.01, p.y1 - p.y0); s = rr(96, 136) * (.75 + d * .5); r = rr(-40, 40); }
+      else if (p.k === 'sky') s = rr(56, 76);
+      else if (p.k === 'busy') s = rr(62, 86);
+      else s = rr(72, 98);
+    }
+    return { e: id, x, y, s, r, a: 1, flip: R() < .3, kind: p.k };
+  };
+
+  const items = [];
+  const T = [];
+  const free = (x, y, gap) => T.every(t => Math.hypot(t.x - x, t.y - y) > gap);
+  const safe = it => it.x > 140 && it.x < SW - 260 && it.y > 80 && it.y < SH - 150;
+  const tricks = ['natural', 'busy', 'flip', 'behind', 'line', 'busy'];
+  if (s.ch >= 1) tricks.push('tiny', 'edge', 'flip');
+  if (s.ch >= 2) tricks.push('huge', 'tiny', 'behind', 'edge');
+
+  targets.forEach((id, k) => {
+    for (let tries = 0; tries < 40; tries++) {
+      const trick = tries < 30 ? rp(tricks) : 'natural';
+      let it, over = null;
+      if (trick === 'busy') { it = place(id, spotOf(['busy'], id)); it.s *= .9; it.a = .72; }
+      else if (trick === 'tiny') { it = place(id, spotOf(['floor', 'shelf', 'busy'], id)); it.s = rr(40, 50); it.a = .9; }
+      else if (trick === 'huge') { it = place(id, spotOf(['floor', 'hang'], id)); it.s = rr(240, 320); it.a = .4; }
+      else if (trick === 'flip') { it = place(id, spotOf(['floor', 'shelf', 'hang', 'busy'], id)); it.r = rp([180, 90, -90]) + rr(-8, 8); it.a = .88; }
+      else if (trick === 'edge') { it = place(id, spotOf(['edge'], id)); it.a = .85; }
+      else if (trick === 'line' && LONG.has(id)) {
+        it = place(id, spotOf(['floor', 'edge'], id));
+        it.r = rp([90, -90, 0, 180]) + rr(-5, 5); it.a = .85;   // follows boards, posts and ledges
+      } else if (trick === 'behind') {
+        it = place(id, spotOf(['floor', 'shelf'], id)); it.a = .95;
+        const cover = rp(clutter);
+        over = { e: cover, x: it.x + rp([-1, 1]) * it.s * rr(.3, .42), y: it.y + it.s * rr(.1, .3), s: it.s * rr(1.05, 1.3), r: rr(-15, 15), a: 1, flip: R() < .5, over: true };
+      } else { it = place(id, spotOf(['floor', 'shelf', 'hang', 'busy', 'sky'], id)); it.a = .92; }
+      if (!safe(it) || !free(it.x, it.y, 260)) continue;
+      it.t = k; it.trick = trick;
+      T.push(it);
+      items.push(it);
+      if (over) items.push(over);
+      return;
+    }
+  });
+  targets = targets.slice(0, T.length);
+  T.forEach((t, k) => { t.t = k; });
+
+  // Decoys: fewer than before, all sitting where things would really be. Lookalikes included.
+  const n = 90 + s.ch * 8;
+  const kinds = ['floor', 'floor', 'floor', 'shelf', 'shelf', 'shelf', 'hang', 'hang', 'busy', 'busy', 'busy', 'edge', 'edge', 'sky'];
+  for (let k = 0, tries = 0; k < n && tries < n * 6; tries++) {
+    const id = rp(clutter);
+    const it = place(id, spotOf([rp(kinds)], id));
+    // never sit on top of a listed item (only its chosen cover may)
+    if (T.some(t => Math.hypot(t.x - it.x, t.y - it.y) < (t.s + it.s) * .4)) continue;
+    if (items.some(o => !o.over && o.t === undefined && Math.hypot(o.x - it.x, o.y - it.y) < (o.s + it.s) * .22)) continue;
+    it.a = rr(.85, 1);
+    items.push(it);
+    k++;
+  }
+  // back to front; a cover is drawn right after the item it hides
+  items.forEach(it => { it.z = it.over ? it.y + 2000 : it.y; });
+  items.sort((a, b) => a.z - b.z);
+  return { seed: s.seed, th, items, T };
+}
+
+const imgCache = new Map();
+function loadImg(src) {
+  if (!imgCache.has(src)) imgCache.set(src, new Promise((ok, fail) => {
+    const im = new Image();
+    im.onload = () => ok(im);
+    im.onerror = () => fail(new Error(src));
+    im.src = src;
+  }));
+  return imgCache.get(src);
+}
+const sprites = {};
+
+// Engravings sit on white paper, so multiply lets the backdrop show through the white.
+function drawItem(g, it) {
+  const im = sprites[it.e];
+  if (!im) return;
+  g.save();
+  g.globalCompositeOperation = 'multiply';
+  g.globalAlpha = it.a == null ? 1 : it.a;
+  g.translate(it.x, it.y);
+  g.rotate(it.r * Math.PI / 180);
+  if (it.flip) g.scale(-1, 1);
+  g.drawImage(im, -it.s / 2, -it.s / 2, it.s, it.s);
+  g.restore();
+}
+// A found item is coloured in with a watercolour wash, then its lines are re-inked on top.
+function drawFound(g, t) {
+  const col = WASH[(t.e.length * 7 + t.e.charCodeAt(0)) % WASH.length];
+  const r = Math.max(30, t.s * .5);
+  g.save();
+  g.globalCompositeOperation = 'multiply';
+  const gr = g.createRadialGradient(t.x, t.y, 0, t.x, t.y, r);
+  gr.addColorStop(0, col + '.8)');
+  gr.addColorStop(.65, col + '.55)');
+  gr.addColorStop(1, col + '0)');
+  g.fillStyle = gr;
+  g.beginPath(); g.arc(t.x, t.y, r, 0, Math.PI * 2); g.fill();
+  g.restore();
+  drawItem(g, Object.assign({}, t, { a: 1 }));
+}
+
+let scn = null;
+async function renderScene() {
+  const s = S.search, cv = $('scv');
+  $('sload').hidden = false;
+  $('sload').textContent = '情景を描いています…';
+  $('slayer').querySelectorAll('.mark,.hintring,.miss,.float').forEach(el => el.remove());
+  const L = layoutScene(s);
+  const ids = [...new Set(L.items.map(it => it.e))];
+  let bg;
+  try {
+    [bg] = await Promise.all([loadImg(`assets/${L.hidden ? L.th.hs : L.th.bg}.jpg`), ...ids.map(id => loadImg(findSrc(id)).then(im => { sprites[id] = im; }))]);
+  } catch (e) {
+    $('sload').textContent = '画像を読み込めませんでした。通信状態を確認して、もう一度開いてください。';
+    return;
+  }
+  if (!S.search || S.search.seed !== s.seed) return;   // the player left or changed scene meanwhile
+  cv.width = SW * SRES; cv.height = SH * SRES;
+  cv.style.width = SW + 'px'; cv.style.height = SH + 'px';
+  $('slayer').style.width = SW + 'px'; $('slayer').style.height = SH + 'px';
+  const g = cv.getContext('2d');
+  g.setTransform(SRES, 0, 0, SRES, 0, 0);
+  const k = Math.max(SW / bg.width, SH / bg.height);
+  g.drawImage(bg, (SW - bg.width * k) / 2, (SH - bg.height * k) / 2, bg.width * k, bg.height * k);
+  L.items.forEach(it => drawItem(g, it));
+  // In a seek-and-find picture, the list shows each item cut straight out of the picture.
+  if (L.hidden) L.T.forEach(t => {
+    const [x, y, r] = t.at[0].src, c = document.createElement('canvas');
+    c.width = c.height = 72;
+    c.getContext('2d').drawImage(bg, x - r * 1.15, y - r * 1.15, r * 2.3, r * 2.3, 0, 0, 72, 72);
+    t.thumb = c.toDataURL('image/jpeg', .85);
+  });
+  L.T.filter(t => s.found.includes(t.t)).forEach(t => { drawFound(g, t); addMark(t); });
+  scn = L;
+  $('sload').hidden = true;
+  fitView();
+  renderFinds();
+}
+
+/* ---- view: pinch zoom / pan ---- */
+const V = { z: 1, x: 0, y: 0, min: .2, max: 2 };
+function applyView(glide) {
+  const r = $('sview').getBoundingClientRect();
+  V.z = Math.min(V.max, Math.max(V.min, V.z));
+  const w = SW * V.z, h = SH * V.z;
+  V.x = w <= r.width ? (r.width - w) / 2 : Math.min(0, Math.max(r.width - w, V.x));
+  V.y = h <= r.height ? (r.height - h) / 2 : Math.min(0, Math.max(r.height - h, V.y));
+  const L = $('slayer');
+  L.classList.toggle('glide', !!glide);
+  L.style.transform = `translate(${V.x}px,${V.y}px) scale(${V.z})`;
+  L.style.setProperty('--inv', 1 / V.z);
+}
+function fitView() {
+  const r = $('sview').getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  V.min = Math.min(r.width / SW, r.height / SH);
+  V.max = Math.max(V.min * 6, 1.5);
+  // Open filling the frame (no letterbox), centred on the crowded lower half.
+  V.z = Math.min(Math.max(r.width / SW, r.height / SH), V.min * 2.2);
+  V.x = (r.width - SW * V.z) / 2;
+  V.y = r.height - SH * V.z * .82;
+  applyView();
+}
+function zoomAt(f, cx, cy, glide) {
+  const wx = (cx - V.x) / V.z, wy = (cy - V.y) / V.z;
+  V.z = Math.min(V.max, Math.max(V.min, V.z * f));
+  V.x = cx - wx * V.z; V.y = cy - wy * V.z;
+  applyView(glide);
+}
+function onSviewResize() {
+  if (!scn) return;
+  const r = $('sview').getBoundingClientRect();
+  if (!r.width) return;
+  const atMin = V.z <= V.min + 1e-6;
+  V.min = Math.min(r.width / SW, r.height / SH);
+  V.max = Math.max(V.min * 6, 1.5);
+  if (atMin || V.z < V.min) V.z = V.min;
+  applyView();
+}
+
+const sv = $('sview'), ptrs = new Map();
+let gest = null;
+const local = e => { const r = sv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+sv.addEventListener('pointerdown', e => {
+  if (!scn || S.view !== 'search' || !$('overlay').hidden || e.target.closest('button')) return;
+  e.preventDefault();
+  try { sv.setPointerCapture(e.pointerId); } catch (err) {}
+  const p = local(e);
+  ptrs.set(e.pointerId, p);
+  if (ptrs.size === 1) gest = { mode: 'tap', sx: p.x, sy: p.y, vx: V.x, vy: V.y };
+  else if (ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()];
+    gest = { mode: 'pinch', d: Math.hypot(a.x - b.x, a.y - b.y) || 1, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2, z: V.z, vx: V.x, vy: V.y };
+    $('ptip').hidden = true;
+  }
+});
+sv.addEventListener('pointermove', e => {
+  if (!ptrs.has(e.pointerId) || !gest) return;
+  const p = local(e);
+  ptrs.set(e.pointerId, p);
+  if (gest.mode === 'pinch') {
+    if (ptrs.size < 2) return;
+    const [a, b] = [...ptrs.values()];
+    const d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    const wx = (gest.mx - gest.vx) / gest.z, wy = (gest.my - gest.vy) / gest.z;
+    V.z = Math.min(V.max, Math.max(V.min, gest.z * d / gest.d));
+    V.x = mx - wx * V.z; V.y = my - wy * V.z;
+    applyView();
+    return;
+  }
+  const dx = p.x - gest.sx, dy = p.y - gest.sy;
+  if (gest.mode === 'tap' && Math.hypot(dx, dy) > 9) { gest.mode = 'pan'; $('ptip').hidden = true; }
+  if (gest.mode === 'pan') { V.x = gest.vx + dx; V.y = gest.vy + dy; applyView(); }
+});
+function endPtr(e) {
+  if (!ptrs.has(e.pointerId)) return;
+  const p = ptrs.get(e.pointerId);
+  ptrs.delete(e.pointerId);
+  if (gest && gest.mode === 'tap' && e.type === 'pointerup') tapWorld((p.x - V.x) / V.z, (p.y - V.y) / V.z);
+  if (!ptrs.size) gest = null;
+  else if (gest && gest.mode === 'pinch') { const q = [...ptrs.values()][0]; gest = { mode: 'pan', sx: q.x, sy: q.y, vx: V.x, vy: V.y }; }
+}
+sv.addEventListener('pointerup', endPtr);
+sv.addEventListener('pointercancel', endPtr);
+sv.addEventListener('wheel', e => {
+  if (!scn) return;
+  e.preventDefault();
+  const p = local(e);
+  zoomAt(Math.exp(-e.deltaY * .0015), p.x, p.y);
+}, { passive: false });
+const zoomCenter = f => { const r = sv.getBoundingClientRect(); zoomAt(f, r.width / 2, r.height / 2, true); };
+$('zin').addEventListener('click', () => zoomCenter(1.6));
+$('zout').addEventListener('click', () => zoomCenter(1 / 1.6));
+$('zfit').addEventListener('click', () => { V.z = V.min; applyView(true); });
+
+/* ---- finding ---- */
+function inWorld(cls, x, y, size, text) {
+  const el = document.createElement('div');
+  el.className = cls;
+  el.style.left = x + 'px'; el.style.top = y + 'px';
+  if (size) el.style.width = el.style.height = size + 'px';
+  if (text) el.textContent = text;
+  $('slayer').appendChild(el);
+  return el;
+}
+const addMark = t => inWorld('mark', t.x, t.y, t.s * 1.3);
+
+function tapWorld(wx, wy) {
+  const s = S.search;
+  const slop = Math.min(16 / V.z, 26);   // finger tolerance, capped so tapping zoomed-out isn't a free pass
+  const hit = scn.T.filter(t => !s.found.includes(t.t))
+    .flatMap(t => (t.at || [t]).map(p => ({ t, p, d: Math.hypot(p.x - wx, p.y - wy) })))
+    .filter(o => o.d < o.p.s * .55 + slop)
+    .sort((a, b) => a.d - b.d)[0];
+  if (hit) {
+    const t = hit.t;
+    if (hit.p !== t) Object.assign(t, { x: hit.p.x, y: hit.p.y, s: hit.p.s });   // mark the copy that was tapped
+    s.found.push(t.t);
+    drawFound($('scv').getContext('2d'), t);
+    addMark(t);
+    const f = inWorld('float sfloat ok', t.x, t.y - t.s * .7, 0, `${t.ja || FINDS[t.e]}！`);
+    setTimeout(() => f.remove(), 1200);
+    sfx.found();
+    renderFinds();
+    save();
+    if (s.found.length >= scn.T.length) setTimeout(searchClear, 1300);
+  } else {
+    const m = inWorld('miss', wx, wy, 0, '×');
+    setTimeout(() => m.remove(), 700);
+    sfx.wrong();
+  }
+}
+
+function renderFinds() {
+  if (!S.search || !scn) return;
+  const s = S.search, T = scn.T.slice().sort((a, b) => a.t - b.t);
+  $('mTitle').textContent = `${story(S.ch).mission}　${s.found.length} / ${T.length}`;
+  $('finds').innerHTML = T.map(t => `<span class="find${s.found.includes(t.t) ? ' got' : ''}"><img src="${t.thumb || findSrc(t.e)}" alt="">${t.ja || FINDS[t.e]}</span>`).join('');
+  renderTop();
+}
+
+function useEye() {
+  if (!scn || S.eyes <= 0) return;
+  const left = scn.T.filter(t => !S.search.found.includes(t.t));
+  if (!left.length) return;
+  S.eyes--;
+  renderTop();
+  sfx.eye();
+  const t = pick(left), r = sv.getBoundingClientRect();
+  const ox = (Math.random() - .5) * t.s * 2.2, oy = (Math.random() - .5) * t.s * 2.2;
+  V.z = Math.min(V.max, Math.max(V.z, V.min * 3));
+  V.x = r.width / 2 - (t.x + ox) * V.z;
+  V.y = r.height / 2 - (t.y + oy) * V.z;
+  applyView(true);
+  const h = inWorld('hintring', t.x + ox, t.y + oy, t.s * 4.6);
+  setTimeout(() => h.remove(), 3500);
+  toast('このあたりに、ただならぬ気配が…');
+  save();
+}
+$('eyeBtn').addEventListener('click', useEye);
+
+function setView(v) {
+  S.view = v;
+  $('mergeView').hidden = v !== 'merge';
+  $('searchView').hidden = v !== 'search';
+  if (v === 'search') {
+    setTimeout(() => {
+      if (!scn || scn.seed !== S.search.seed) renderScene();
+      else { onSviewResize(); renderFinds(); }
+    }, 0);
+  } else { renderOrders(); renderTop(); }
+  setTimeout(fitAll, 0);
+  save();
+}
+$('backBtn').addEventListener('click', () => setView('merge'));
+$('goSearch').addEventListener('click', () => {
+  if (S.search) { setView('search'); return; }
+  const st = story(S.ch);
+  showOverlay(`
+    <p class="kicker">現場検証</p>
+    <h2>${st.mission}</h2>
+    <p class="lore">${st.missionText}</p>
+    <ul class="how">
+      <li><span>🔍</span><div>細かく描かれた情景の中から、<b>リストの品 ${findCount(S.ch)}つ</b>を探してタップ。見つけた品には色がつく。</div></li>
+      <li><span><img class="ic mult" src="${findSrc('bone')}" alt=""></span><div>品は絵の中に<b>なじむように</b>隠されている。とても小さかったり、大きすぎて背景に見えたり、逆さまだったり、何かのかげに半分隠れていたり。棚の上や壁、絵の端っこも見逃さないで。</div></li>
+      <li><span>🤏</span><div><b>ピンチで拡大</b>、ドラッグで移動。＋ − ボタンでも拡大できる。</div></li>
+      <li><span><img class="ic mult" src="${findSrc('oldkey')}" alt=""></span><div>そっくりな品（鍵と古い鍵、タコとイカ、シルクハットと山高帽など）もまぎれている。よく見て。</div></li>
+      <li><span>👁️</span><div>困ったら<b>千里眼</b>。だいたいの場所まで連れていってくれる。</div></li>
+    </ul>
+    <p class="muted">時間制限はない。まちがえても大丈夫。</p>
+    <button class="btn primary" type="button" data-go>探しはじめる</button>
+  `, () => { S.search = newSearch(S.ch); hideOverlay(); setView('search'); });
+});
+
+function searchClear() {
+  const ch = S.ch, st = story(ch);
+  const coins = 40 + 30 * ch;
+  const list = [`🪙 ${coins}`, '👁️ 千里眼 ×2'];
+  S.coins += coins;
+  S.eyes += 2;
+  const row = unlockRow();
+  if (row !== false) list.push('✴ 盤面の封印が一列とけた');
+  if (!S.gens[2]) { S.gens[2] = true; S.inbox.push({ k: 'gen', g: 2, lv: 1 }); list.push(`${CHAINS[2].gen.e} 祭壇（新しい道具）`); }
+  const avail = [0, 1, 2].filter(g => S.gens[g]);
+  const gt = Math.min(2 + Math.floor(ch / 2), 4);
+  for (let k = 0; k < 2; k++) {
+    const c = pick(avail);
+    S.inbox.push({ k: 'item', c, t: gt });
+    list.push(`🎁 ${ITEM(c, gt)[0]} ${ITEM(c, gt)[1]}`);
+  }
+  S.inbox.push({ k: 'chest', n: 3, lv: 4 });
+  list.push(`🎁 ${CHEST} 宝箱`);
+  S.ch++;
+  S.stars = 0;
+  S.search = null;
+  scn = null;
+  setView('merge');
+  if (row !== false) for (let c = 0; c < COLS; c++) paintM(row * COLS + c, 'puff');
+  sfx.seal();
+  showOverlay(`
+    <p class="kicker">第${ch + 1}章 解決</p>
+    <h2>${st.mission}</h2>
+    <p class="lore">${st.outro}</p>
+    <ul class="rewards">${list.map(x => `<li>${x}</li>`).join('')}</ul>
+    <p class="muted">🎁 のボタンを押すと、もらったものを盤面に出せる。</p>
+    <button class="btn primary" type="button" data-go>つづきへ</button>
+  `, showIntro);
+}
+
+/* ================= overlays ================= */
+function showOverlay(html, onGo) {
+  $('panel').innerHTML = html;
+  $('overlay').hidden = false;
+  $('panel').scrollTop = 0;
+  const go = $('panel').querySelector('[data-go]');
+  if (go) { go.addEventListener('click', onGo); setTimeout(() => go.focus({ preventScroll: true }), 50); }
+}
+function hideOverlay() { $('overlay').hidden = true; }
+
+function showIntro() {
+  const st = story(S.ch), g = goal(S.ch);
+  const first = S.ch === 0;
+  showOverlay(`
+    ${first ? '<h1>ルルイエ<br>捜索録</h1>' : ''}
+    <p class="kicker">第${S.ch + 1}章</p>
+    <h2>${st.title}</h2>
+    <p class="lore">${st.intro}</p>
+    ${first ? `<ul class="how">
+      <li><span>${CHAINS[0].gen.e}</span><div>光る輪の<b>道具</b>をタップすると素材が出る。</div></li>
+      <li><span>${ITEM(0, 1)[0]}</span><div>同じものを<b>ドラッグで重ねる</b>と合体して、ひとつ上のものになる。はじめて作ったものは図鑑に載り、ボーナスがもらえる。</div></li>
+      <li><span>✨</span><div>同じものを4つ以上となりあわせて並べ、そこへもう1つ重ねると<b>大合体</b>。ひとつ多くできてお得。高い段階の合体では、ときどき宝箱も出る。</div></li>
+      <li><span>${ITEM(1, 1)[0]}</span><div>町の人の<b>依頼</b>の品がそろったら「納品」。🪙と★がもらえる。🪙で道具を強化できる。</div></li>
+      <li><span>🔎</span><div>★がたまると<b>現場検証</b>へ。細かい情景の中からリストの品を探しだすと、物語が進み、ごほうびがもらえる。</div></li>
+    </ul>` : ''}
+    <p class="muted">依頼をこなして ★${g} 集めると、現場検証ができる。時間制限はないので、ゆっくりどうぞ。</p>
+    <button class="btn primary" type="button" data-go>依頼を受ける</button>
+  `, () => { S.introCh = S.ch; hideOverlay(); save(); });
+}
+
+function showDex() {
+  const total = CHAINS.length * (MAXT + 1);
+  const found = Object.keys(S.dex).length;
+  const rows = CHAINS.map((ch, c) => `<div><h3>${ch.gen.e} ${ch.name}</h3><div class="dexrow">${ch.items.map((it, t) =>
+    S.dex[key(c, t)] ? `<div class="dexitem">${it[0]}<small>${it[1]}</small></div>` : `<div class="dexitem unknown">？<small>Lv${t + 1}</small></div>`).join('')}</div></div>`).join('');
+  showOverlay(`
+    <p class="kicker">調査手帳</p>
+    <h2>図鑑 ${found} / ${total}</h2>
+    <div class="dex">${rows}</div>
+    <button class="btn primary" type="button" data-go>とじる</button>
+    <button class="btn tiny danger" type="button" id="resetBtn">データを消して最初から</button>
+  `, hideOverlay);
+  let armed = false;
+  $('resetBtn').addEventListener('click', () => {
+    if (!armed) { armed = true; $('resetBtn').textContent = '本当に消す（もとに戻せません）'; return; }
+    try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+    freshState(); sel = -1;
+    setView('merge'); buildMerge(); renderAll(); showIntro();
+  });
+}
+$('dexBtn').addEventListener('click', showDex);
+$('mute').addEventListener('click', () => {
+  muted = !muted;
+  try { localStorage.setItem('rlyeh-muted', muted ? '1' : '0'); } catch (e) {}
+  renderTop();
+  if (!muted) sfx.spawn();
+});
+document.addEventListener('gesturestart', e => e.preventDefault());
+
+/* ================= boot ================= */
+function renderAll() {
+  renderOrders();
+  renderTop();
+  renderInfo();
+  S.cells.forEach((_, i) => paintM(i));
+}
+function boot(data) {
+  S = (data && data.S && data.S.v === 2) ? data.S : loadSave();
+  if (!S) freshState();
+  while (S.orders.length < 3) S.orders.push(makeOrder());
+  sel = -1;
+  buildMerge();
+  renderAll();
+  if (S.search && !S.search.seed) S.search = null;   // saves from the crowd-search version
+  setView(S.search && S.view === 'search' ? 'search' : 'merge');
+  if (S.introCh !== S.ch) showIntro();
+}
+const hot = window.claude && window.claude.hot;
+try { if (hot && hot.snapshot) hot.snapshot(() => ({ S })); } catch (e) {}
+if (hot && hot.ready) hot.ready(boot); else boot((hot && hot.data) || {});
+})();
+</script>

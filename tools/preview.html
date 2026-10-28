@@ -1,0 +1,31 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>画像プレビュー</title>
+<style>
+  body{margin:0;background:#0a1518;color:#e6dcc3;font-family:"Yu Gothic",sans-serif;padding:16px}
+  h2{font-size:15px;margin:10px 0 6px}
+  .row{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+  .board{display:grid;grid-template-columns:repeat(3,150px);border:2px solid #3b6b62;border-radius:12px;overflow:hidden;
+    background:repeating-conic-gradient(#16302e 0 25%,#122927 0 50%) 0 0/300px 300px}
+  .board.light{background:#c9b48e}
+  .board.red{background:#5a1a1e}
+  .board div{width:150px;height:150px;display:grid;place-items:center}
+  .board img{width:140px;height:140px}
+  .scene{position:relative;width:640px;max-width:100%;border:2px solid #3b6b62;border-radius:12px;overflow:hidden}
+  .scene img.bg{display:block;width:100%}
+  .scene img.sp{position:absolute;mix-blend-mode:multiply}
+  .note{font-size:12px;opacity:.7;margin:4px 0}
+</style>
+<h2>マージ盤面：いつもの盤面 / 明るい色 / 赤（切り残しの確認用）</h2>
+<div class="row">
+  <div class="board"><div><img src="../assets/m-0-4.png"></div><div><img src="../assets/m-1-5.png"></div><div><img src="../assets/g-0.png"></div></div>
+  <div class="board light"><div><img src="../assets/m-0-4.png"></div><div><img src="../assets/m-1-5.png"></div><div><img src="../assets/g-0.png"></div></div>
+  <div class="board red"><div><img src="../assets/m-0-4.png"></div><div><img src="../assets/m-1-5.png"></div><div><img src="../assets/g-0.png"></div></div>
+</div>
+<h2>現場検証：背景に小物を乗算で重ねた例</h2>
+<div class="scene">
+  <img class="bg" src="../assets/bg-0.jpg">
+  <img class="sp" src="../assets/f-key.png" style="left:58%;top:70%;width:10%;transform:rotate(-20deg)">
+  <img class="sp" src="../assets/f-octopus.png" style="left:22%;top:66%;width:11%">
+</div>
+<p class="note">鍵は床の右寄り、タコは床の左寄り</p>

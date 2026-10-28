@@ -1,0 +1,29 @@
+[
+  {
+    "name": "m-0-4",
+    "prompt": "Game item icon of a single giant octopus with curling tentacles. Painterly oil-painting style, muted teal, sea-green and bone colours, gloomy 1920s Lovecraftian mood, soft rim light, rich detail. One object only, centred, filling most of the frame, isolated on a plain pure white background. No text, no frame, no border, no cast shadow on the background."
+  },
+  {
+    "name": "m-1-5",
+    "prompt": "Game item icon of a single antique crystal ball on a tarnished brass stand, a faint sunken city glowing inside the glass. Painterly oil-painting style, muted teal, sea-green and bone colours, gloomy 1920s Lovecraftian mood, soft rim light, rich detail. One object only, centred, filling most of the frame, isolated on a plain pure white background. No text, no frame, no border, no cast shadow on the background."
+  },
+  {
+    "name": "g-0",
+    "prompt": "Game item icon of a coiled old fishing net with cork floats and a rusty hook, magical faint green glow. Painterly oil-painting style, muted teal, sea-green and bone colours, gloomy 1920s Lovecraftian mood, soft rim light, rich detail. One object only, centred, filling most of the frame, isolated on a plain pure white background. No text, no frame, no border, no cast shadow on the background."
+  },
+  {
+    "name": "bg-0",
+    "aspect": "3:2",
+    "size": 2400,
+    "format": "jpg",
+    "prompt": "Vintage copperplate engraving illustration of the interior of a shabby 1920s harbour-town tavern in New England, wide view: wooden plank walls, long wall shelves, arched windows with a full moon outside, hanging oil lamps, a bar counter at the back, heavy ceiling beams. Fine cross-hatching, sepia-brown ink on aged parchment paper, highly detailed, eerie Lovecraftian atmosphere. The lower half is an open wooden floor seen from slightly above, with NO furniture, objects or people on it. No text, no frame."
+  },
+  {
+    "name": "f-key",
+    "prompt": "A single small antique iron key drawn as a vintage copperplate engraving: black ink line art with fine cross-hatching shading, no colour, no grey wash. One object only, centred, filling most of the frame, on a plain pure white background. No text, no frame, no border, no shadow on the background."
+  },
+  {
+    "name": "f-octopus",
+    "prompt": "A single small octopus drawn as a vintage copperplate engraving: black ink line art with fine cross-hatching shading, no colour, no grey wash. One object only, centred, filling most of the frame, on a plain pure white background. No text, no frame, no border, no shadow on the background."
+  }
+]

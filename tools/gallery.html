@@ -1,0 +1,25 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>素材一覧</title>
+<style>
+  body{margin:0;background:#0a1518;color:#e6dcc3;font-family:"Yu Gothic",sans-serif;padding:12px}
+  h2{font-size:14px;margin:10px 0 6px}
+  .grid{display:flex;flex-wrap:wrap;gap:6px}
+  .icon{width:92px;text-align:center;font-size:11px;background:repeating-conic-gradient(#16302e 0 25%,#122927 0 50%) 0 0/40px 40px;border:1px solid #3b6b62;border-radius:8px;padding:4px}
+  .icon img{width:80px;height:80px}
+  .find{width:76px;text-align:center;font-size:11px;background:#d9c9a3;color:#2b2118;border-radius:6px;padding:3px}
+  .find img{width:68px;height:68px;mix-blend-mode:multiply}
+  .bg{width:250px;font-size:11px}
+  .bg img{width:250px;border:1px solid #3b6b62;border-radius:6px}
+</style>
+<h2>マージ（アイテム・道具・宝箱）</h2><div class="grid" id="icons"></div>
+<h2>現場検証の背景</h2><div class="grid" id="bgs"></div>
+<h2>現場検証の小物（羊皮紙色の上に乗算）</h2><div class="grid" id="finds"></div>
+<script>
+fetch('assets.json').then(r => r.json()).then(a => {
+  const v = '?v=' + Date.now();
+  document.getElementById('icons').innerHTML = a.icon.map(i => `<div class="icon"><img src="../assets/${i.name}.png${v}"><div>${i.ja}</div></div>`).join('');
+  document.getElementById('bgs').innerHTML = a.bg.map(i => `<div class="bg"><img src="../assets/${i.name}.jpg${v}"><div>${i.ja}</div></div>`).join('');
+  document.getElementById('finds').innerHTML = a.find.map(i => `<div class="find"><img src="../assets/${i.name}.png${v}"><div>${i.ja}</div></div>`).join('');
+});
+</script>

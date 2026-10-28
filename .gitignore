@@ -1,0 +1,5 @@
+# Secrets: never commit or publish
+.env
+
+# Raw full-size images straight from the generator (only the resized copies in assets/ ship)
+gen-raw/

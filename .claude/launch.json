@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "game",
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "C:\\Users\\shimaday\\AppData\\Local\\Temp\\claude\\C--Users-shimaday-Desktop----------\\e456271d-63d3-4217-a33f-2e75a040732f\\scratchpad\\serve.ps1", "-Root", "C:\\Users\\shimaday\\Desktop\\暇つぶしアプリ開発"],
+      "port": 8765
+    }
+  ]
+}
