@@ -206,14 +206,11 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 /* Wanted cards: big picture swatches in one row that scrolls sideways (a grid in the landscape rail) */
 .finds{display:flex;flex-wrap:nowrap;gap:8px;flex:1 1 100%;min-width:0;overflow-x:auto;overflow-y:hidden;padding:2px 2px 6px;
   scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior-x:contain}
-.find{position:relative;flex:none;width:96px;display:flex;flex-direction:column;align-items:center;gap:3px;scroll-snap-align:start;
-  background:#d9cba6;color:#2b2118;border:2px solid var(--gold);border-radius:10px;padding:5px 5px 4px;
-  font-size:12px;font-weight:700;line-height:1.3;text-align:center;box-shadow:inset 0 0 8px rgba(80,50,20,.4)}
-.find span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.find img{display:block;width:82px;height:82px;border-radius:6px;mix-blend-mode:multiply}
-.find.got{opacity:.5}
-.find.got span{text-decoration:line-through;text-decoration-color:var(--stripe);text-decoration-thickness:2px}
-.find.got::after{content:'✓';position:absolute;top:4px;right:6px;font-size:26px;font-weight:800;color:var(--stripe);text-shadow:0 1px 0 #fff}
+.find{position:relative;flex:none;width:100px;scroll-snap-align:start;
+  background:#d9cba6;border:2px solid var(--gold);border-radius:10px;padding:4px;box-shadow:inset 0 0 8px rgba(80,50,20,.4)}
+.find img{display:block;width:100%;height:auto;aspect-ratio:1;border-radius:6px;mix-blend-mode:multiply}
+.find.got{opacity:.45}
+.find.got::after{content:'✓';position:absolute;inset:0;display:grid;place-items:center;font-size:54px;font-weight:800;color:var(--stripe);text-shadow:0 2px 0 #fff}
 @keyframes missfade{0%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
 
 /* Discovery banner, toast */
@@ -1576,7 +1573,7 @@ function renderFinds() {
   if (!S.search || !scn) return;
   const s = S.search, T = scn.T.slice().sort((a, b) => a.t - b.t);
   $('mTitle').textContent = `${story(S.ch).mission}　${s.found.length} / ${T.length}`;
-  $('finds').innerHTML = T.map(t => `<span class="find${s.found.includes(t.t) ? ' got' : ''}"><img src="${t.thumb || findSrc(t.e)}" alt=""><span>${t.ja || FINDS[t.e]}</span></span>`).join('');
+  $('finds').innerHTML = T.map(t => `<span class="find${s.found.includes(t.t) ? ' got' : ''}"><img src="${t.thumb || findSrc(t.e)}" alt="${t.ja || FINDS[t.e]}"></span>`).join('');
   renderTop();
 }
 
