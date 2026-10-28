@@ -203,11 +203,17 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 .zoombar .btn{width:44px;height:44px;padding:0;font-size:22px}
 .ptip{position:absolute;left:10px;bottom:10px;margin:0;font-size:12px;background:rgba(3,9,11,.75);padding:5px 12px;border-radius:999px;pointer-events:none;z-index:2}
 .sload{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-display);font-size:18px;letter-spacing:.1em;background:rgba(5,11,13,.88);z-index:3}
-.finds{display:flex;flex-wrap:wrap;gap:6px}
-.find{display:inline-flex;align-items:center;gap:4px;background:#d9cba6;color:#2b2118;border:2px solid var(--gold);border-radius:8px;padding:2px 8px 2px 4px;
-  font-size:13px;font-weight:700;white-space:nowrap;box-shadow:inset 0 0 8px rgba(80,50,20,.4)}
-.find img{width:30px;height:30px;mix-blend-mode:multiply}
-.find.got{opacity:.5;text-decoration:line-through;text-decoration-color:var(--stripe);text-decoration-thickness:2px}
+/* Wanted cards: big picture swatches in one row that scrolls sideways (a grid in the landscape rail) */
+.finds{display:flex;flex-wrap:nowrap;gap:8px;flex:1 1 100%;min-width:0;overflow-x:auto;overflow-y:hidden;padding:2px 2px 6px;
+  scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior-x:contain}
+.find{position:relative;flex:none;width:96px;display:flex;flex-direction:column;align-items:center;gap:3px;scroll-snap-align:start;
+  background:#d9cba6;color:#2b2118;border:2px solid var(--gold);border-radius:10px;padding:5px 5px 4px;
+  font-size:12px;font-weight:700;line-height:1.3;text-align:center;box-shadow:inset 0 0 8px rgba(80,50,20,.4)}
+.find span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.find img{display:block;width:82px;height:82px;border-radius:6px;mix-blend-mode:multiply}
+.find.got{opacity:.5}
+.find.got span{text-decoration:line-through;text-decoration-color:var(--stripe);text-decoration-thickness:2px}
+.find.got::after{content:'✓';position:absolute;top:4px;right:6px;font-size:26px;font-weight:800;color:var(--stripe);text-shadow:0 1px 0 #fff}
 @keyframes missfade{0%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
 
 /* Discovery banner, toast */
@@ -278,7 +284,9 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
   .info .acts{flex-direction:row}
   .mission{flex-direction:column;align-items:stretch}
   .mission h2,.finds{flex:none}
-  .finds{display:grid;grid-template-columns:1fr 1fr}
+  .finds{display:grid;grid-template-columns:1fr 1fr;overflow:visible;touch-action:auto}
+  .find{width:auto}
+  .find img{width:100%;height:auto;aspect-ratio:1}
   .mbtns{flex-direction:column}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -1419,8 +1427,8 @@ async function renderScene() {
   // In a seek-and-find picture, the list shows each item cut straight out of the picture.
   if (L.hidden) L.T.forEach(t => {
     const [x, y, r] = t.at[0].src, c = document.createElement('canvas');
-    c.width = c.height = 72;
-    c.getContext('2d').drawImage(bg, x - r * 1.15, y - r * 1.15, r * 2.3, r * 2.3, 0, 0, 72, 72);
+    c.width = c.height = 192;   // shown at up to ~130 CSS px, sharp on Retina
+    c.getContext('2d').drawImage(bg, x - r * 1.15, y - r * 1.15, r * 2.3, r * 2.3, 0, 0, 192, 192);
     t.thumb = c.toDataURL('image/jpeg', .85);
   });
   L.T.filter(t => s.found.includes(t.t)).forEach(t => { drawFound(g, t); addMark(t); });
@@ -1568,7 +1576,7 @@ function renderFinds() {
   if (!S.search || !scn) return;
   const s = S.search, T = scn.T.slice().sort((a, b) => a.t - b.t);
   $('mTitle').textContent = `${story(S.ch).mission}　${s.found.length} / ${T.length}`;
-  $('finds').innerHTML = T.map(t => `<span class="find${s.found.includes(t.t) ? ' got' : ''}"><img src="${t.thumb || findSrc(t.e)}" alt="">${t.ja || FINDS[t.e]}</span>`).join('');
+  $('finds').innerHTML = T.map(t => `<span class="find${s.found.includes(t.t) ? ' got' : ''}"><img src="${t.thumb || findSrc(t.e)}" alt=""><span>${t.ja || FINDS[t.e]}</span></span>`).join('');
   renderTop();
 }
 
