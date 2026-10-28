@@ -3,6 +3,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="ルルイエ捜索録">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a1518">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap">
@@ -32,6 +36,8 @@
   color-scheme:dark;
 }
 html{height:100%;box-sizing:border-box;background:var(--abyss)}
+/* touch-action isn't inherited: give every element "no double-tap zoom"; boards and the scene override it with none */
+*,*::before,*::after{touch-action:manipulation}
 *,*::before,*::after{box-sizing:inherit}
 [hidden]{display:none!important}
 body{height:100%;margin:0;background:radial-gradient(ellipse 120% 70% at 50% 115%,#123b35 0%,var(--abyss) 65%) var(--abyss);color:var(--bone);
@@ -215,7 +221,7 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
   border:1px solid var(--line);font-weight:700;padding:10px 18px;border-radius:999px;font-size:15px;max-width:calc(100% - 32px);text-align:center}
 
 /* Overlay */
-.overlay{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:var(--veil);touch-action:auto;
+.overlay{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:var(--veil);touch-action:manipulation;
   padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 .panel{position:relative;width:min(560px,100%);max-height:100%;overflow:auto;background:var(--paper);border:2px solid var(--line);border-radius:20px;
   box-shadow:0 6px 0 var(--ink),0 0 60px rgba(114,224,178,.15);padding:28px 24px 22px;display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center;touch-action:pan-y}
@@ -1711,6 +1717,11 @@ $('mute').addEventListener('click', () => {
   if (!muted) sfx.spawn();
 });
 document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('dblclick', e => e.preventDefault());
+// Offline cache for the home-screen install; only on a standalone host, not inside the artifact viewer.
+if ('serviceWorker' in navigator && window.top === window && location.protocol === 'https:') {
+  try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {}
+}
 
 /* ================= boot ================= */
 function renderAll() {
