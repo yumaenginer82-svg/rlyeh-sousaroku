@@ -210,9 +210,11 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 .find{position:relative;flex:none;width:100px;scroll-snap-align:start;
   background:#d9cba6;border:2px solid var(--gold);border-radius:10px;padding:4px;box-shadow:inset 0 0 8px rgba(80,50,20,.4)}
 .find img{display:block;width:100%;height:auto;aspect-ratio:1;border-radius:6px;mix-blend-mode:multiply}
+.find .nm{display:block;margin-top:3px;color:#2b2118;font-size:12px;font-weight:700;line-height:1.3;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .find.got{opacity:.45}
+.find.got .nm{text-decoration:line-through;text-decoration-color:var(--stripe);text-decoration-thickness:2px}
 .find.all{border-color:var(--stripe);box-shadow:inset 0 0 8px rgba(80,50,20,.4),0 0 0 2px rgba(170,62,58,.35)}
-.find .cnt{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);background:var(--stripe);color:#fff;font-size:13px;font-weight:800;
+.find .cnt{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);background:var(--stripe);color:#fff;font-size:13px;font-weight:800;
   border-radius:999px;padding:1px 9px;white-space:nowrap;box-shadow:0 1px 0 rgba(0,0,0,.4)}
 .find.all::before{content:'全部';position:absolute;left:6px;top:6px;background:var(--stripe);color:#fff;font-size:11px;font-weight:800;border-radius:5px;padding:0 5px;z-index:1}
 .find.got::after{content:'✓';position:absolute;inset:0;display:grid;place-items:center;font-size:54px;font-weight:800;color:var(--stripe);text-shadow:0 2px 0 #fff}
@@ -1733,7 +1735,7 @@ function renderFinds() {
   $('mTitle').textContent = `${story(S.ch).mission}　${s.found.length} / ${T.length}`;
   $('finds').innerHTML = T.map(t => {
     const cnt = t.all ? `<b class="cnt">${((s.parts || {})[t.t] || []).length} / ${t.at.length}</b>` : '';
-    return `<span class="find${t.all ? ' all' : ''}${s.found.includes(t.t) ? ' got' : ''}"><img src="${t.thumb || findSrc(t.e)}" alt="${t.ja || FINDS[t.e]}">${cnt}</span>`;
+    return `<span class="find${t.all ? ' all' : ''}${s.found.includes(t.t) ? ' got' : ''}"><img src="${t.thumb || findSrc(t.e)}" alt="">${cnt}<span class="nm">${t.ja || FINDS[t.e]}</span></span>`;
   }).join('');
   renderTop();
 }
