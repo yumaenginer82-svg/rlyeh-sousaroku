@@ -180,6 +180,7 @@ img.ic{display:block;width:100%;height:100%;object-fit:contain;pointer-events:no
 .need .ic{width:40px;height:40px}
 .info .big .ic,.disc .big .ic{width:56px;height:56px;margin:0 auto}
 .dexitem .ic{width:46px;height:46px;margin:0 auto}
+.dex h3 .ic{display:inline-block;width:28px;height:28px;vertical-align:middle;margin-right:4px}
 .how li > span .ic{width:32px;height:32px;margin:0 auto}
 .muted .ic,.rewards .ic,.info p .ic{display:inline-block;width:1.6em;height:1.6em;vertical-align:middle}
 img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
@@ -210,6 +211,10 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
   background:#d9cba6;border:2px solid var(--gold);border-radius:10px;padding:4px;box-shadow:inset 0 0 8px rgba(80,50,20,.4)}
 .find img{display:block;width:100%;height:auto;aspect-ratio:1;border-radius:6px;mix-blend-mode:multiply}
 .find.got{opacity:.45}
+.find.all{border-color:var(--stripe);box-shadow:inset 0 0 8px rgba(80,50,20,.4),0 0 0 2px rgba(170,62,58,.35)}
+.find .cnt{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);background:var(--stripe);color:#fff;font-size:13px;font-weight:800;
+  border-radius:999px;padding:1px 9px;white-space:nowrap;box-shadow:0 1px 0 rgba(0,0,0,.4)}
+.find.all::before{content:'全部';position:absolute;left:6px;top:6px;background:var(--stripe);color:#fff;font-size:11px;font-weight:800;border-radius:5px;padding:0 5px;z-index:1}
 .find.got::after{content:'✓';position:absolute;inset:0;display:grid;place-items:center;font-size:54px;font-weight:800;color:var(--stripe);text-shadow:0 2px 0 #fff}
 @keyframes missfade{0%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
 
@@ -246,6 +251,16 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 .dexitem{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 2px;text-align:center;font-size:28px;line-height:1.1}
 .dexitem small{display:block;font-size:10px;margin-top:4px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dexitem.unknown{color:#4d6a64;font-family:var(--f-display)}
+.dex h3 small{font-weight:500;font-size:11px;letter-spacing:0;margin-left:6px}
+.relics{display:grid;gap:6px}
+.relic{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--gold);border-radius:10px;padding:6px 10px}
+.relic .ic{width:44px;height:44px;flex:none;filter:drop-shadow(0 0 8px rgba(232,196,104,.8))}
+.relic b{display:block;font-size:13px;color:var(--gold)}
+.relic small{display:block;font-size:11px;opacity:.85;line-height:1.5}
+.relic.unknown{border-color:var(--line)}
+.relic.unknown span{width:44px;text-align:center;font-family:var(--f-display);font-size:26px;color:#4d6a64}
+.relic.unknown b{color:#4d6a64}
+.relic-art .ic{width:120px;height:120px;filter:drop-shadow(0 0 22px rgba(232,196,104,.9));animation:beckon 2.2s ease-in-out infinite}
 
 @keyframes pop{0%{transform:scale(.3)}60%{transform:scale(1.28)}100%{transform:scale(1)}}
 @keyframes land{0%{transform:scale(1.15)}100%{transform:scale(1)}}
@@ -380,6 +395,16 @@ const SELL = [1, 2, 4, 8, 16, 32];
 // Generator level → chance of producing tier 0 / 1 / 2.
 const GEN_LV = [null, [1, 0, 0], [.8, .2, 0], [.62, .33, .05], [.5, .4, .1], [.4, .42, .18]];
 const GEN_COST = [0, 0, 30, 90, 240, 600];
+// Relics: two final-stage items of a chain merge into that chain's relic, which leaves the board
+// and grants a permanent perk that stacks up to max.
+const RELICS = [
+  { n: '深海の秘宝', d: '依頼でもらえる🪙が 10% 増える', max: 10 },
+  { n: '禁断の写本', d: '道具から 1段階上の素材が出ることがある（+5%）', max: 8 },
+  { n: '月の宝珠', d: '合体で宝箱が出やすくなる（+5%）', max: 6 },
+];
+const RELIC_COINS = 100;
+const relicLv = c => Math.min((S.relics && S.relics[c]) || 0, RELICS[c].max);
+const orderCoins = o => Math.round(o.coins * (1 + .1 * relicLv(0)));
 const NPCS = [
   { e: '🕵️‍♂️', n: '探偵ダニエル' },
   { e: '👩‍🔬', n: 'アーミテッジ教授' },
@@ -704,9 +729,14 @@ function layoutHidden(s, th) {
   const k = Math.max(SW / H.w, SH / H.h), ox = (SW - H.w * k) / 2, oy = (SH - H.h * k) / 2;
   const pool = H.items.slice();
   for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-  const T = pool.slice(0, Math.min(findCount(s.ch), pool.length)).map((it, n) => {
+  const chosen = pool.slice(0, Math.min(findCount(s.ch), pool.length));
+  // One "find them all" item: something the picture holds several of; every copy must be found.
+  const many = pool.filter(it => it.at.length >= 3);
+  const all = many.length ? many[Math.floor(R() * many.length)] : null;
+  if (all && !chosen.includes(all)) chosen[chosen.length - 1] = all;
+  const T = chosen.map((it, n) => {
     const at = it.at.map(([x, y, r]) => ({ x: x * k + ox, y: y * k + oy, s: r * k / .55, src: [x, y, r] }));
-    return Object.assign({ t: n, e: it.id, ja: it.ja, at }, at[0]);
+    return Object.assign({ t: n, e: it.id, ja: it.ja, at, all: it === all }, at[0]);
   });
   return { seed: s.seed, th, items: [], T, hidden: true };
 }
@@ -776,7 +806,7 @@ function freshState() {
   cells[2 * COLS + 1] = { k: 'gen', g: 0, lv: 1 };
   cells[2 * COLS + 5] = { k: 'gen', g: 1, lv: 1 };
   const st = { v: 2, ch: 0, stars: 0, coins: 0, eyes: 3, cells, orders: [], dex: {}, inbox: [], gens: [true, true, false],
-    search: null, view: 'merge', introCh: -1, nextId: 1 };
+    search: null, view: 'merge', introCh: -1, nextId: 1, relics: [0, 0, 0] };
   const free = shuffle(cells.map((c, i) => c ? -1 : i).filter(i => i >= 0 && i < 6 * COLS));
   [[0, 0], [0, 0], [0, 1], [1, 0], [1, 0], [1, 1]].forEach(([c, t], n) => {
     cells[free[n]] = { k: 'item', c, t };
@@ -790,6 +820,14 @@ function freshState() {
 function makeOrder() {
   const avail = [0, 1, 2].filter(g => S.gens[g]);
   const maxT = Math.min(MAXT, 2 + S.ch), minT = Math.max(1, maxT - 2);
+  const used = S.orders.map(o => o.npc.n);
+  const npc = pick(NPCS.filter(p => !used.includes(p.n)));
+  // Final-stage requests, so finished items have a use: often for one already on the board,
+  // and more often the further the story goes.
+  const asked = c => S.orders.some(o => o.need.some(x => x.c === c && x.t === MAXT));
+  const tops = S.cells.filter(c => c && c.k === 'item' && c.t === MAXT && avail.includes(c.c) && !asked(c.c));
+  if (tops.length && Math.random() < .45) return { id: S.nextId++, npc, need: [{ c: pick(tops).c, t: MAXT }], coins: 5 * 2 ** MAXT + 40, stars: 2 };
+  if (S.ch >= 3 && Math.random() < Math.min(.4, .15 + .05 * (S.ch - 3))) return { id: S.nextId++, npc, need: [{ c: pick(avail), t: MAXT }], coins: 5 * 2 ** MAXT + 40, stars: 2 };
   const n = S.ch >= 1 && Math.random() < .35 ? 2 : 1;
   const need = [];
   for (let k = 0; k < n; k++) {
@@ -797,8 +835,6 @@ function makeOrder() {
     if (k === 1) t = Math.max(1, t - 1);
     need.push({ c: pick(avail), t });
   }
-  const used = S.orders.map(o => o.npc.n);
-  const npc = pick(NPCS.filter(p => !used.includes(p.n)));
   // Occasional special request: one high-tier item, big payout.
   if (S.ch >= 1 && Math.random() < .18 && !S.orders.some(o => o.sp)) {
     const t = Math.min(MAXT, maxT + 1);
@@ -924,7 +960,7 @@ function renderInfo() {
   }
   if (c.k === 'item') {
     const it = ITEM(c.c, c.t);
-    const next = c.t < MAXT ? (S.dex[key(c.c, c.t + 1)] ? `${ITEM(c.c, c.t + 1)[0]} ${ITEM(c.c, c.t + 1)[1]}` : '？？？（まだ見ぬもの）') : 'これが最終段階';
+    const next = c.t < MAXT ? (S.dex[key(c.c, c.t + 1)] ? `${ITEM(c.c, c.t + 1)[0]} ${ITEM(c.c, c.t + 1)[1]}` : '？？？（まだ見ぬもの）') : `古き秘宝「${RELICS[c.c].n}」（ずっと効く力）`;
     box.innerHTML = `<div class="big">${it[0]}</div><div class="txt"><b>${it[1]}<small>Lv${c.t + 1}</small></b><p>${it[2]}</p><p class="muted">2つ重ねると → ${next}</p></div>
       <div class="acts"><button class="btn tiny${sellArm ? ' danger' : ''}" data-act="sell" type="button">${sellArm ? '本当に売る？' : '売る'} 🪙${SELL[c.t]}</button></div>`;
   } else if (c.k === 'gen') {
@@ -992,6 +1028,7 @@ function produce(i) {
   const odds = GEN_LV[g.lv];
   let x = Math.random(), t = 0;
   while (t < 2 && x > odds[t]) { x -= odds[t]; t++; }
+  if (Math.random() < .05 * relicLv(1)) t = Math.min(t + 1, 3);
   const j = empties[0];
   S.cells[j] = { k: 'item', c: g.g, t };
   paintM(i, 'land');
@@ -1016,7 +1053,7 @@ function drop(a, b) {
     return;
   }
   if (sameItem(s, d)) {
-    if (s.t >= MAXT) { paintM(a); toast('これ以上は合体できない。依頼に使おう'); sfx.bump(); return; }
+    if (s.t >= MAXT) { makeRelic(a, b, s.c); return; }
     const group = cluster(b, a);
     const n = group.length + 1;
     C[a] = null;
@@ -1047,6 +1084,27 @@ function drop(a, b) {
   afterChange(); renderInfo();
 }
 
+function makeRelic(a, b, c) {
+  S.cells[a] = null; S.cells[b] = null; sel = -1;
+  S.relics = S.relics || [0, 0, 0];
+  const n = ++S.relics[c], r = RELICS[c];
+  S.coins += RELIC_COINS;
+  paintM(a); paintM(b, 'puff');
+  burst($('mboard'), COLS, b, 9);
+  floater($('mboard'), COLS, b, `${r.n}！`, 'gold');
+  sfx.merge(7); setTimeout(sfx.discover, 220);
+  const lv = n > r.max ? '（効果はもう最大）' : n > 1 ? `（${n}つ分の力）` : '';
+  showOverlay(`
+    <p class="kicker">古き秘宝</p>
+    <div class="relic-art">${ITEM(c, MAXT)[0]}</div>
+    <h2>${r.n}${n > 1 ? ` ×${n}` : ''}</h2>
+    <p>${r.d}${lv}</p>
+    <p class="muted">秘宝は盤面からはなれて、ずっと力をかしてくれる。🪙+${RELIC_COINS}</p>
+    <button class="btn primary" type="button" data-go>受けとる</button>
+  `, hideOverlay);
+  renderInfo(); afterChange();
+}
+
 // Orthogonally connected identical items starting at b (b first, nearest first), ignoring the dragged cell.
 function cluster(b, skip) {
   const ref = S.cells[b], seen = new Set([b]), out = [b];
@@ -1064,7 +1122,7 @@ function cluster(b, skip) {
 
 const CHEST_ODDS = [0, 0, 0, .2, .35, .6];
 function maybeChest(i, t) {
-  if (Math.random() >= CHEST_ODDS[t]) return;
+  if (!CHEST_ODDS[t] || Math.random() >= CHEST_ODDS[t] + .05 * relicLv(2)) return;
   const chest = { k: 'chest', n: t, lv: t };
   const j = emptyCellsNear(i)[0];
   if (j === undefined) { S.inbox.push(chest); toast('宝箱が出た！ 🎁 に入れておいた'); }
@@ -1133,7 +1191,7 @@ function renderOrders() {
     return `<div class="order${ready ? ' ready' : ''}${o.sp ? ' special' : ''}" data-oid="${o.id}">
       <div class="npc"><span class="nm">${o.npc.n}</span>${o.sp ? '<span class="sp-tag">特別</span>' : ''}</div>
       <div class="needs">${needs}</div>
-      <div class="foot"><span class="rew">🪙${o.coins} ★${o.stars}${o.eyes ? ' 👁️' + o.eyes : ''}</span><button class="btn tiny gold" type="button" data-deliver="${o.id}" ${ready ? '' : 'disabled'}>納品</button></div>
+      <div class="foot"><span class="rew">🪙${orderCoins(o)} ★${o.stars}${o.eyes ? ' 👁️' + o.eyes : ''}</span><button class="btn tiny gold" type="button" data-deliver="${o.id}" ${ready ? '' : 'disabled'}>納品</button></div>
     </div>`;
   }).join('');
   $('orders').innerHTML = html || '<div class="empty-orders">新しい依頼を待っている…</div>';
@@ -1156,12 +1214,13 @@ function deliver(id) {
   }
   taken.forEach(j => { S.cells[j] = null; if (sel === j) sel = -1; paintM(j, 'puff'); });
   const g = goal(S.ch), before = S.stars;
-  S.coins += o.coins;
+  const coins = orderCoins(o);
+  S.coins += coins;
   S.stars += o.stars;
   if (o.eyes) S.eyes += o.eyes;
   S.orders = S.orders.filter(x => x.id !== id);
   sfx.coin();
-  toast(`${o.npc.n}「助かったよ」 🪙+${o.coins} ★+${o.stars}`);
+  toast(`${o.npc.n}「助かったよ」 🪙+${coins} ★+${o.stars}`);
   renderInfo();
   afterChange();
   if (before < g && S.stars >= g) setTimeout(() => { sfx.discover(); toast('手がかりがそろった。現場検証へ向かおう'); }, 900);
@@ -1236,8 +1295,8 @@ mb.addEventListener('pointermove', e => {
       if (sameItem(s, oc) && s.t < MAXT) {
         const g = cluster(over, drag.i);
         drag.hl = g.length + 1 >= 5 ? g : [over];
-      } else drag.hl = [over];
-      drag.hl.forEach(j => mEls[j].classList.add(sameItem(s, oc) && s.t < MAXT ? 'can' : 'hover'));
+      } else drag.hl = [over];   // final stage pairs make a relic, one at a time
+      drag.hl.forEach(j => mEls[j].classList.add(sameItem(s, oc) ? 'can' : 'hover'));
     }
   }
 });
@@ -1428,7 +1487,11 @@ async function renderScene() {
     c.getContext('2d').drawImage(bg, x - r * 1.15, y - r * 1.15, r * 2.3, r * 2.3, 0, 0, 192, 192);
     t.thumb = c.toDataURL('image/jpeg', .85);
   });
-  L.T.filter(t => s.found.includes(t.t)).forEach(t => { drawFound(g, t); addMark(t); });
+  L.T.forEach(t => {
+    // colour in the copies already tapped (older saves only know that the item was found: use its first copy)
+    const parts = (s.parts || {})[t.t] || (s.found.includes(t.t) ? [0] : []);
+    parts.forEach(n => { const p = t.at ? t.at[n] : t; if (!p) return; const at = Object.assign({}, t, { x: p.x, y: p.y, s: p.s }); drawFound(g, at); addMark(at); });
+  });
   scn = L;
   $('sload').hidden = true;
   fitView();
@@ -1546,17 +1609,23 @@ const addMark = t => inWorld('mark', t.x, t.y, t.s * 1.3);
 function tapWorld(wx, wy) {
   const s = S.search;
   const slop = Math.min(16 / V.z, 26);   // finger tolerance, capped so tapping zoomed-out isn't a free pass
-  const hit = scn.T.filter(t => !s.found.includes(t.t))
-    .flatMap(t => (t.at || [t]).map(p => ({ t, p, d: Math.hypot(p.x - wx, p.y - wy) })))
+  s.parts = s.parts || {};
+  const got = t => s.parts[t.t] || [];
+  const near = scn.T.filter(t => !s.found.includes(t.t))
+    .flatMap(t => (t.at || [t]).map((p, n) => ({ t, p, n, d: Math.hypot(p.x - wx, p.y - wy) })))
     .filter(o => o.d < o.p.s * .55 + slop)
     .sort((a, b) => a.d - b.d)[0];
+  // A "find them all" copy counts once: tapping one already found again does nothing (not a miss, not its neighbour).
+  if (near && got(near.t).includes(near.n)) return;
+  const hit = near;
   if (hit) {
-    const t = hit.t;
-    if (hit.p !== t) Object.assign(t, { x: hit.p.x, y: hit.p.y, s: hit.p.s });   // mark the copy that was tapped
-    s.found.push(t.t);
-    drawFound($('scv').getContext('2d'), t);
-    addMark(t);
-    const f = inWorld('float sfloat ok', t.x, t.y - t.s * .7, 0, `${t.ja || FINDS[t.e]}！`);
+    const t = hit.t, at = Object.assign({}, t, { x: hit.p.x, y: hit.p.y, s: hit.p.s });
+    s.parts[t.t] = got(t).concat(hit.n);   // which copy was tapped, so a reload colours the same one
+    const total = t.all ? t.at.length : 1, n = s.parts[t.t].length;
+    if (n >= total) s.found.push(t.t);
+    drawFound($('scv').getContext('2d'), at);
+    addMark(at);
+    const f = inWorld('float sfloat ok', at.x, at.y - at.s * .7, 0, `${t.ja || FINDS[t.e]}${t.all ? ` ${n}/${total}` : ''}！`);
     setTimeout(() => f.remove(), 1200);
     sfx.found();
     renderFinds();
@@ -1571,9 +1640,12 @@ function tapWorld(wx, wy) {
 
 function renderFinds() {
   if (!S.search || !scn) return;
-  const s = S.search, T = scn.T.slice().sort((a, b) => a.t - b.t);
+  const s = S.search, T = scn.T.slice().sort((a, b) => (b.all ? 1 : 0) - (a.all ? 1 : 0) || a.t - b.t);   // "find them all" card first
   $('mTitle').textContent = `${story(S.ch).mission}　${s.found.length} / ${T.length}`;
-  $('finds').innerHTML = T.map(t => `<span class="find${s.found.includes(t.t) ? ' got' : ''}"><img src="${t.thumb || findSrc(t.e)}" alt="${t.ja || FINDS[t.e]}"></span>`).join('');
+  $('finds').innerHTML = T.map(t => {
+    const cnt = t.all ? `<b class="cnt">${((s.parts || {})[t.t] || []).length} / ${t.at.length}</b>` : '';
+    return `<span class="find${t.all ? ' all' : ''}${s.found.includes(t.t) ? ' got' : ''}"><img src="${t.thumb || findSrc(t.e)}" alt="${t.ja || FINDS[t.e]}">${cnt}</span>`;
+  }).join('');
   renderTop();
 }
 
@@ -1584,7 +1656,9 @@ function useEye() {
   S.eyes--;
   renderTop();
   sfx.eye();
-  const t = pick(left), r = sv.getBoundingClientRect();
+  const pt = pick(left), r = sv.getBoundingClientRect();
+  const done = (S.search.parts || {})[pt.t] || [];
+  const t = (pt.at || [pt]).find((p, n) => !done.includes(n)) || pt;   // for "find them all", a copy not yet found
   const ox = (Math.random() - .5) * t.s * 2.2, oy = (Math.random() - .5) * t.s * 2.2;
   V.z = Math.min(V.max, Math.max(V.z, V.min * 3));
   V.x = r.width / 2 - (t.x + ox) * V.z;
@@ -1620,6 +1694,7 @@ $('goSearch').addEventListener('click', () => {
     <p class="lore">${st.missionText}</p>
     <ul class="how">
       <li><span>🔍</span><div>細かく描かれた情景の中から、<b>リストの品 ${findCount(S.ch)}つ</b>を探してタップ。見つけた品には色がつく。</div></li>
+      <li><span>🔢</span><div>「<b>全部</b>」の札がついた品は、絵の中にいくつもある。ぜんぶ見つけたら1つ完了。</div></li>
       <li><span><img class="ic mult" src="${findSrc('bone')}" alt=""></span><div>品は絵の中に<b>なじむように</b>隠されている。とても小さかったり、大きすぎて背景に見えたり、逆さまだったり、何かのかげに半分隠れていたり。棚の上や壁、絵の端っこも見逃さないで。</div></li>
       <li><span>🤏</span><div><b>ピンチで拡大</b>、ドラッグで移動。＋ − ボタンでも拡大できる。</div></li>
       <li><span><img class="ic mult" src="${findSrc('oldkey')}" alt=""></span><div>そっくりな品（鍵と古い鍵、タコとイカ、シルクハットと山高帽など）もまぎれている。よく見て。</div></li>
@@ -1699,7 +1774,12 @@ function showDex() {
   const total = CHAINS.length * (MAXT + 1);
   const found = Object.keys(S.dex).length;
   const rows = CHAINS.map((ch, c) => `<div><h3>${ch.gen.e} ${ch.name}</h3><div class="dexrow">${ch.items.map((it, t) =>
-    S.dex[key(c, t)] ? `<div class="dexitem">${it[0]}<small>${it[1]}</small></div>` : `<div class="dexitem unknown">？<small>Lv${t + 1}</small></div>`).join('')}</div></div>`).join('');
+    S.dex[key(c, t)] ? `<div class="dexitem">${it[0]}<small>${it[1]}</small></div>` : `<div class="dexitem unknown">？<small>Lv${t + 1}</small></div>`).join('')}</div></div>`).join('')
+    + `<div><h3>古き秘宝 <small class="muted">最終段階どうしを重ねると手に入る</small></h3><div class="relics">${RELICS.map((r, c) => {
+      const n = (S.relics && S.relics[c]) || 0;
+      return n ? `<div class="relic">${ITEM(c, MAXT)[0]}<div><b>${r.n} ×${n}</b><small>${r.d}${n >= r.max ? '（最大）' : ''}</small></div></div>`
+        : `<div class="relic unknown"><span>？</span><div><b>？？？</b><small>${CHAINS[c].name}の最終段階を2つ重ねる</small></div></div>`;
+    }).join('')}</div></div>`;
   showOverlay(`
     <p class="kicker">調査手帳</p>
     <h2>図鑑 ${found} / ${total}</h2>
