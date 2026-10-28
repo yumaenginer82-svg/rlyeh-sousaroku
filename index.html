@@ -107,6 +107,25 @@ body{height:100%;margin:0;background:radial-gradient(ellipse 120% 70% at 50% 115
 .info .txt small{font-family:var(--f-body);font-size:12px;color:var(--gold);margin-left:4px}
 .info p{margin:2px 0 0;font-size:13px;line-height:1.55}
 .info .acts{display:flex;flex-direction:column;gap:6px;flex:none}
+/* Drop targets that replace the info panel while dragging */
+.info .dz{flex:1;align-self:stretch;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:2px dashed var(--line);border-radius:12px;
+  font-size:14px;transition:background .15s,border-color .15s,transform .15s;position:relative;overflow:hidden;min-width:0}
+.info .dz small{font-size:12px;opacity:.8}
+.info .dz.on{border-style:solid;border-color:var(--gold);background:rgba(201,163,74,.15);transform:scale(1.03)}
+.info .dz.full{opacity:.45}
+.info .dz.abyss{border-color:#3d6b7a;background:radial-gradient(circle at 50% 50%,#050b10 0%,#0b2530 55%,transparent 75%)}
+.info .dz.abyss.on{border-color:var(--glow);background:radial-gradient(circle at 50% 50%,#000 0%,#0d3a40 60%,transparent 80%)}
+.vortex{position:absolute;inset:-40%;background:repeating-conic-gradient(from 0deg,rgba(114,224,178,.0) 0 18deg,rgba(114,224,178,.16) 18deg 24deg);
+  border-radius:50%;animation:swirl 3.5s linear infinite;pointer-events:none}
+.info .dz.abyss.on .vortex{animation-duration:1.2s}
+.info .dz.abyss b,.info .dz.abyss small{position:relative}
+@keyframes swirl{to{transform:rotate(360deg)}}
+.slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%}
+.slot{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:10px;padding:4px;color:inherit;font:inherit;cursor:pointer}
+.slot .ic{width:70%;height:auto;aspect-ratio:1}
+.slot small{font-size:10px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.slot.empty{border-style:dashed;opacity:.5;cursor:default}
 .muted{opacity:.7}
 
 /* Boards */
@@ -179,7 +198,7 @@ img.ic{display:block;width:100%;height:100%;object-fit:contain;pointer-events:no
 .cell .e .ic{width:100%;height:100%}
 .need .ic{width:40px;height:40px}
 .info .big .ic,.disc .big .ic{width:56px;height:56px;margin:0 auto}
-.dexitem .ic{width:46px;height:46px;margin:0 auto}
+.dexitem .ic{width:100%;max-width:46px;height:auto;aspect-ratio:1;margin:0 auto}
 .dex h3 .ic{display:inline-block;width:28px;height:28px;vertical-align:middle;margin-right:4px}
 .how li > span .ic{width:32px;height:32px;margin:0 auto}
 .muted .ic,.rewards .ic,.info p .ic{display:inline-block;width:1.6em;height:1.6em;vertical-align:middle}
@@ -249,7 +268,7 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 .rewards{list-style:none;margin:0;padding:12px 16px;display:grid;gap:6px;width:100%;background:var(--panel2);border:1px solid var(--gold);border-radius:12px;text-align:left;font-weight:700}
 .dex{display:grid;gap:12px;width:100%;text-align:left}
 .dex h3{margin:0 0 6px;font-size:14px;letter-spacing:.06em}
-.dexrow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.dexrow{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px}
 .dexitem{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 2px;text-align:center;font-size:28px;line-height:1.1}
 .dexitem small{display:block;font-size:10px;margin-top:4px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dexitem.unknown{color:#4d6a64;font-family:var(--f-display)}
@@ -313,6 +332,7 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
     <div class="prog" title="依頼をこなすと★がたまる"><div class="pbar"><i id="pfill"></i></div><span id="ptext">★ 0 / 4</span></div>
     <div class="res"><span class="pill">🪙 <b id="coins">0</b></span><span class="pill">👁️ <b id="eyes">3</b></span></div>
     <div class="hbtns">
+      <button id="storeBtn" class="btn small" type="button" aria-label="封印の櫃（しまっておく場所）">櫃 <b id="storeN">0</b></button>
       <button id="inboxBtn" class="btn small" type="button" aria-label="もらったアイテムを出す">🎁 <b id="inboxN">0</b></button>
       <button id="dexBtn" class="btn small" type="button">📖 図鑑</button>
       <button id="mute" class="btn small" type="button" aria-label="音のオン・オフ">🔊</button>
@@ -366,6 +386,8 @@ const CHAINS = [
     ['🦑', 'イカ', '吐いた墨は、乾いても動きつづける。'],
     ['🐙', '大ダコ', 'その目は、人より多くを知っている。'],
     ['🐋', '深きクジラ', '海の底から、低い歌が聞こえる。'],
+    ['🗿', '深きものの像', '海の民の像。その目は、まだこちらを見ている。'],
+    ['🌊', 'ダゴン', '波の下から、父なる神が身を起こす。'],
   ]},
   { name: '書物', gen: { e: '🗄️', n: '古書棚' }, items: [
     ['✒️', '羽根ペン', 'インクは、なぜか潮の香りがする。'],
@@ -374,6 +396,8 @@ const CHAINS = [
     ['📖', '写本', '禁じられた書物の、不完全な写し。'],
     ['📚', '禁書の山', '読むほどに、夢が深くなる。'],
     ['🔮', '水晶玉', 'のぞきこむと、沈んだ都が見える。'],
+    ['📕', 'ネクロノミコン', '人の皮で綴じられた魔道書。読むたびに、表紙の顔が変わる。'],
+    ['🪨', 'ルルイエの石板', '沈んだ都の地図。刻まれた線は、見るたびにねじれる。'],
   ]},
   { name: '儀式', gen: { e: '🛐', n: '祭壇' }, items: [
     ['🕯️', 'ろうそく', '黒い蝋でできている。'],
@@ -382,6 +406,8 @@ const CHAINS = [
     ['⚱️', '祭壺', '中には海水と、何かのうろこ。'],
     ['🗿', '石像', '海底から引き上げられた、名もなき像。'],
     ['🌕', '赤い月', '儀式の夜、月は血の色に染まる。'],
+    ['🌀', '星辰の門', '星が正しい位置に並ぶとき、門はひらく。'],
+    ['🐙', 'クトゥルフの像', 'ルルイエの館にて、死せるクトゥルフ、夢見るままに待ちいたり。'],
   ]},
 ];
 // Item art: assets/m-<chain>-<tier>.png and generators assets/g-<chain>.png, white backgrounds already cut out.
@@ -391,9 +417,9 @@ CHAINS.forEach((ch, c) => {
   ch.items.forEach((it, t) => { it[0] = ICON(`assets/m-${c}-${t}.png`); });
 });
 const CHEST = ICON('assets/x-chest.png');
-const MAXT = 5;
+const MAXT = 7;   // 8 stages per chain (0..7)
 const COLS = 7, ROWS = 9;
-const SELL = [1, 2, 4, 8, 16, 32];
+const SELL = [1, 2, 4, 8, 16, 32, 64, 128];
 // Generator level → chance of producing tier 0 / 1 / 2.
 const GEN_LV = [null, [1, 0, 0], [.8, .2, 0], [.62, .33, .05], [.5, .4, .1], [.4, .42, .18]];
 const GEN_COST = [0, 0, 30, 90, 240, 600];
@@ -401,7 +427,7 @@ const GEN_COST = [0, 0, 30, 90, 240, 600];
 // and grants a permanent perk that stacks up to max.
 const RELICS = [
   { n: '深海の秘宝', d: '依頼でもらえる🪙が 10% 増える', max: 10 },
-  { n: '禁断の写本', d: '道具から 1段階上の素材が出ることがある（+5%）', max: 8 },
+  { n: '禁断の写本', d: '道具から 1段階上の素材が出ることがある（+3%）', max: 5 },
   { n: '月の宝珠', d: '合体で宝箱が出やすくなる（+5%）', max: 6 },
 ];
 const RELIC_COINS = 100;
@@ -845,6 +871,11 @@ const sfx = {
   wrong: () => { osc(98, { vol: .08, dur: .35, slide: .85 }); osc(138.6, { vol: .05, dur: .35, slide: .85 }); },   // a tritone, muffled
   eye: () => { noise({ vol: .07, dur: 1.2, f: 500, q: 3, att: .5, sweep: 3 }); osc(73.4, { vol: .09, att: .4, dur: 1.4 }); osc(110, { vol: .05, att: .5, dur: 1.4, detune: 14 }); },
   seal: () => { [[55, .16], [82.4, .08], [138.6, .05], [207, .03]].forEach(([f, v]) => osc(f, { vol: v, att: .01, dur: 3.2 })); noise({ vol: .05, dur: .5, f: 120, q: 1, type: 'lowpass' }); },
+  abyss: () => {   // swallowed by the deep: a falling swirl and a low sigh
+    noise({ vol: .08, dur: .9, f: 1400, q: 2, att: .03, sweep: .12 });
+    osc(196, { vol: .07, att: .02, dur: .9, slide: .35 });
+    bubble(.25, 260); bubble(.38, 220);
+  },
   relic: () => {
     // a low, wordless choir swelling up, then a bell
     [73.4, 110, 146.8, 174.6, 220].forEach((f, i) => [-9, 9].forEach(dt => osc(f, { type: 'sawtooth', vol: .018, att: .9, dur: 3.2, detune: dt, delay: i * .05, to: choirFilter() })));
@@ -856,32 +887,72 @@ function choirFilter() {
   const f = A.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 900; f.Q.value = 4;
   f.connect(bus); return f;
 }
-// Quiet sea drone under everything: two detuned low tones and slow surf, started by the first tap.
+// Background music: a calm, mysterious ambient piece. Soft pad chords drift through a slow modal
+// progression (D minor colour, no low rumble), with sparse music-box notes and a faint shimmer of water.
+// Everything is scheduled a little ahead in small steps, so it can fade out cleanly on mute.
 let drone = null;
+const PADS = [   // chord tones in Hz, mid register only
+  [293.7, 349.2, 440, 523.3],    // Dm7
+  [233.1, 293.7, 349.2, 440],    // Bbmaj7
+  [261.6, 329.6, 392, 493.9],    // Cmaj7
+  [220, 293.7, 329.6, 392],      // A7sus4-ish
+];
+const MELODY = [587.3, 659.3, 698.5, 880, 987.8, 1174.7, 1318.5];   // D dorian, upper register
 function startDrone() {
   const A = audio(); if (!A || drone) return;
   const g = A.createGain(); g.gain.value = 0; g.connect(bus);
-  g.gain.linearRampToValueAtTime(.05, A.currentTime + 4);
-  const srcs = [];
-  [[55, 0], [55, 7], [82.4, -5]].forEach(([f, dt]) => { const o = A.createOscillator(); o.frequency.value = f; o.detune.value = dt; o.connect(g); o.start(); srcs.push(o); });
-  // surf: looping noise through a lowpass whose cutoff breathes
+  g.gain.linearRampToValueAtTime(.32, A.currentTime + 5);
+  const lp = A.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1500; lp.Q.value = .4; lp.connect(g);
+  // water shimmer: very quiet high noise that slowly breathes
   const n = A.sampleRate * 4, b = A.createBuffer(1, n, A.sampleRate), d = b.getChannelData(0);
   for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
   const s = A.createBufferSource(); s.buffer = b; s.loop = true;
-  const lp = A.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 380;
-  const lfo = A.createOscillator(), lg = A.createGain(); lfo.frequency.value = .09; lg.gain.value = 260;
-  lfo.connect(lg).connect(lp.frequency);
-  const sg = A.createGain(); sg.gain.value = .5;
-  s.connect(lp).connect(sg).connect(g); s.start(); lfo.start();
-  srcs.push(s, lfo);
-  drone = { g, srcs };
+  const hp = A.createBiquadFilter(); hp.type = 'bandpass'; hp.frequency.value = 3200; hp.Q.value = .6;
+  const sg = A.createGain(); sg.gain.value = .012;
+  const lfo = A.createOscillator(), lg = A.createGain(); lfo.frequency.value = .07; lg.gain.value = .01;
+  lfo.connect(lg).connect(sg.gain);
+  s.connect(hp).connect(sg).connect(g); s.start(); lfo.start();
+  drone = { g, lp, srcs: [s, lfo], next: A.currentTime + .5, bar: 0, timer: 0 };
+  const tick = () => {
+    if (!drone) return;
+    while (drone.next < A.currentTime + 1.5) { scheduleBar(A, drone.next, drone.bar++); drone.next += 8; }
+    drone.timer = setTimeout(tick, 500);
+  };
+  tick();
+}
+function scheduleBar(A, t0, bar) {
+  const chord = PADS[bar % PADS.length];
+  chord.forEach((f, i) => [-6, 6].forEach(dt => {   // two slightly detuned voices per note
+    const o = A.createOscillator(), e = A.createGain();
+    o.type = i % 2 ? 'sine' : 'triangle'; o.frequency.value = f; o.detune.value = dt;
+    e.gain.setValueAtTime(.0001, t0);
+    e.gain.linearRampToValueAtTime(.022, t0 + 2.8);   // slow swell
+    e.gain.linearRampToValueAtTime(.016, t0 + 6.5);
+    e.gain.linearRampToValueAtTime(.0001, t0 + 10);    // overlaps the next chord
+    o.connect(e).connect(drone.lp); o.start(t0); o.stop(t0 + 10.1);
+  }));
+  // a few music-box notes, not every bar
+  const notes = 1 + (bar * 7 % 3);
+  for (let k = 0; k < notes; k++) {
+    if ((bar + k) % 4 === 3) continue;
+    const f = MELODY[(bar * 3 + k * 2) % MELODY.length], tt = t0 + 1.2 + k * 1.9 + (bar % 2) * .6;
+    [[1, .03], [2, .008], [3, .004]].forEach(([m, v]) => {
+      const o = A.createOscillator(), e = A.createGain();
+      o.frequency.value = f * m;
+      e.gain.setValueAtTime(.0001, tt);
+      e.gain.exponentialRampToValueAtTime(v, tt + .01);
+      e.gain.exponentialRampToValueAtTime(.0001, tt + 2.6 / m);
+      o.connect(e).connect(drone.g); o.start(tt); o.stop(tt + 2.7);
+    });
+  }
 }
 function stopDrone() {
   if (!drone || !ac) return;
-  const { g, srcs } = drone; drone = null;
+  const { g, srcs, timer } = drone; drone = null;
+  clearTimeout(timer);
   g.gain.cancelScheduledValues(ac.currentTime);
-  g.gain.setTargetAtTime(0, ac.currentTime, .3);
-  setTimeout(() => srcs.forEach(s => { try { s.stop(); } catch (e) {} }), 1500);
+  g.gain.setTargetAtTime(0, ac.currentTime, .4);
+  setTimeout(() => { srcs.forEach(s => { try { s.stop(); } catch (e) {} }); try { g.disconnect(); } catch (e) {} }, 2500);
 }
 document.addEventListener('pointerdown', () => { if (!muted) startDrone(); }, { capture: true });
 
@@ -910,15 +981,15 @@ function freshState() {
 
 function makeOrder() {
   const avail = [0, 1, 2].filter(g => S.gens[g]);
-  const maxT = Math.min(MAXT, 2 + S.ch), minT = Math.max(1, maxT - 2);
+  const maxT = Math.min(5, 2 + S.ch), minT = Math.max(1, maxT - 2);   // everyday requests stay below the top stages
   const used = S.orders.map(o => o.npc.n);
   const npc = pick(NPCS.filter(p => !used.includes(p.n)));
-  // Final-stage requests, so finished items have a use: often for one already on the board,
+  // High-stage requests, so big items have a use: often for one already on the board (6th stage and up),
   // and more often the further the story goes.
-  const asked = c => S.orders.some(o => o.need.some(x => x.c === c && x.t === MAXT));
-  const tops = S.cells.filter(c => c && c.k === 'item' && c.t === MAXT && avail.includes(c.c) && !asked(c.c));
-  if (tops.length && Math.random() < .45) return { id: S.nextId++, npc, need: [{ c: pick(tops).c, t: MAXT }], coins: 5 * 2 ** MAXT + 40, stars: 2 };
-  if (S.ch >= 3 && Math.random() < Math.min(.4, .15 + .05 * (S.ch - 3))) return { id: S.nextId++, npc, need: [{ c: pick(avail), t: MAXT }], coins: 5 * 2 ** MAXT + 40, stars: 2 };
+  const asked = x => S.orders.some(o => o.need.some(n => n.c === x.c && n.t === x.t));
+  const tops = S.cells.filter(c => c && c.k === 'item' && c.t >= 5 && avail.includes(c.c) && !asked(c));
+  const hiChance = Math.min(.6, .4 + .04 * S.ch);
+  if (tops.length && Math.random() < hiChance) { const x = pick(tops); return { id: S.nextId++, npc, need: [{ c: x.c, t: x.t }], coins: 5 * 2 ** x.t + 40, stars: 2 }; }
   const n = S.ch >= 1 && Math.random() < .35 ? 2 : 1;
   const need = [];
   for (let k = 0; k < n; k++) {
@@ -928,7 +999,7 @@ function makeOrder() {
   }
   // Occasional special request: one high-tier item, big payout.
   if (S.ch >= 1 && Math.random() < .18 && !S.orders.some(o => o.sp)) {
-    const t = Math.min(MAXT, maxT + 1);
+    const t = Math.min(MAXT - 1, maxT + 1);
     return { id: S.nextId++, npc, need: [{ c: pick(avail), t }], coins: 10 * 2 ** t + 20, stars: 3, eyes: 1, sp: true };
   }
   const coins = need.reduce((s, x) => s + 5 * 2 ** x.t, 5);
@@ -1007,6 +1078,7 @@ function renderTop() {
   $('eyesS').textContent = S.eyes;
   $('eyeBtn').disabled = S.eyes <= 0;
   $('inboxN').textContent = S.inbox.length;
+  $('storeN').textContent = `${(S.store || []).length}/${storeCap()}`;
   $('inboxBtn').disabled = !S.inbox.length;
   $('mute').textContent = muted ? '🔇' : '🔊';
   const ready = S.stars >= g || S.search;
@@ -1053,7 +1125,8 @@ function renderInfo() {
     const it = ITEM(c.c, c.t);
     const next = c.t < MAXT ? (S.dex[key(c.c, c.t + 1)] ? `${ITEM(c.c, c.t + 1)[0]} ${ITEM(c.c, c.t + 1)[1]}` : '？？？（まだ見ぬもの）') : `古き秘宝「${RELICS[c.c].n}」（ずっと効く力）`;
     box.innerHTML = `<div class="big">${it[0]}</div><div class="txt"><b>${it[1]}<small>Lv${c.t + 1}</small></b><p>${it[2]}</p><p class="muted">2つ重ねると → ${next}</p></div>
-      <div class="acts"><button class="btn tiny${sellArm ? ' danger' : ''}" data-act="sell" type="button">${sellArm ? '本当に売る？' : '売る'} 🪙${SELL[c.t]}</button></div>`;
+      <div class="acts"><button class="btn tiny" data-act="stash" type="button" ${storeFull() ? 'disabled' : ''}>櫃にしまう</button>
+        <button class="btn tiny${sellArm ? ' danger' : ''}" data-act="sell" type="button">${sellArm ? '本当に還す？' : '深淵へ還す'} 🪙${SELL[c.t]}</button></div>`;
   } else if (c.k === 'gen') {
     const g = CHAINS[c.g].gen, odds = GEN_LV[c.lv];
     const oddsText = odds.map((p, t) => p ? `${ITEM(c.g, t)[0]}${Math.round(p * 100)}%` : '').filter(Boolean).join('　');
@@ -1061,7 +1134,8 @@ function renderInfo() {
     box.innerHTML = `<div class="big">${g.e}</div><div class="txt"><b>${g.n}<small>Lv${c.lv}</small></b><p>タップで「${CHAINS[c.g].name}」の素材が出る。強化すると、はじめから上の段階が出やすくなる。</p><p class="muted">${oddsText}</p></div>
       <div class="acts">${up}</div>`;
   } else if (c.k === 'chest') {
-    box.innerHTML = `<div class="big">${CHEST}</div><div class="txt"><b>宝箱<small>あと${c.n}回</small></b><p>タップすると中身が飛び出す。高い段階の合体で、ときどき見つかる。</p></div>`;
+    box.innerHTML = `<div class="big">${CHEST}</div><div class="txt"><b>宝箱<small>あと${c.n}回</small></b><p>タップすると中身が飛び出す。高い段階の合体で、ときどき見つかる。</p></div>
+      <div class="acts"><button class="btn tiny" data-act="stash" type="button" ${storeFull() ? 'disabled' : ''}>櫃にしまう</button></div>`;
   } else {
     box.innerHTML = `<div class="big">✴</div><div class="txt"><b>封印されたマス</b><p>現場検証を解決するたびに、封印が一列ずつ解ける。</p></div>`;
   }
@@ -1073,13 +1147,9 @@ $('info').addEventListener('click', e => {
   const c = S.cells[sel];
   if (b.dataset.act === 'sell' && c && c.k === 'item') {
     if (!sellArm) { sellArm = true; renderInfo(); return; }
-    S.coins += SELL[c.t];
-    S.cells[sel] = null;
-    floater($('mboard'), COLS, sel, `🪙+${SELL[c.t]}`, 'gold');
-    paintM(sel, 'puff');
-    sfx.coin();
-    select(-1);
-    afterChange();
+    toAbyss(sel);
+  } else if (b.dataset.act === 'stash' && c) {
+    stash(sel);
   } else if (b.dataset.act === 'upgrade' && c && c.k === 'gen' && c.lv < 5 && S.coins >= GEN_COST[c.lv + 1]) {
     S.coins -= GEN_COST[c.lv + 1];
     c.lv++;
@@ -1119,7 +1189,7 @@ function produce(i) {
   const odds = GEN_LV[g.lv];
   let x = Math.random(), t = 0;
   while (t < 2 && x > odds[t]) { x -= odds[t]; t++; }
-  if (Math.random() < .05 * relicLv(1)) t = Math.min(t + 1, 3);
+  if (Math.random() < .03 * relicLv(1)) t = Math.min(t + 1, 3);
   const j = empties[0];
   S.cells[j] = { k: 'item', c: g.g, t };
   paintM(i, 'land');
@@ -1184,7 +1254,13 @@ function makeRelic(a, b, c) {
   burst($('mboard'), COLS, b, 9);
   floater($('mboard'), COLS, b, `${r.n}！`, 'gold');
   sfx.relic();
-  const lv = n > r.max ? '（効果はもう最大）' : n > 1 ? `（${n}つ分の力）` : '';
+  // Only the first relic of a kind gets the full reveal; later ones just announce themselves, to keep the pace.
+  if (n > 1) {
+    toast(`${r.n} ×${n}${n > r.max ? '（効果はもう最大）' : '　力が強まった'}　🪙+${RELIC_COINS}`);
+    renderInfo(); afterChange();
+    return;
+  }
+  const lv = '';
   showOverlay(`
     <p class="kicker">古き秘宝</p>
     <div class="relic-art">${ITEM(c, MAXT)[0]}</div>
@@ -1211,7 +1287,7 @@ function cluster(b, skip) {
   return out;
 }
 
-const CHEST_ODDS = [0, 0, 0, .2, .35, .6];
+const CHEST_ODDS = [0, 0, 0, .2, .35, .5, .6, .7];
 function maybeChest(i, t) {
   if (!CHEST_ODDS[t] || Math.random() >= CHEST_ODDS[t] + .05 * relicLv(2)) return;
   const chest = { k: 'chest', n: t, lv: t };
@@ -1334,6 +1410,82 @@ function placeGift() {
 }
 $('inboxBtn').addEventListener('click', placeGift);
 
+/* ================= sealed chest (storage) and the abyss (discard) ================= */
+const STORE_CAP = [4, 6, 8, 10, 12], STORE_COST = [0, 80, 200, 500, 1200];
+const storeCap = () => STORE_CAP[S.storeLv || 0];
+const storeFull = () => (S.store || []).length >= storeCap();
+const cellArt = c => c.k === 'item' ? ITEM(c.c, c.t)[0] : CHEST;
+
+// While an item is dragged, the info panel turns into two drop targets.
+function showDropZones(c) {
+  const box = $('info');
+  box.innerHTML = `<div class="dz store${storeFull() ? ' full' : ''}" data-dz="store"><b>封印の櫃にしまう</b><small>${storeFull() ? 'いっぱい' : `${(S.store || []).length} / ${storeCap()}`}</small></div>
+    ${c.k === 'item' ? `<div class="dz abyss" data-dz="abyss"><span class="vortex"></span><b>深淵へ還す</b><small>🪙+${SELL[c.t]}</small></div>` : ''}`;
+}
+function zoneAt(x, y) {
+  for (const el of document.querySelectorAll('#info .dz')) {
+    const r = el.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom && !el.classList.contains('full')) return el.dataset.dz;
+  }
+  return null;
+}
+function stash(i) {
+  const c = S.cells[i];
+  if (!c || (c.k !== 'item' && c.k !== 'chest')) { paintM(i); return; }
+  if (storeFull()) { toast('櫃がいっぱい。🪙で広げられる'); sfx.bump(); paintM(i); return; }
+  (S.store = S.store || []).push(c);
+  S.cells[i] = null;
+  paintM(i, 'puff');
+  sfx.move();
+  toast(`封印の櫃にしまった（${S.store.length} / ${storeCap()}）`);
+  select(-1);
+  afterChange();
+}
+function toAbyss(i) {
+  const c = S.cells[i];
+  if (!c || c.k !== 'item') { paintM(i); return; }
+  S.coins += SELL[c.t];
+  S.cells[i] = null;
+  floater($('mboard'), COLS, i, `深淵へ… 🪙+${SELL[c.t]}`, 'gold');
+  paintM(i, 'puff');
+  sfx.abyss();
+  select(-1);
+  afterChange();
+}
+function showStore() {
+  const st = S.store || [], cap = storeCap(), lv = S.storeLv || 0, cost = STORE_COST[lv + 1];
+  const slots = [...Array(cap).keys()].map(n => st[n]
+    ? `<button class="slot" type="button" data-take="${n}">${cellArt(st[n])}<small>${st[n].k === 'item' ? ITEM(st[n].c, st[n].t)[1] : '宝箱'}</small></button>`
+    : '<div class="slot empty"></div>').join('');
+  showOverlay(`
+    <p class="kicker">封印の櫃</p>
+    <h2>${st.length} / ${cap}</h2>
+    <p class="muted">盤面の品をドラッグして説明欄の「櫃」に落とすと、ここにしまえる。タップで盤面に出す。</p>
+    <div class="slots">${slots}</div>
+    ${cost ? `<button class="btn tiny gold" type="button" id="storeUp" ${S.coins < cost ? 'disabled' : ''}>櫃を広げる（+2） 🪙${cost}</button>` : '<p class="muted">これ以上は広げられない</p>'}
+    <button class="btn primary" type="button" data-go>とじる</button>
+  `, hideOverlay);
+  $('panel').querySelectorAll('[data-take]').forEach(b => b.addEventListener('click', () => {
+    const empties = emptyCellsNear(3 * COLS + 3);
+    if (!empties.length) { toast('空きマスがない。場所をあけてから出そう'); sfx.bump(); return; }
+    const c = S.store.splice(+b.dataset.take, 1)[0], j = empties[0];
+    S.cells[j] = c;
+    paintM(j, 'pop');
+    sfx.spawn();
+    afterChange();
+    showStore();
+  }));
+  const up = $('storeUp');
+  if (up) up.addEventListener('click', () => {
+    if (S.coins < cost) return;
+    S.coins -= cost; S.storeLv = lv + 1;
+    sfx.discover();
+    afterChange();
+    showStore();
+  });
+}
+$('storeBtn').addEventListener('click', showStore);
+
 function unlockRow() {
   const row = [...Array(ROWS).keys()].find(r => S.cells.slice(r * COLS, r * COLS + COLS).some(c => c && c.k === 'lock'));
   if (row === undefined) return false;
@@ -1372,9 +1524,12 @@ mb.addEventListener('pointermove', e => {
     document.body.appendChild(g);
     drag.ghost = g;
     mEls[drag.i].classList.add('lift');
+    if (c.k !== 'gen') showDropZones(c);
     if (c.k === 'item') S.cells.forEach((o, j) => { if (j !== drag.i && sameItem(c, o)) mEls[j].classList.add('match'); });
   }
   drag.ghost.style.transform = `translate(${e.clientX}px,${e.clientY}px) translate(-50%,-70%) scale(1.15)`;
+  const z = zoneAt(e.clientX, e.clientY);
+  document.querySelectorAll('#info .dz').forEach(el => el.classList.toggle('on', el.dataset.dz === z));
   const over = idxAt(mb, COLS, ROWS, e.clientX, e.clientY);
   if (over !== drag.over) {
     (drag.hl || []).forEach(j => mEls[j].classList.remove('hover', 'can'));
@@ -1397,8 +1552,12 @@ function endDrag(e, cancelled) {
   drag = null;
   if (d.ghost) d.ghost.remove();
   mEls.forEach(el => el.classList.remove('match', 'hover', 'can', 'lift'));
+  const z = d.moving && !cancelled ? zoneAt(e.clientX, e.clientY) : null;
+  if (d.moving) renderInfo();   // put the info panel back in place of the drop zones
   if (cancelled) { paintM(d.i); return; }
-  if (d.moving) drop(d.i, idxAt(mb, COLS, ROWS, e.clientX, e.clientY));
+  if (z === 'store') stash(d.i);
+  else if (z === 'abyss') toAbyss(d.i);
+  else if (d.moving) drop(d.i, idxAt(mb, COLS, ROWS, e.clientX, e.clientY));
   else if (!d.dead) tapM(d.i);
   else select(d.i);
 }
