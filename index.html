@@ -765,34 +765,123 @@ let muted = false;
 try { muted = localStorage.getItem('rlyeh-muted') === '1'; } catch (e) {}
 
 /* ================= sound ================= */
-let ac = null;
-function tone(freq, dur = .12, type = 'sine', vol = .14, slide = 1, delay = 0) {
-  if (muted) return;
+// Everything is synthesised (no audio files): sounds run through a shared cave-like reverb, with
+// deep-sea timbres — bubbles, sunken bells, a muffled gong, a low choir — and an optional sea drone.
+let ac = null, bus = null, wet = null;
+function audio() {
+  if (muted) return null;
   try {
-    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if (!ac) {
+      ac = new (window.AudioContext || window.webkitAudioContext)();
+      bus = ac.createGain(); bus.gain.value = .9;
+      const dry = ac.createGain(); dry.gain.value = .8;
+      wet = ac.createConvolver(); wet.buffer = impulse(3.2, 2.6);
+      const wg = ac.createGain(); wg.gain.value = .55;
+      const tone = ac.createBiquadFilter(); tone.type = 'lowpass'; tone.frequency.value = 5200;   // a little underwater
+      bus.connect(dry).connect(tone); bus.connect(wet).connect(wg).connect(tone);
+      tone.connect(ac.destination);
+    }
     if (ac.state === 'suspended') ac.resume();
-    const t0 = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
-    o.type = type;
-    o.frequency.setValueAtTime(freq, t0);
-    if (slide !== 1) o.frequency.exponentialRampToValueAtTime(freq * slide, t0 + dur);
-    g.gain.setValueAtTime(vol, t0);
-    g.gain.exponentialRampToValueAtTime(.001, t0 + dur);
-    o.connect(g).connect(ac.destination);
-    o.start(t0); o.stop(t0 + dur + .02);
-  } catch (e) {}
+    return ac;
+  } catch (e) { return null; }
 }
+// Decaying stereo noise = a long, dark room.
+function impulse(sec, decay) {
+  const n = Math.floor(ac.sampleRate * sec), b = ac.createBuffer(2, n, ac.sampleRate);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = b.getChannelData(ch);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, decay);
+  }
+  return b;
+}
+function env(g, t0, vol, att, dur) {
+  g.gain.setValueAtTime(.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol, t0 + att);
+  g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+}
+function osc(freq, { type = 'sine', vol = .1, att = .005, dur = .3, delay = 0, slide = 1, detune = 0, to = null } = {}) {
+  const A = audio(); if (!A) return;
+  const t0 = A.currentTime + delay, o = A.createOscillator(), g = A.createGain();
+  o.type = type; o.detune.value = detune;
+  o.frequency.setValueAtTime(freq, t0);
+  if (slide !== 1) o.frequency.exponentialRampToValueAtTime(freq * slide, t0 + dur * .8);
+  env(g, t0, vol, att, dur);
+  o.connect(g).connect(to || bus);
+  o.start(t0); o.stop(t0 + dur + .05);
+}
+function noise({ vol = .1, dur = .3, delay = 0, f = 800, q = 1, type = 'bandpass', att = .01, sweep = 1 } = {}) {
+  const A = audio(); if (!A) return;
+  const t0 = A.currentTime + delay, n = Math.floor(A.sampleRate * dur), b = A.createBuffer(1, n, A.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+  const s = A.createBufferSource(), fl = A.createBiquadFilter(), g = A.createGain();
+  s.buffer = b; fl.type = type; fl.Q.value = q;
+  fl.frequency.setValueAtTime(f, t0);
+  if (sweep !== 1) fl.frequency.exponentialRampToValueAtTime(f * sweep, t0 + dur);
+  env(g, t0, vol, att, dur);
+  s.connect(fl).connect(g).connect(bus);
+  s.start(t0); s.stop(t0 + dur + .05);
+}
+// A sunken bell: inharmonic partials that ring out.
+function bell(f, vol = .08, delay = 0, dur = 1.6) {
+  [[1, 1], [2.76, .45], [5.4, .22], [8.93, .1]].forEach(([m, v]) => osc(f * m, { vol: vol * v, att: .004, dur: dur / Math.sqrt(m), delay }));
+}
+const bubble = (delay = 0, f = 380 + Math.random() * 260) => osc(f, { vol: .07, att: .003, dur: .09, slide: 2.4, delay });
+// Phrygian-ish notes (D, Eb, F, A, Bb): uneasy rather than cheerful.
+const SCALE = [146.8, 155.6, 174.6, 220, 233.1, 293.7, 311.1, 349.2, 440, 466.2, 587.3];
 const sfx = {
-  move: () => tone(520, .06, 'sine', .07),
-  bump: () => tone(180, .1, 'square', .05),
-  spawn: () => tone(660, .08, 'triangle', .1, 1.3),
-  merge: t => { tone(330 + t * 110, .18, 'triangle', .16, 1.5); if (t >= 3) tone(660 + t * 110, .25, 'sine', .1, 1.2, .08); },
-  discover: () => [659, 784, 988, 1318].forEach((f, i) => tone(f, .2, 'sine', .12, 1, i * .07)),
-  coin: () => { tone(988, .08, 'square', .06); tone(1318, .12, 'square', .06, 1, .07); },
-  found: () => [784, 988, 1318].forEach((f, i) => tone(f, .16, 'sine', .16, 1, i * .08)),
-  wrong: () => tone(220, .2, 'sine', .07, .7),
-  eye: () => tone(880, .3, 'sine', .1, .5),
-  seal: () => tone(110, .4, 'sawtooth', .07, .5),
+  move: () => { noise({ vol: .05, dur: .07, f: 420, q: 2 }); osc(150, { vol: .05, dur: .08, slide: .7 }); },
+  bump: () => { osc(70, { vol: .12, dur: .18, slide: .8 }); noise({ vol: .04, dur: .1, f: 200, q: 1, type: 'lowpass' }); },
+  spawn: () => { bubble(); bubble(.05); },
+  merge: t => {
+    for (let i = 0; i < 2 + Math.min(t, 4); i++) bubble(i * .035);
+    bell(SCALE[Math.min(t + 2, SCALE.length - 1)], .07 + t * .01, .04, 1.1 + t * .2);
+    if (t >= 3) osc(SCALE[Math.min(t, SCALE.length - 1)] / 2, { vol: .06, att: .05, dur: 1.4, type: 'triangle', delay: .05 });
+  },
+  discover: () => [0, 3, 5, 6].forEach((n, i) => bell(SCALE[n + 3], .07, i * .13, 1.8)),
+  coin: () => { osc(1568, { vol: .05, dur: .25, type: 'triangle' }); osc(2093, { vol: .035, dur: .35, delay: .06, type: 'triangle', detune: -18 }); },
+  found: () => { noise({ vol: .05, dur: .45, f: 900, q: .7, att: .12, sweep: 2.2 }); bell(SCALE[8], .06, .05, 1.6); bell(SCALE[10], .04, .16, 1.8); },
+  wrong: () => { osc(98, { vol: .08, dur: .35, slide: .85 }); osc(138.6, { vol: .05, dur: .35, slide: .85 }); },   // a tritone, muffled
+  eye: () => { noise({ vol: .07, dur: 1.2, f: 500, q: 3, att: .5, sweep: 3 }); osc(73.4, { vol: .09, att: .4, dur: 1.4 }); osc(110, { vol: .05, att: .5, dur: 1.4, detune: 14 }); },
+  seal: () => { [[55, .16], [82.4, .08], [138.6, .05], [207, .03]].forEach(([f, v]) => osc(f, { vol: v, att: .01, dur: 3.2 })); noise({ vol: .05, dur: .5, f: 120, q: 1, type: 'lowpass' }); },
+  relic: () => {
+    // a low, wordless choir swelling up, then a bell
+    [73.4, 110, 146.8, 174.6, 220].forEach((f, i) => [-9, 9].forEach(dt => osc(f, { type: 'sawtooth', vol: .018, att: .9, dur: 3.2, detune: dt, delay: i * .05, to: choirFilter() })));
+    bell(293.7, .09, .9, 2.6); bell(440, .05, 1.1, 2.6);
+  },
 };
+function choirFilter() {
+  const A = audio(); if (!A) return null;
+  const f = A.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 900; f.Q.value = 4;
+  f.connect(bus); return f;
+}
+// Quiet sea drone under everything: two detuned low tones and slow surf, started by the first tap.
+let drone = null;
+function startDrone() {
+  const A = audio(); if (!A || drone) return;
+  const g = A.createGain(); g.gain.value = 0; g.connect(bus);
+  g.gain.linearRampToValueAtTime(.05, A.currentTime + 4);
+  const srcs = [];
+  [[55, 0], [55, 7], [82.4, -5]].forEach(([f, dt]) => { const o = A.createOscillator(); o.frequency.value = f; o.detune.value = dt; o.connect(g); o.start(); srcs.push(o); });
+  // surf: looping noise through a lowpass whose cutoff breathes
+  const n = A.sampleRate * 4, b = A.createBuffer(1, n, A.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+  const s = A.createBufferSource(); s.buffer = b; s.loop = true;
+  const lp = A.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 380;
+  const lfo = A.createOscillator(), lg = A.createGain(); lfo.frequency.value = .09; lg.gain.value = 260;
+  lfo.connect(lg).connect(lp.frequency);
+  const sg = A.createGain(); sg.gain.value = .5;
+  s.connect(lp).connect(sg).connect(g); s.start(); lfo.start();
+  srcs.push(s, lfo);
+  drone = { g, srcs };
+}
+function stopDrone() {
+  if (!drone || !ac) return;
+  const { g, srcs } = drone; drone = null;
+  g.gain.cancelScheduledValues(ac.currentTime);
+  g.gain.setTargetAtTime(0, ac.currentTime, .3);
+  setTimeout(() => srcs.forEach(s => { try { s.stop(); } catch (e) {} }), 1500);
+}
+document.addEventListener('pointerdown', () => { if (!muted) startDrone(); }, { capture: true });
 
 /* ================= state ================= */
 let S = null;
@@ -1092,7 +1181,7 @@ function makeRelic(a, b, c) {
   paintM(a); paintM(b, 'puff');
   burst($('mboard'), COLS, b, 9);
   floater($('mboard'), COLS, b, `${r.n}！`, 'gold');
-  sfx.merge(7); setTimeout(sfx.discover, 220);
+  sfx.relic();
   const lv = n > r.max ? '（効果はもう最大）' : n > 1 ? `（${n}つ分の力）` : '';
   showOverlay(`
     <p class="kicker">古き秘宝</p>
@@ -1800,7 +1889,7 @@ $('mute').addEventListener('click', () => {
   muted = !muted;
   try { localStorage.setItem('rlyeh-muted', muted ? '1' : '0'); } catch (e) {}
   renderTop();
-  if (!muted) sfx.spawn();
+  if (muted) stopDrone(); else { sfx.spawn(); startDrone(); }
 });
 document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('dblclick', e => e.preventDefault());
