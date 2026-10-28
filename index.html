@@ -79,7 +79,7 @@ body{height:100%;margin:0;background:radial-gradient(ellipse 120% 70% at 50% 115
 .merge{grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"orders" "board" "info"}
 .search{grid-template-rows:auto minmax(0,1fr);grid-template-areas:"orders" "board"}
 .side{grid-area:orders;display:flex;flex-direction:column;gap:8px;min-width:0}
-.wrap{grid-area:board;position:relative;min-width:0;min-height:0;display:grid;place-items:center}
+.wrap{grid-area:board;position:relative;min-width:0;min-height:0;display:grid;place-items:center;contain:size}
 .info{grid-area:info}
 
 /* Orders */
@@ -99,7 +99,8 @@ body{height:100%;margin:0;background:radial-gradient(ellipse 120% 70% at 50% 115
 .empty-orders{grid-column:1/-1;font-size:13px;opacity:.7;padding:8px}
 
 /* Info panel */
-.info{display:flex;align-items:center;gap:12px;background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:10px 14px;min-height:84px;box-shadow:0 3px 0 var(--ink)}
+.info{display:flex;align-items:center;gap:12px;background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:10px 14px;box-shadow:0 3px 0 var(--ink);
+  height:104px;box-sizing:border-box;overflow-y:auto;overflow-x:hidden}   /* fixed, so picking a different item never resizes the board */
 .info .big{font-size:44px;line-height:1;width:56px;text-align:center;flex:none}
 .info .txt{flex:1;min-width:0}
 .info .txt b{font-family:var(--f-display);font-size:17px}
@@ -273,7 +274,7 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
   .search{grid-template-columns:300px minmax(0,1fr);grid-template-rows:minmax(0,1fr);grid-template-areas:"orders board"}
   .side{overflow-y:auto;overflow-x:hidden}
   .orders{grid-template-columns:1fr}
-  .info{flex-wrap:wrap;align-items:flex-start}
+  .info{flex-wrap:wrap;align-items:flex-start;height:176px}
   .info .acts{flex-direction:row}
   .mission{flex-direction:column;align-items:stretch}
   .mission h2,.finds{flex:none}
@@ -1718,6 +1719,17 @@ $('mute').addEventListener('click', () => {
 });
 document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('dblclick', e => e.preventDefault());
+// iOS Safari can still double-tap-zoom despite touch-action. Cancel the second quick tap's default (the zoom)
+// and deliver its click by hand, so rapid tapping on buttons keeps working. Pointer events are unaffected.
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e => {
+  const now = e.timeStamp;
+  if (now - lastTouchEnd < 450 && !e.touches.length && !e.target.closest('input,textarea,select')) {
+    e.preventDefault();
+    if (e.target.click) e.target.click();
+  }
+  lastTouchEnd = now;
+}, { passive: false });
 // Offline cache for the home-screen install; only on a standalone host, not inside the artifact viewer.
 if ('serviceWorker' in navigator && window.top === window && location.protocol === 'https:') {
   try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {}
