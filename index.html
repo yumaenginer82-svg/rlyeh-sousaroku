@@ -327,6 +327,10 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 .page small{display:block;font-size:11px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .page.now{border-style:dashed;opacity:.7}
 .pstars{color:var(--gold);font-size:16px;white-space:nowrap}
+.page small.wrap{white-space:normal;line-height:1.5}
+.pch{font-style:normal;font-weight:500;font-size:10px;color:#c9a8ee;margin-left:8px}
+.npc[data-who]{cursor:pointer}
+.npc .who{font-style:normal;display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--line);font-size:10px;margin-left:2px;vertical-align:1px;opacity:.8}
 .pstars.r0{color:#4d6a64}
 
 @keyframes pop{0%{transform:scale(.3)}60%{transform:scale(1.28)}100%{transform:scale(1)}}
@@ -481,13 +485,15 @@ const RELIC_COINS = 100;
 const relicLv = c => Math.min((S.relics && S.relics[c]) || 0, RELICS[c].max);
 const orderCoins = o => Math.round(o.coins * (1 + .1 * relicLv(0)));
 const NPCS = [
-  { e: '🕵️‍♂️', n: '探偵ダニエル' },
-  { e: '👩‍🔬', n: 'アーミテッジ教授' },
-  { e: '🧓', n: '老漁師ザドック' },
-  { e: '👮‍♀️', n: '保安官マーシュ' },
-  { e: '🧑‍🎨', n: '画家ウィルコックス' },
-  { e: '👩‍⚕️', n: '町医者ハリエット' },
+  { e: '🕵️‍♂️', n: '探偵ダニエル', d: 'ボストンの私立探偵。行方不明の記者とは古い友人で、この調査をあなたに頼んだ本人。' },
+  { e: '👩‍🔬', n: 'アーミテッジ教授', d: 'ミスカトニック大学の図書館長。古い文献と、禁じられた書物にくわしい。' },
+  { e: '🧓', n: '老漁師ザドック', d: '町いちばんの年寄り。酒が入ると、若いころに見た「海の何か」の話を始める。' },
+  { e: '👮‍♀️', n: '保安官マーシュ', d: '町の保安官。よそ者には厳しいが、町の古い一族とのつながりを隠している。' },
+  { e: '🧑‍🎨', n: '画家ウィルコックス', d: '夜ごと同じ夢を見る若い画家。夢で見た沈んだ都を、取りつかれたように描きつづけている。' },
+  { e: '👩‍⚕️', n: '町医者ハリエット', d: '町でただ一人の医者。町の人々の顔つきが少しずつ変わっていくことに、気づいている。' },
 ];
+// Who a client is, by name (saved orders only keep the name).
+const whoIs = n => ([...NPCS, ...BOSSES, bossOf(99)].find(p => p.n === n) || {}).d || '';
 const STORY = [
   { title: '霧の港町',
     intro: '行方不明になった記者を追って、あなたは寂れた港町インスマスへやって来た。町の人々はよそ者に冷たい。まずは依頼をこなして、信頼を集めよう。',
@@ -522,14 +528,14 @@ function story(ch) {
 }
 // The chapter's climax request: after the stars are in, one person asks for two high-stage items before the search opens.
 const BOSSES = [
-  { n: '酒場の主人', say: '記者のことを知りたきゃ、それなりの品を持ってきな。' },
-  { n: '教会の番人', say: '冠の話をするには、まず祈りの品を見せてもらおう。' },
-  { n: '教団の祭司', say: '集会に入りたいのなら、捧げものを示せ。' },
-  { n: '暗礁の渡し守', say: '満月の舟に乗りたけりゃ、海の底の品をよこしな。' },
-  { n: '仮面の長老', say: '祭りにまざるなら、深きものへの供物がいる。' },
-  { n: '夢の門番', say: '都の門をくぐるには、星辰の証がいる。' },
+  { n: '酒場の主人', say: '記者のことを知りたきゃ、それなりの品を持ってきな。', d: '港の酒場を仕切る男。町のうわさも密売の話も、すべてここに集まる。' },
+  { n: '教会の番人', say: '冠の話をするには、まず祈りの品を見せてもらおう。', d: '町はずれの古い教会を守る、無口な老人。金の冠のことを何か知っている。' },
+  { n: '教団の祭司', say: '集会に入りたいのなら、捧げものを示せ。', d: 'ダゴン秘密教団の祭司。低い声で、海の底の神への祈りを唱える。' },
+  { n: '暗礁の渡し守', say: '満月の舟に乗りたけりゃ、海の底の品をよこしな。', d: '満月の夜だけ、悪魔の暗礁へ舟を出す。フードの奥の顔は、濡れて光っている。' },
+  { n: '仮面の長老', say: '祭りにまざるなら、深きものへの供物がいる。', d: '仮面の祭りを取りしきる長老。仮面の下の顔を見た者はいない。' },
+  { n: '夢の門番', say: '都の門をくぐるには、星辰の証がいる。', d: '夢の都ルルイエの門に立つ影。人の言葉を話すが、人ではない。' },
 ];
-const bossOf = ch => BOSSES[ch] || { n: '深淵の声', say: 'より深きものを捧げよ。' };
+const bossOf = ch => BOSSES[ch] || { n: '深淵の声', say: 'より深きものを捧げよ。', d: '夢と現実の境目から聞こえる声。どこから響くのか、だれにもわからない。' };
 const bossT = ch => Math.min(3 + Math.floor(ch * .75), 6);
 // Chapter twists on the board, from chapter 2 on.
 const GIMMICKS = {
@@ -1095,6 +1101,7 @@ function showBoss() {
   showOverlay(`
     <p class="kicker">第${S.ch + 1}章　山場の依頼</p>
     <h2>${B.n}</h2>
+    <p class="muted">${B.d}</p>
     <p class="lore">「${B.say}」</p>
     <div class="boss-needs">${b.need.map(n => `<div>${ITEM(n.c, n.t)[0]}<small>${ITEM(n.c, n.t)[1]}<br>Lv${n.t + 1}</small></div>`).join('')}</div>
     <p class="muted">この2つを納品すると、現場検証へ進める。ほうび：🪙${b.coins}　👁️${b.eyes}　宝箱</p>
@@ -1598,7 +1605,7 @@ function renderOrders() {
       return `<span class="need" title="${ITEM(n.c, n.t)[1]}">${ITEM(n.c, n.t)[0]}${ok ? '<i>✓</i>' : ''}</span>`;
     }).join('');
     return `<div class="order${ready ? ' ready' : ''}${o.sp ? ' special' : ''}${o.boss ? ' boss' : ''}" data-oid="${o.id}">
-      <div class="npc"><span class="nm">${o.npc.n}</span>${o.sp ? '<span class="sp-tag">特別</span>' : o.boss ? '<span class="sp-tag boss-tag">山場</span>' : ''}</div>
+      <div class="npc" data-who="${o.npc.n}"><span class="nm">${o.npc.n} <i class="who">?</i></span>${o.sp ? '<span class="sp-tag">特別</span>' : o.boss ? '<span class="sp-tag boss-tag">山場</span>' : ''}</div>
       <div class="needs">${needs}</div>
       <div class="foot"><span class="rew">🪙${orderCoins(o)}${o.stars ? ' ★' + o.stars : ''}${o.eyes ? ' 👁️' + o.eyes : ''}</span><button class="btn tiny gold" type="button" data-deliver="${o.id}" ${ready ? '' : 'disabled'}>納品</button></div>
     </div>`;
@@ -1609,7 +1616,13 @@ function renderOrders() {
 
 $('orders').addEventListener('click', e => {
   const b = e.target.closest('[data-deliver]');
-  if (b && !b.disabled) deliver(+b.dataset.deliver);
+  if (b && !b.disabled) { deliver(+b.dataset.deliver); return; }
+  // Tapping a client's name shows who they are in the info panel.
+  const w = e.target.closest('[data-who]');
+  if (w && whoIs(w.dataset.who)) {
+    select(-1);
+    $('info').innerHTML = `<div class="big">🗝️</div><div class="txt"><b>${w.dataset.who}<small>依頼主</small></b><p>${whoIs(w.dataset.who)}</p></div>`;
+  }
 });
 
 function deliver(id) {
@@ -2368,11 +2381,17 @@ function showDex() {
       <span class="pstars r${e ? e.stars : 0}">${starsText(e ? e.stars : 0)}</span>
       <button class="btn tiny" type="button" data-replay="${ch}" ${S.search ? 'disabled' : ''}>再調査</button></div>`;
   }).join('');
+  // Clients: the townsfolk, then each chapter's climax client once that chapter is reached.
+  const people = NPCS.map(p => `<div class="page"><div><b>${p.n}</b><small class="wrap">${p.d}</small></div></div>`).join('')
+    + [...Array(Math.max(BOSSES.length, S.ch + 1)).keys()].map(ch => ch <= S.ch
+      ? `<div class="page"><div><b>${bossOf(ch).n}<em class="pch">第${ch + 1}章 山場</em></b><small class="wrap">${bossOf(ch).d}</small></div></div>`
+      : `<div class="page now"><div><b>？？？<em class="pch">第${ch + 1}章 山場</em></b><small>まだ会っていない</small></div></div>`).join('');
   showOverlay(`
     <p class="kicker">調査手帳</p>
     <h2>${TITLES[lv][1]}</h2>
     <p class="muted">評価の★ 合計 ${ratingSum()}${next ? `　／　次の称号「${next[1]}」まで あと${next[0] - ratingSum()}` : '　／　最高の称号'}</p>
-    <div class="dex"><div><h3>捜索録 <small class="muted">再調査で★★★を狙える（よくなった分だけほうび）${S.search ? '　※進行中の現場検証を終えてから' : ''}</small></h3><div class="pages">${pages}</div></div></div>
+    <div class="dex"><div><h3>捜索録 <small class="muted">再調査で★★★を狙える（よくなった分だけほうび）${S.search ? '　※進行中の現場検証を終えてから' : ''}</small></h3><div class="pages">${pages}</div></div>
+      <div><h3>依頼主 <small class="muted">依頼カードの名前をタップしても見られる</small></h3><div class="pages">${people}</div></div></div>
     <h2 class="sub">図鑑 ${found} / ${total}</h2>
     <div class="dex">${rows}</div>
     <button class="btn primary" type="button" data-go>とじる</button>
