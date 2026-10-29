@@ -213,7 +213,8 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 .slayer.glide{transition:transform .45s ease}
 .slayer canvas{display:block}
 .mark{position:absolute;transform:translate(-50%,-50%);border:calc(5px * var(--inv)) solid var(--stripe);border-radius:50%;pointer-events:none;
-  box-shadow:0 0 0 calc(2px * var(--inv)) rgba(255,255,255,.7);animation:ring .45s ease-out}
+  box-shadow:0 0 0 calc(2px * var(--inv)) rgba(255,255,255,.7);animation:markring .45s ease-out}
+@keyframes markring{0%{transform:translate(-50%,-50%) scale(1.8);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
 .miss{position:absolute;transform:translate(-50%,-50%);color:var(--stripe);font-weight:700;pointer-events:none;font-size:calc(34px * var(--inv));
   text-shadow:0 0 4px #fff;animation:missfade .7s forwards}
 .hintring{position:absolute;transform:translate(-50%,-50%);border:calc(5px * var(--inv)) dashed var(--glow);border-radius:50%;pointer-events:none;
@@ -283,6 +284,45 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 .relic.unknown b{color:#4d6a64}
 .relic-art .ic{width:120px;height:120px;filter:drop-shadow(0 0 22px rgba(232,196,104,.9));animation:beckon 2.2s ease-in-out infinite}
 
+/* Client portraits */
+img.face{display:block;flex:none;width:38px;height:38px;object-fit:cover;object-position:50% 20%;border-radius:50%;background:radial-gradient(circle at 50% 35%,#8fa69e,#3a5552 60%,#1c2e30);
+  border:2px solid var(--line);pointer-events:none;-webkit-user-drag:none;user-select:none}
+.order.boss img.face{border-color:#a07cc8}
+.npc .whot{display:flex;flex-direction:column;min-width:0;flex:1}
+.npc .say{font-size:11px;line-height:1.35;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--f-display)}
+.portrait img.face{width:120px;height:120px;border-width:3px;margin:0 auto;box-shadow:0 0 24px rgba(114,224,178,.25)}
+.info .big img.face{width:60px;height:60px;margin:0 auto}
+.disc img.face{width:56px;height:56px}
+.disc b.thx{font-size:16px;display:block;max-width:22em}
+.page img.face{width:44px;height:44px}
+/* The dealer's shop */
+.goods{display:grid;gap:6px;width:100%;text-align:left}
+.good{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+.good > div{flex:1;min-width:0}
+.good b{display:block;font-size:14px}
+.good small{display:block;font-size:11px;opacity:.85;line-height:1.5}
+.gart{width:40px;height:40px;flex:none;display:grid;place-items:center;font-size:26px}
+.gart .ic{width:40px;height:40px}
+/* Mythos notes */
+.lorebox{position:sticky;top:-28px;z-index:2;width:100%;display:flex;gap:12px;align-items:flex-start;text-align:left;background:var(--panel2);border:1px solid var(--gold);
+  border-radius:12px;padding:10px 12px;box-shadow:0 6px 14px rgba(0,0,0,.45)}
+.lorebox > small{opacity:.8}
+.lorebox .lart{width:64px;height:64px;flex:none}
+.lorebox .lart .ic{width:64px;height:64px}
+.lorebox b{display:block;font-family:var(--f-display);font-size:16px;color:var(--gold)}
+.lorebox b small{font-family:var(--f-body);font-size:11px;color:var(--bone);opacity:.7;margin-left:6px}
+.lorebox p{margin:4px 0 0;font-size:13px;line-height:1.65}
+.lorebox p.flav{opacity:.75;font-style:italic}
+button.dexitem{font:inherit;color:inherit;cursor:pointer;width:100%}
+.dexitem.on{border-color:var(--gold);box-shadow:0 0 10px rgba(232,196,104,.5)}
+details.myth{display:block;text-align:left}
+details.myth summary{cursor:pointer;list-style:none}
+details.myth summary b{display:inline}
+details.myth summary::-webkit-details-marker{display:none}
+details.myth summary::before{content:'▸ ';color:var(--gold)}
+details.myth[open] summary::before{content:'▾ '}
+details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
+
 /* Chapter twists on the board */
 .fog{width:96%;height:96%;border-radius:30%;background:radial-gradient(circle at 30% 40%,rgba(200,220,215,.85),transparent 55%),radial-gradient(circle at 70% 60%,rgba(170,195,190,.8),transparent 55%),
   radial-gradient(circle at 50% 50%,rgba(120,150,150,.75),rgba(60,85,90,.6) 70%);filter:blur(1.5px);animation:drift 6s ease-in-out infinite}
@@ -327,7 +367,7 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 .page small{display:block;font-size:11px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .page.now{border-style:dashed;opacity:.7}
 .pstars{color:var(--gold);font-size:16px;white-space:nowrap}
-.page small.wrap{white-space:normal;line-height:1.5}
+.page small.desc{white-space:normal;line-height:1.5}
 .pch{font-style:normal;font-weight:500;font-size:10px;color:#c9a8ee;margin-left:8px}
 .npc[data-who]{cursor:pointer}
 .npc .who{font-style:normal;display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--line);font-size:10px;margin-left:2px;vertical-align:1px;opacity:.8}
@@ -384,6 +424,7 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
     <div class="hbtns">
       <button id="storeBtn" class="btn small" type="button" aria-label="封印の櫃（しまっておく場所）">櫃 <b id="storeN">0</b></button>
       <button id="inboxBtn" class="btn small" type="button" aria-label="もらったアイテムを出す">🎁 <b id="inboxN">0</b></button>
+      <button id="shopBtn" class="btn small" type="button" aria-label="骨董商の店">店</button>
       <button id="dexBtn" class="btn small" type="button">📖 手帳</button>
       <button id="mute" class="btn small" type="button" aria-label="音のオン・オフ">🔊</button>
     </div>
@@ -492,8 +533,72 @@ const NPCS = [
   { e: '🧑‍🎨', n: '画家ウィルコックス', d: '夜ごと同じ夢を見る若い画家。夢で見た沈んだ都を、取りつかれたように描きつづけている。' },
   { e: '👩‍⚕️', n: '町医者ハリエット', d: '町でただ一人の医者。町の人々の顔つきが少しずつ変わっていくことに、気づいている。' },
 ];
+// What each client says when asking, and when you deliver.
+const LINES = {
+  '探偵ダニエル': [['記者の足どりを追うのに、これが要る。', '手がかりになりそうな品を集めてくれ。'], ['助かった。これで一歩前進だ。', 'さすがだな。きみに頼んでよかった。']],
+  'アーミテッジ教授': [['研究のために、この品を調べたいの。', '文献と照らし合わせたい品があるのです。'], ['すばらしい。やはり記録どおりだわ。', 'これで、また一つ謎が解けそう。']],
+  '老漁師ザドック': [['一杯おごるかわりに、こいつを持ってきな。', '昔話の続きを聞きたけりゃ、これだ。'], ['ひっひ…あんた、見どころがあるのう。', 'よし、ではあの晩の話をしてやろう。']],
+  '保安官マーシュ': [['町の決まりでね。これを出してもらう。', 'よそ者でも、役に立つなら使ってあげる。'], ['……まあ、いいでしょう。', '余計なことは嗅ぎまわらないことね。']],
+  '画家ウィルコックス': [['夢で見たものを描くのに、これが要るんだ。', 'この形…夢に出てきた。どうか持ってきて。'], ['ああ、これだ！ 夢のとおりだ…', 'ありがとう。今夜はもっと深く描ける。']],
+  '町医者ハリエット': [['診療に使うの。手を貸してくださる？', '町の人の具合が悪いの。これが要るわ。'], ['ありがとう。これで何人か助けられる。', 'あなたも、体には気をつけて。']],
+};
+// Portraits: townsfolk x-p<n>, climax clients x-b<chapter> (x-b6 for the endless chapters), the dealer x-shop.
+const MERCHANT = { n: '骨董商ラバン', d: '港の裏通りで店をひらく骨董商。どこから仕入れたのか、だれも知らない品ばかり並べている。' };
+function picOf(n) {
+  const p = NPCS.findIndex(x => x.n === n);
+  if (p >= 0) return `assets/x-p${p}.png`;
+  const b = BOSSES.findIndex(x => x.n === n);
+  if (b >= 0) return `assets/x-b${b}.png`;
+  return n === MERCHANT.n ? 'assets/x-shop.png' : 'assets/x-b6.png';
+}
+const FACE = (n, cls = '') => `<img class="face ${cls}" src="${picOf(n)}" alt="" draggable="false">`;
 // Who a client is, by name (saved orders only keep the name).
-const whoIs = n => ([...NPCS, ...BOSSES, bossOf(99)].find(p => p.n === n) || {}).d || '';
+const whoIs = n => ([...NPCS, ...BOSSES, bossOf(99), MERCHANT].find(p => p.n === n) || {}).d || '';
+const askOf = o => o.boss ? bossOf(S.ch).say : LINES[o.npc.n] ? LINES[o.npc.n][0][o.id % 2] : '';
+const thanksOf = o => LINES[o.npc.n] ? LINES[o.npc.n][1][rnd(2)] : '…いいだろう。';
+
+/* ---- Mythos notes: one per item in the dex, plus a guide that opens chapter by chapter (or from the dealer) ---- */
+const ITEM_LORE = [
+  ['インスマスの海は、ある時期から異常なほど魚がとれるようになった。ラヴクラフトの『インスマスを覆う影』（1936年）の舞台だ。',
+   '深海の生き物の不気味さは、ラヴクラフト作品の大きな源。本人は魚介類が大の苦手だったと言われる。',
+   '神話には、甲殻類に似た体を持つ「ミ＝ゴ（ユゴスよりのもの）」という種族も登場する（『闇に囁くもの』）。',
+   'クトゥルフの姿は「タコのような頭、竜の翼、人に似た体」と描かれる。イカやタコは神話を象徴するモチーフになった。',
+   '触手は「人の理解を超えたもの」の代表的なイメージとして、のちの小説やゲームに広く受けつがれた。',
+   '神話の海には、人が名づけようのない巨大なものが潜む。深海は、宇宙と並ぶもう一つの「未知」として描かれる。',
+   '深きもの（ディープ・ワン）は、魚と蛙をまぜたような海の種族。人と交わり、その子孫はやがて海へ還るという。',
+   '深きものたちが崇める海の神。初期の短編『ダゴン』（1919年）に登場し、のちに妻ハイドラと並んで「父なるダゴン」と呼ばれる。'],
+  ['神話の物語の多くは、主人公が残した手記や手紙という形で語られる。読者は「記録を読む人」になる。',
+   '『クトゥルフの呼び声』（1928年）は、亡くなった大叔父が残したメモと新聞の切り抜きを、甥が読み解いていく物語。',
+   '新聞記事や古い記録の断片をつなぎ合わせると、ばらばらだった出来事が一つの恐ろしい真実になる。神話のお決まりの流れだ。',
+   'ネクロノミコンの写本は、ミスカトニック大学の図書館や大英博物館などに、ごくわずかに残るとされる。',
+   '『エイボンの書』『無名祭祀書』など、神話には架空の魔道書がたくさんある。作家仲間が、互いの本を自分の作品に登場させあった。',
+   '神話の世界では、知りすぎることそのものが危険。真実を見た者は、たいてい正気を失う。',
+   '「狂えるアラブ人」アブドゥル・アルハザードが書いたとされる架空の魔道書。本当にあると信じて、図書館に問い合わせた読者もいた。',
+   'ルルイエは南太平洋の海底に沈んだ石の都。人の幾何学では説明できない、ゆがんだ角度でできているという。'],
+  ['『クトゥルフの呼び声』では、1907年、ルイジアナの沼地で行われていた邪教の儀式に、警察が踏み込む場面がある。',
+   '神話の怪異は、夜と闇の中で姿を見せる。光のとどかない場所こそ、彼らの領域だ。',
+   '儀式で唱えられる言葉は「フングルイ ムグルウナフ クトゥルフ ルルイエ ウガフナグル フタグン」。意味は「ルルイエの館にて、死せるクトゥルフ、夢見るままに待ちいたり」。',
+   'インスマスの人々は、深きものに捧げものをするかわりに、豊漁と金を手に入れていた。',
+   '『クトゥルフの呼び声』では、若い彫刻家ウィルコックスが、夢で見た姿を粘土の浮き彫りにする。この町の画家の名前はここから。',
+   '星々が「正しい位置」にそろうとき、旧支配者たちはよみがえるとされる。',
+   '旧支配者は、人類よりはるか昔に星々からやって来て地球を支配した存在。今は眠りや封印の中にある。',
+   'クトゥルフは旧支配者の大祭司。ルルイエで眠りながら、夢を通して人の心に語りかける。1925年、地震でルルイエが一時浮かび上がり、世界中の芸術家が同じ悪夢を見た。'],
+];
+const MYTHOS = [
+  { ch: 0, n: 'H・P・ラヴクラフト', d: '1890〜1937年、アメリカの作家。生前はほとんど無名で、怪奇小説の雑誌『ウィアード・テイルズ』などに短編を書いた。広大な宇宙の前で人間がいかに小さいかを描く作風で知られる。' },
+  { ch: 0, n: 'クトゥルフ神話', d: 'ラヴクラフトと作家仲間が、互いの作品の神々や本を貸し借りして作りあげた架空の神話。「クトゥルフ神話」という名前でまとめたのは、友人のオーガスト・ダーレス。今も小説やゲームで書きつがれている。' },
+  { ch: 1, n: 'インスマス', d: 'マサチューセッツ州にある、寂れた架空の港町。住人の多くが深きものの血を引いていて、年をとるにつれて顔つきが魚に似てくる（「インスマス面」）。' },
+  { ch: 1, n: 'アーカムとミスカトニック大学', d: 'アーカムは神話によく登場する架空の町。ミスカトニック大学の図書館には、ネクロノミコンの写本がある。アーミテッジ博士はそこの図書館長（『ダンウィッチの怪』）。' },
+  { ch: 2, n: 'ダゴン秘密教団', d: 'インスマスで深きものを崇める教団。船長オーベッド・マーシュが南の島から持ち帰った信仰だ。この町の保安官の姓も、マーシュ家から。' },
+  { ch: 2, n: '旧支配者', d: '人類が生まれるより前に、星々から地球へやって来た存在たち。クトゥルフはその大祭司で、星がそろう日を待って眠っている。' },
+  { ch: 3, n: '悪魔の暗礁', d: 'インスマスの沖に浮かぶ黒い岩礁。その下の深い海には、深きものの都「イハ＝ンスレイ」があるという。' },
+  { ch: 3, n: '深きもの', d: '海に住む、年をとらない種族。陸の人間と交わって子を残し、その子らはやがて海へ帰って永遠に暮らす。' },
+  { ch: 4, n: 'ルルイエ', d: '南太平洋の底に沈む石の都。そこでクトゥルフが眠る。見る角度で形が変わる、ねじれた建物でできている。' },
+  { ch: 4, n: '正気度（SAN）', d: '神話を題材にしたテーブルトークRPG『クトゥルフの呼び声』（1981年）で、知ってはいけないものを見るたびに減っていく数値。このゲームのSANもそれにならっている。' },
+  { ch: 5, n: '夢の国', d: 'ラヴクラフトは、人が夢の中で訪れる別の世界「ドリームランド」も描いた。クトゥルフもまた、夢を通して人に語りかける。' },
+  { ch: 5, n: '宇宙的恐怖', d: '怪物の恐ろしさより、人の常識がまったく通じない広い宇宙そのものが恐ろしい、という考え方。ラヴクラフトが残した、いちばん大きな遺産。' },
+];
+const mythOpen = i => MYTHOS[i].ch <= S.ch || (S.myth || []).includes(i);
 const STORY = [
   { title: '霧の港町',
     intro: '行方不明になった記者を追って、あなたは寂れた港町インスマスへやって来た。町の人々はよそ者に冷たい。まずは依頼をこなして、信頼を集めよう。',
@@ -1100,6 +1205,7 @@ function showBoss() {
   sfx.seal();
   showOverlay(`
     <p class="kicker">第${S.ch + 1}章　山場の依頼</p>
+    <div class="portrait">${FACE(B.n)}</div>
     <h2>${B.n}</h2>
     <p class="muted">${B.d}</p>
     <p class="lore">「${B.say}」</p>
@@ -1167,6 +1273,16 @@ function showDiscovery(it, bonus) {
   d.style.animation = 'none'; void d.offsetWidth; d.style.animation = '';
   clearTimeout(discTimer);
   discTimer = setTimeout(() => { d.hidden = true; }, 2300);
+}
+
+// A delivered request: the client's portrait and a word of thanks drop in from the top.
+function showThanks(name, line, reward) {
+  const d = $('disc');
+  d.innerHTML = `<span class="big">${FACE(name)}</span><div><small>${name}</small><b class="thx">「${line}」</b><em>${reward}</em></div>`;
+  d.hidden = false;
+  d.style.animation = 'none'; void d.offsetWidth; d.style.animation = '';
+  clearTimeout(discTimer);
+  discTimer = setTimeout(() => { d.hidden = true; }, 2800);
 }
 
 /* ================= header ================= */
@@ -1605,7 +1721,7 @@ function renderOrders() {
       return `<span class="need" title="${ITEM(n.c, n.t)[1]}">${ITEM(n.c, n.t)[0]}${ok ? '<i>✓</i>' : ''}</span>`;
     }).join('');
     return `<div class="order${ready ? ' ready' : ''}${o.sp ? ' special' : ''}${o.boss ? ' boss' : ''}" data-oid="${o.id}">
-      <div class="npc" data-who="${o.npc.n}"><span class="nm">${o.npc.n} <i class="who">?</i></span>${o.sp ? '<span class="sp-tag">特別</span>' : o.boss ? '<span class="sp-tag boss-tag">山場</span>' : ''}</div>
+      <div class="npc" data-who="${o.npc.n}">${FACE(o.npc.n)}<div class="whot"><span class="nm">${o.npc.n}</span><span class="say">「${askOf(o)}」</span></div>${o.sp ? '<span class="sp-tag">特別</span>' : o.boss ? '<span class="sp-tag boss-tag">山場</span>' : ''}</div>
       <div class="needs">${needs}</div>
       <div class="foot"><span class="rew">🪙${orderCoins(o)}${o.stars ? ' ★' + o.stars : ''}${o.eyes ? ' 👁️' + o.eyes : ''}</span><button class="btn tiny gold" type="button" data-deliver="${o.id}" ${ready ? '' : 'disabled'}>納品</button></div>
     </div>`;
@@ -1621,7 +1737,7 @@ $('orders').addEventListener('click', e => {
   const w = e.target.closest('[data-who]');
   if (w && whoIs(w.dataset.who)) {
     select(-1);
-    $('info').innerHTML = `<div class="big">🗝️</div><div class="txt"><b>${w.dataset.who}<small>依頼主</small></b><p>${whoIs(w.dataset.who)}</p></div>`;
+    $('info').innerHTML = `<div class="big">${FACE(w.dataset.who)}</div><div class="txt"><b>${w.dataset.who}<small>依頼主</small></b><p>${whoIs(w.dataset.who)}</p></div>`;
   }
 });
 
@@ -1646,9 +1762,9 @@ function deliver(id) {
   if (o.boss) {
     S.boss = null; S.bossDone = true;
     giveGift([{ k: 'chest', n: 3, lv: 4 + Math.min(2, Math.floor(S.ch / 2)) }]);
-    toast(`${o.npc.n}「…いいだろう」 🪙+${coins} 👁️+${o.eyes} 宝箱`);
+    showThanks(o.npc.n, thanksOf(o), `🪙+${coins} 👁️+${o.eyes} 宝箱`);
     setTimeout(() => { sfx.discover(); toast('道がひらけた。現場検証へ向かおう'); }, 1400);
-  } else toast(`${o.npc.n}「助かったよ」 🪙+${coins} ★+${o.stars}`);
+  } else showThanks(o.npc.n, thanksOf(o), `🪙+${coins} ★+${o.stars}${o.eyes ? ` 👁️+${o.eyes}` : ""}`);
   renderInfo();
   afterChange();
   if (before < g && S.stars >= g && !S.bossDone && !S.boss) { makeBoss(); renderOrders(); setTimeout(showBoss, 900); }
@@ -1747,6 +1863,50 @@ function showStore() {
   });
 }
 $('storeBtn').addEventListener('click', showStore);
+
+/* ================= the dealer's shop: things to spend coins on ================= */
+const SHOP_LINES = ['いらっしゃい。どれも、ちょっと訳ありの品でね。', '値切りは聞かないよ。そのかわり、品は確かだ。', 'おや、また来たね。今日は珍しいのが入ってるよ。'];
+function shopGoods() {
+  const ch = S.ch, avail = [0, 1, 2].filter(g => S.gens[g]);
+  const locked = S.cells.some(c => c && c.k === 'lock'), closed = MYTHOS.map((_, i) => i).filter(i => !mythOpen(i));
+  return [
+    { id: 'eye', art: '👁️', n: '千里眼 ×1', d: '現場検証で、品のありかを教えてくれる。', cost: 80 },
+    { id: 'pack', art: GIFT, n: '素材の包み', d: `この章に合った品が3つ入った贈りもの（Lv${Math.min(2 + Math.floor(ch / 2), 5)}前後）。`, cost: 60 + 30 * ch,
+      buy: () => { const t = Math.min(1 + Math.floor(ch / 2), 4); giveGift([0, 1, 2].map(k => ({ k: 'item', c: pick(avail), t: t + (k === 0 ? 1 : 0) }))); } },
+    { id: 'chest', art: CHEST, n: '古い宝箱', d: '何が出るかは開けてのお楽しみ。高い段階の品も入っている。', cost: 150 + 60 * ch,
+      buy: () => giveGift([{ k: 'chest', n: 3, lv: 4 + Math.min(2, Math.floor(ch / 2)) }]) },
+    { id: 'reroll', art: '✉️', n: '依頼の入れかえ', d: 'いまの依頼（山場はのぞく）をすべて新しいものに取りかえる。', cost: 20,
+      buy: () => { S.orders = []; fillOrders(); } },
+    locked && { id: 'unseal', art: '✴', n: '封印をとく', d: '盤面の封印を一列ぶん、今すぐとく。', cost: 400,
+      buy: () => { const row = unlockRow(); if (row !== false) for (let c = 0; c < COLS; c++) paintM(row * COLS + c, 'puff'); } },
+    closed.length && { id: 'myth', art: '📜', n: '古文書の頁', d: `手帳の「神話の手引き」を一つ先に読める（残り${closed.length}）。`, cost: 120,
+      buy: () => { const i = closed[0]; (S.myth = S.myth || []).push(i); setTimeout(() => toast(`手帳に「${MYTHOS[i].n}」の頁が加わった`), 300); } },
+  ].filter(Boolean);
+}
+function showShop(line) {
+  const goods = shopGoods();
+  showOverlay(`
+    <div class="portrait">${FACE(MERCHANT.n)}</div>
+    <p class="kicker">骨董商の店</p>
+    <h2>${MERCHANT.n}</h2>
+    <p class="lore">「${line || SHOP_LINES[rnd(SHOP_LINES.length)]}」</p>
+    <p class="muted">手持ち 🪙${S.coins}</p>
+    <div class="goods">${goods.map(g => `<div class="good"><span class="gart">${g.art}</span><div><b>${g.n}</b><small>${g.d}</small></div>
+      <button class="btn tiny gold" type="button" data-buy="${g.id}" ${S.coins < g.cost ? 'disabled' : ''}>🪙${g.cost}</button></div>`).join('')}</div>
+    <button class="btn primary" type="button" data-go>店を出る</button>
+  `, hideOverlay);
+  $('panel').querySelectorAll('[data-buy]').forEach(b => b.addEventListener('click', () => {
+    const g = shopGoods().find(x => x.id === b.dataset.buy);
+    if (!g || S.coins < g.cost) return;
+    S.coins -= g.cost;
+    if (g.id === 'eye') S.eyes++;
+    else g.buy();
+    sfx.coin();
+    afterChange();
+    showShop('毎度あり。…使い方には、気をつけるんだね。');
+  }));
+}
+$('shopBtn').addEventListener('click', () => showShop());
 
 function unlockRow() {
   const row = [...Array(ROWS).keys()].find(r => S.cells.slice(r * COLS, r * COLS + COLS).some(c => c && c.k === 'lock'));
@@ -2351,7 +2511,7 @@ function showIntro() {
       <li><span>${CHAINS[0].gen.e}</span><div>光る輪の<b>道具</b>をタップすると素材が出る。</div></li>
       <li><span>${ITEM(0, 1)[0]}</span><div>同じものを<b>ドラッグで重ねる</b>と合体して、ひとつ上のものになる。はじめて作ったものは図鑑に載り、ボーナスがもらえる。</div></li>
       <li><span>✨</span><div>同じものを4つ以上となりあわせて並べ、そこへもう1つ重ねると<b>大合体</b>。ひとつ多くできてお得。高い段階の合体では、ときどき宝箱も出る。</div></li>
-      <li><span>${ITEM(1, 1)[0]}</span><div>町の人の<b>依頼</b>の品がそろったら「納品」。🪙と★がもらえる。🪙で道具を強化できる。</div></li>
+      <li><span>${ITEM(1, 1)[0]}</span><div>町の人の<b>依頼</b>の品がそろったら「納品」。🪙と★がもらえる。🪙は道具の強化や、骨董商の<b>店</b>での買い物に使える。</div></li>
       <li><span>🔎</span><div>★がたまると<b>現場検証</b>へ。細かい情景の中からリストの品を探しだすと、物語が進み、ごほうびがもらえる。</div></li>
       <li><span>${GIFT}</span><div>ほうびは盤面の<b>贈りもの</b>に入って届く。タップで開ける。贈りものどうしを重ねると、おまけが増える。</div></li>
       <li><span>${VAULT}</span><div>盤面の<b>封印の櫃</b>に品を重ねると、しまっておける。タップで出せる。</div></li>
@@ -2366,7 +2526,7 @@ function showDex() {
   const total = CHAINS.length * (MAXT + 1);
   const found = Object.keys(S.dex).length;
   const rows = CHAINS.map((ch, c) => `<div><h3>${ch.gen.e} ${ch.name}</h3><div class="dexrow">${ch.items.map((it, t) =>
-    S.dex[key(c, t)] ? `<div class="dexitem">${it[0]}<small>${it[1]}</small></div>` : `<div class="dexitem unknown">？<small>Lv${t + 1}</small></div>`).join('')}</div></div>`).join('')
+    S.dex[key(c, t)] ? `<button class="dexitem" type="button" data-lore="${c}-${t}">${it[0]}<small>${it[1]}</small></button>` : `<div class="dexitem unknown">？<small>Lv${t + 1}</small></div>`).join('')}</div></div>`).join('')
     + `<div><h3>古き秘宝 <small class="muted">最終段階どうしを重ねると手に入る</small></h3><div class="relics">${RELICS.map((r, c) => {
       const n = (S.relics && S.relics[c]) || 0;
       return n ? `<div class="relic">${ITEM(c, MAXT)[0]}<div><b>${r.n} ×${n}</b><small>${r.d}${n >= r.max ? '（最大）' : ''}</small></div></div>`
@@ -2382,21 +2542,32 @@ function showDex() {
       <button class="btn tiny" type="button" data-replay="${ch}" ${S.search ? 'disabled' : ''}>再調査</button></div>`;
   }).join('');
   // Clients: the townsfolk, then each chapter's climax client once that chapter is reached.
-  const people = NPCS.map(p => `<div class="page"><div><b>${p.n}</b><small class="wrap">${p.d}</small></div></div>`).join('')
-    + [...Array(Math.max(BOSSES.length, S.ch + 1)).keys()].map(ch => ch <= S.ch
-      ? `<div class="page"><div><b>${bossOf(ch).n}<em class="pch">第${ch + 1}章 山場</em></b><small class="wrap">${bossOf(ch).d}</small></div></div>`
+  const people = [...NPCS, MERCHANT].map(p => `<div class="page">${FACE(p.n)}<div><b>${p.n}</b><small class="desc">${p.d}</small></div></div>`).join('')
+    + [...Array(BOSSES.length + (S.ch >= BOSSES.length ? 1 : 0)).keys()].map(ch => ch <= S.ch
+      ? `<div class="page">${FACE(bossOf(ch).n)}<div><b>${bossOf(ch).n}<em class="pch">${ch < BOSSES.length ? `第${ch + 1}章` : `第${BOSSES.length + 1}章〜`} 山場</em></b><small class="desc">${bossOf(ch).d}</small></div></div>`
       : `<div class="page now"><div><b>？？？<em class="pch">第${ch + 1}章 山場</em></b><small>まだ会っていない</small></div></div>`).join('');
   showOverlay(`
     <p class="kicker">調査手帳</p>
     <h2>${TITLES[lv][1]}</h2>
     <p class="muted">評価の★ 合計 ${ratingSum()}${next ? `　／　次の称号「${next[1]}」まで あと${next[0] - ratingSum()}` : '　／　最高の称号'}</p>
     <div class="dex"><div><h3>捜索録 <small class="muted">再調査で★★★を狙える（よくなった分だけほうび）${S.search ? '　※進行中の現場検証を終えてから' : ''}</small></h3><div class="pages">${pages}</div></div>
-      <div><h3>依頼主 <small class="muted">依頼カードの名前をタップしても見られる</small></h3><div class="pages">${people}</div></div></div>
+      <div><h3>依頼主 <small class="muted">依頼カードの名前をタップしても見られる</small></h3><div class="pages">${people}</div></div>
+      <div><h3>神話の手引き <small class="muted">${MYTHOS.filter((_, i) => mythOpen(i)).length} / ${MYTHOS.length}　章が進むと読める（店の「古文書の頁」でも）</small></h3><div class="pages">${MYTHOS.map((m, i) => mythOpen(i)
+        ? `<details class="page myth"><summary><b>${m.n}</b></summary><p>${m.d}</p></details>`
+        : `<div class="page now"><div><b>？？？</b><small>第${m.ch + 1}章で読める</small></div></div>`).join('')}</div></div></div>
     <h2 class="sub">図鑑 ${found} / ${total}</h2>
+    <div class="lorebox" id="lorebox"><small>見つけた品をタップすると、クトゥルフ神話の解説が読める。</small></div>
     <div class="dex">${rows}</div>
     <button class="btn primary" type="button" data-go>とじる</button>
     <button class="btn tiny danger" type="button" id="resetBtn">データを消して最初から</button>
   `, hideOverlay);
+  $('panel').querySelectorAll('[data-lore]').forEach(b => b.addEventListener('click', () => {
+    const [c, t] = b.dataset.lore.split('-').map(Number), it = ITEM(c, t);
+    $('lorebox').innerHTML = `<span class="lart">${it[0]}</span><div><b>${it[1]}<small>${CHAINS[c].name} Lv${t + 1}</small></b><p class="flav">${it[2]}</p><p>${ITEM_LORE[c][t]}</p></div>`;
+    $('panel').querySelectorAll('.dexitem.on').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    $('lorebox').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }));
   $('panel').querySelectorAll('[data-replay]').forEach(b => b.addEventListener('click', () => {
     if (S.search) return;
     S.search = Object.assign(newSearch(+b.dataset.replay), { replay: true });
