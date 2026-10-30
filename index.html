@@ -302,6 +302,26 @@ img.uic{display:inline-block;width:26px;height:26px;object-fit:contain;vertical-
 .btn.hb.snd{position:relative}
 #eyeBtn img.uic{width:26px;height:26px}
 
+/* Sena, the very rare guest: a gold card with a light sweeping across it */
+.order.rare{border-color:#f0c860;background:linear-gradient(160deg,#3a2c10,var(--paper) 70%);overflow:hidden;
+  box-shadow:0 3px 0 var(--ink),0 0 18px rgba(240,200,96,.7);animation:rareglow 1.6s ease-in-out infinite}
+.order.rare::before{content:"";position:absolute;top:-40%;bottom:-40%;width:40%;left:-60%;pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,240,190,.45),transparent);transform:skewX(-18deg);animation:raresweep 2.4s ease-in-out infinite}
+@keyframes rareglow{0%,100%{box-shadow:0 3px 0 var(--ink),0 0 12px rgba(240,200,96,.5)}50%{box-shadow:0 3px 0 var(--ink),0 0 26px rgba(255,220,120,.95)}}
+@keyframes raresweep{0%{left:-60%}60%,100%{left:130%}}
+.order.rare img.face{border-color:#f0c860;object-fit:cover;object-position:50% 30%}
+.rare-tag{background:linear-gradient(90deg,#b8862a,#f0c860);color:#2a1d05}
+.senapic .ic{width:200px;height:200px;margin:0 auto;filter:drop-shadow(0 0 22px rgba(240,200,96,.7));animation:pop .5s ease}
+.senah{color:#f0c860}
+.album{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.apage{margin:0;padding:6px;border-radius:10px;background:#efe3c8;border:1px solid #c8a86a;box-shadow:0 2px 6px rgba(0,0,0,.4);transform:rotate(-1.5deg);color:#3a2c18}
+.apage:nth-child(even){transform:rotate(1.5deg)}
+.apage .ic{width:100%;height:auto;aspect-ratio:1;background:#fff8e8;border-radius:4px}
+.apage figcaption b{display:block;font-size:12px;margin-top:4px}
+.apage figcaption small{display:block;font-size:10px;line-height:1.4;opacity:.8}
+.apage.locked{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#2a2418;border-color:#5a4a2a;color:#8a7a5a}
+.apage.locked span{font-size:30px;font-family:var(--f-display);aspect-ratio:1;display:grid;place-items:center}
+
 /* Star dice and the miniature shelf */
 .dicebtn{width:100%;gap:10px}
 .dicebtn .ic{width:30px;height:30px}
@@ -793,18 +813,27 @@ const LINES = {
   '編集長ハーグレイヴ': [['記者の原稿を確かめたい。これが手がかりになる。', '記事にできるかどうか、これを見てから決める。'], ['ふむ……やはりあいつの書いたことは本当だったのか。', '助かる。だが、このことはまだ記事にはできん。']],
   '学生ピーズリー': [['教授に頼まれた資料なんです。お願いできますか？', '伝承の裏づけに、これがどうしても必要で。'], ['ありがとうございます！ 論文が一歩進みました。', 'この町の人たち、ぼくのこと、ずっと見てる気がするんです。']],
 };
+// The very rare guest: Sena the Yorkshire Terrier. Each visit adds a page to her album in the journal.
+const SENA = { n: 'ヨークシャテリア セナ', d: 'どこからともなく現れる、小さなヨークシャテリア。大きな耳で、人には聞こえない海の歌を聞いているらしい。' };
+LINES[SENA.n] = [['わん！（何かを探してほしいみたいだ）', 'くぅん……（じっとこちらを見上げている）'], ['わんわん！（しっぽをぶんぶん振っている）', '（うれしそうに足もとをくるくる回っている）']];
+const SENA_ALBUM = [
+  { n: 'はじめての出会い', d: 'はじめて出会った日のセナ。大きな耳が、ぴんと立っていた。' },
+  { n: 'おねだり', d: 'なにかを期待するとき、セナはこうして見上げてくる。だれも断れない。' },
+  { n: '名探偵セナ', d: '探偵帽をかぶったセナ。手がかりの匂いは、だれよりも早く見つける。' },
+  { n: 'おやすみ', d: '古い本の上で眠るセナ。どんな悪夢も、この寝顔には近づけない。' },
+];
 // Portraits: townsfolk x-p<n>, climax clients x-b<chapter> (x-b6 for the endless chapters), the dealer x-shop.
-const MERCHANT = { n: '骨董商ラバン', d: '港の裏通りで店をひらく骨董商。どこから仕入れたのか、だれも知らない品ばかり並べている。' };
+const MERCHANT ={ n: '骨董商ラバン', d: '港の裏通りで店をひらく骨董商。どこから仕入れたのか、だれも知らない品ばかり並べている。' };
 function picOf(n) {
   const p = NPCS.findIndex(x => x.n === n);
   if (p >= 0) return `assets/x-p${p}.png`;
   const b = BOSSES.findIndex(x => x.n === n);
   if (b >= 0) return `assets/x-b${b === 6 ? 7 : b}.png`;
-  return n === MERCHANT.n ? 'assets/x-shop.png' : 'assets/x-b6.png';
+  return n === MERCHANT.n ? 'assets/x-shop.png' : n === SENA.n ? 'assets/x-sena0.png' : 'assets/x-b6.png';
 }
 const FACE = (n, cls = '') => `<img class="face ${cls}" src="${picOf(n)}" alt="" draggable="false">`;
 // Who a client is, by name (saved orders only keep the name).
-const whoIs = n => ([...NPCS, ...BOSSES, bossOf(99), MERCHANT].find(p => p.n === n) || {}).d || '';
+const whoIs = n => ([...NPCS, ...BOSSES, bossOf(99), MERCHANT, SENA].find(p => p.n === n) || {}).d || '';
 const askOf = o => o.boss ? bossOf(S.ch).say : LINES[o.npc.n] ? LINES[o.npc.n][0][o.id % 2] : '';
 const thanksOf = o => LINES[o.npc.n] ? LINES[o.npc.n][1][rnd(2)] : '…いいだろう。';
 
@@ -945,6 +974,23 @@ function showDice(msg) {
   });
 }
 
+// After helping Sena: the next page of her album (and a little extra once the album is full).
+function senaVisit() {
+  S.sena = (S.sena || 0) + 1;
+  const i = Math.min(S.sena, SENA_ALBUM.length) - 1, fresh = S.sena <= SENA_ALBUM.length;
+  if (!fresh) { S.coins += 200; S.eyes += 1; }
+  sfx.relic();
+  afterChange();
+  showOverlay(`
+    <p class="kicker">特別な依頼主</p>
+    <div class="senapic"><img class="ic" src="assets/x-sena${i}.png" alt=""></div>
+    <h2>${fresh ? SENA_ALBUM[i].n : 'またね、セナ'}</h2>
+    <p class="lore">${fresh ? SENA_ALBUM[i].d : 'セナはしっぽを振って、霧の向こうへ駆けていった。足あとに、小さな金貨が落ちていた。'}</p>
+    <p class="muted">${fresh ? `手帳の「セナのアルバム」に1枚加わった（${S.sena} / ${SENA_ALBUM.length}）` : 'アルバムはもう全部そろっている。かわりに 🪙200 と 👁️1'}</p>
+    <button class="btn primary" type="button" data-go>なでてあげる</button>
+  `, hideOverlay);
+}
+
 /* ---- Research: donations to Miskatonic University buy lasting upgrades (the long-term use for coins) ---- */
 const RESEARCH = [
   { id: 'gen', n: '道具の改良', d: '道具から素材が2つ出ることがある（1段階ごとに +8%）', cost: [200, 500, 1000, 2000, 4000] },
@@ -1042,6 +1088,7 @@ const ACHS = [
   { id: 'ch6', n: 'ルルイエへの到達', d: '第6章を解決する', p: () => [S.ch, 6], c: 600, e: 2 },
   { id: 'ch10', n: '終わらない調査', d: '第10章を解決する', p: () => [S.ch, 10], c: 1500, e: 3 },
   { id: 'end', n: '封印者', d: '最終章を解決し、都を眠りへ還す', p: () => [S.cleared ? 1 : 0, 1], c: 500, e: 2 },
+  { id: 'sena', n: 'セナの親友', d: 'セナのアルバムを4枚そろえる', p: () => [Math.min(S.sena || 0, 4), 4], c: 1000, e: 3 },
   { id: 'figs', n: '神々の蒐集家', d: 'ミニチュアの像を12体すべて集める', p: () => [(S.figs || []).length, FIGS.length], c: 1500, e: 3 },
   { id: 'res10', n: '大学の後援者', d: '研究を合わせて10段すすめる', p: () => [Object.values(S.res || {}).reduce((a, b) => a + b, 0), 10], c: 800, e: 2 },
   { id: 'scrap', n: '断章の収集家', d: '断章をすべて読む', p: () => [MYTHOS.filter((m, i) => m.ch > 50 && mythOpen(i)).length, 6], c: 600, e: 2 },
@@ -1663,6 +1710,11 @@ function makeOrder() {
   const avail = [0, 1, 2].filter(g => S.gens[g]);
   const maxT = Math.min(5, 2 + S.ch), minT = Math.max(1, maxT - 2);   // everyday requests stay below the top stages
   const used = S.orders.map(o => o.npc.n);
+  // Very rarely, Sena turns up with a small request and a big reward (never two at once).
+  if (!S.orders.some(o => o.rare) && Math.random() < .035) {
+    const t = Math.max(1, minT);
+    return { id: S.nextId++, npc: { n: SENA.n }, need: [{ c: pick(avail), t }, { c: pick(avail), t: Math.max(0, t - 1) }], coins: 300 + 60 * S.ch, stars: 2, eyes: 2, rare: true };
+  }
   const npc = pick(NPCS.filter(p => !used.includes(p.n)));
   // High-stage requests, so big items have a use: often for one already on the board (6th stage and up),
   // and more often the further the story goes.
@@ -2235,8 +2287,8 @@ function renderOrders() {
       (idx[k] || []).forEach(i => wantSet.add(i));
       return `<span class="need" title="${ITEM(n.c, n.t)[1]}">${ITEM(n.c, n.t)[0]}${ok ? '<i>✓</i>' : ''}</span>`;
     }).join('');
-    return `<div class="order${ready ? ' ready' : ''}${o.sp ? ' special' : ''}${o.boss ? ' boss' : ''}${clash(o) ? ' clash' : ''}" data-oid="${o.id}">
-      <div class="npc" data-who="${o.npc.n}">${FACE(o.npc.n)}<div class="whot"><span class="nm">${o.npc.n}</span><span class="say">「${askOf(o)}」</span></div>${o.sp ? '<span class="sp-tag">特別</span>' : o.boss ? '<span class="sp-tag boss-tag">山場</span>' : ''}</div>
+    return `<div class="order${ready ? ' ready' : ''}${o.sp ? ' special' : ''}${o.boss ? ' boss' : ''}${clash(o) ? ' clash' : ''}${o.rare ? ' rare' : ''}" data-oid="${o.id}">
+      <div class="npc" data-who="${o.npc.n}">${FACE(o.npc.n)}<div class="whot"><span class="nm">${o.npc.n}</span><span class="say">「${askOf(o)}」</span></div>${o.sp ? '<span class="sp-tag">特別</span>' : o.boss ? '<span class="sp-tag boss-tag">山場</span>' : o.rare ? '<span class="sp-tag rare-tag">超レア</span>' : ''}</div>
       <div class="orow"><div class="needs">${needs}</div>
       <div class="foot"><span class="rew">🪙${orderCoins(o)}${o.stars ? ' ★' + o.stars : ''}${o.eyes ? ' 👁️' + o.eyes : ''}</span><button class="btn tiny gold" type="button" data-deliver="${o.id}" ${ready ? '' : 'disabled'}>納品</button></div></div>
     </div>`;
@@ -2284,6 +2336,7 @@ function deliver(id) {
     showThanks(o.npc.n, thanksOf(o), `🪙+${coins} 👁️+${o.eyes} 宝箱`);
     setTimeout(() => { sfx.discover(); toast('道がひらけた。現場検証へ向かおう'); }, 1400);
   } else showThanks(o.npc.n, thanksOf(o), `🪙+${coins} ★+${o.stars}${o.eyes ? ` 👁️+${o.eyes}` : ""}`);
+  if (o.rare) setTimeout(senaVisit, 1600);
   renderInfo();
   afterChange();
   if (before < g && S.stars >= g) {
@@ -3390,6 +3443,7 @@ function showEnding(replay) {
       <h3>物語・プログラム</h3><p>Claude</p>
       <h3>絵</h3><p>Gemini</p>
       <h3>依頼主</h3>${[...NPCS, ...BOSSES, MERCHANT].map(p => `<p>${p.n}</p>`).join('')}
+      <h3>特別出演</h3><p>ヨークシャテリア セナ</p>
       <h3>原典</h3><p>H・P・ラヴクラフト</p><p>『ダゴン』『クトゥルフの呼び声』</p><p>『インスマスを覆う影』『ダンウィッチの怪』</p>
     </div>`;
     R.querySelector('.rollin').addEventListener('animationend', () => setTimeout(epilogue, 1500));
@@ -3501,6 +3555,7 @@ function showDex() {
     <div class="dex"><div><h3>捜索録 <small class="muted">再調査で★★★を狙える（よくなった分だけほうび）${S.search ? '　※進行中の現場検証を終えてから' : ''}</small></h3><div class="pages">${pages}</div></div>
       <div><h3>依頼主 <small class="muted">依頼カードの名前をタップしても見られる</small></h3><div class="pages">${people}</div></div>
       <div><h3>封印の欠片 <small class="muted">${(S.shards || []).length} / ${SHARDS.length}　各章を解決すると手に入る。最後に祭壇で捧げる</small></h3><div class="pages">${SHARDS.map((x, i) => (S.shards || []).includes(i) ? `<div class="page"><span class="pshard">${shardArt(i)}</span><div><b>${x.n}</b><small class="desc">${x.d}</small></div></div>` : `<div class="page now"><div><b>？？？</b><small>第${i + 1}章で手に入る</small></div></div>`).join("")}</div></div>
+      ${S.sena ? `<div><h3 class="senah">セナのアルバム <small class="muted">${Math.min(S.sena, SENA_ALBUM.length)} / ${SENA_ALBUM.length}　ごく稀に現れるセナの依頼をこなすと増える</small></h3><div class="album">${SENA_ALBUM.map((a, i) => i < S.sena ? `<figure class="apage"><img class="ic" src="assets/x-sena${i}.png" alt=""><figcaption><b>${a.n}</b><small>${a.d}</small></figcaption></figure>` : `<figure class="apage locked"><span>？</span><figcaption><b>？？？</b></figcaption></figure>`).join('')}</div></div>` : ''}
       <div><h3>ミニチュアの飾り棚 <small class="muted">${(S.figs || []).length} / ${FIGS.length}　店の「星辰の賽」で集まる。像をタップすると話が読める</small></h3><div class="figbox" id="figbox"><small>集めた像をタップすると、まつわる話が読める。</small></div><div class="shelf">${FIGS.map((x, i) => (S.figs || []).includes(i) ? `<button class="fig ${FIG_TIERS[x.t].c}" type="button" data-fig="${i}">${figArt(i)}<small>${x.n}</small></button>` : `<div class="fig unknown ${FIG_TIERS[x.t].c}">${figArt(i)}<small>？？？</small></div>`).join('')}</div></div>
       <div><h3>神話の手引き <small class="muted">${MYTHOS.filter((_, i) => mythOpen(i)).length} / ${MYTHOS.length}　章が進むと読める。<b>頁の切れ端</b>を3枚集めても1頁読める（いま ${(S.scraps || 0) % 3} / 3）</small></h3><div class="pages">${MYTHOS.map((m, i) => mythOpen(i)
         ? `<details class="page myth"><summary><b>${m.n}</b></summary><p>${m.d}</p></details>`
