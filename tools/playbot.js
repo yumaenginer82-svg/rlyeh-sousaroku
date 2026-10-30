@@ -32,20 +32,24 @@ window.PB = (() => {
     const ready = document.querySelector(focus ? '#orders .order.boss [data-deliver]:not([disabled])' : '#orders [data-deliver]:not([disabled])');
     if (ready) { ready.click(); await w(PB.pace + 400); return 'deliver'; }
     const C = S.cells, empties = C.map((c, i) => c ? -1 : i).filter(i => i >= 0);
-    const needs = focus ? S.boss.need : S.orders.flatMap(o => o.need);
+    const needs = PB.targets || (focus ? S.boss.need : S.orders.flatMap(o => o.need));
     const maxNeed = c => Math.max(-1, ...needs.filter(n => n.c === c).map(n => n.t));
+    // a chain whose asked-for items are all already on the board needs no more merging
+    const count = (c, t) => C.filter(x => x && x.k === 'item' && x.c === c && x.t === t).length;
+    const met = c => needs.filter(n => n.c === c).every(n => count(n.c, n.t) >= needs.filter(m => m.c === n.c && m.t === n.t).length);
     // open presents and chests while there is room
     const box = C.findIndex(c => c && (c.k === 'gift' || c.k === 'chest'));
-    if (box >= 0 && empties.length > 3) { await PB.tap(box); return 'open'; }
+    if (box >= 0 && empties.length > 14) { await PB.tap(box); return 'open'; }   // merge first; open boxes only with room to spare
     // merge the lowest pair that is still useful
     const groups = {};
     C.forEach((c, i) => { if (c && c.k === 'item') (groups[c.c + '-' + c.t] = groups[c.c + '-' + c.t] || []).push(i); });
     const pairs = Object.entries(groups).filter(([k, v]) => v.length >= 2).map(([k, v]) => { const [c, t] = k.split('-').map(Number); return { c, t, v }; })
-      .filter(p => p.t < maxNeed(p.c) || (p.t < 5 && needs.length === 0))
+      .filter(p => (p.t < maxNeed(p.c) && !met(p.c)) || (p.t < 5 && needs.length === 0))
       .sort((a, b) => a.t - b.t);
     if (pairs.length) { await PB.drag(pairs[0].v[0], pairs[0].v[1]); return 'merge'; }
+    if (box >= 0 && empties.length > 2 && !PB.targets) { await PB.tap(box); return 'open'; }   // nothing to merge: unpack a box before tapping a tool
     // make room: send a useless low item to the abyss
-    if (empties.length < 2) {
+    if (empties.length < (PB.targets ? 12 : 2)) {   // working toward one item: keep plenty of room
       const junk = C.map((c, i) => ({ c, i })).filter(o => o.c && o.c.k === 'item' && o.c.t > maxNeed(o.c.c)).sort((a, b) => a.c.t - b.c.t)[0]
         || C.map((c, i) => ({ c, i })).filter(o => o.c && o.c.k === 'item').sort((a, b) => a.c.t - b.c.t)[0];
       if (junk) {
@@ -56,7 +60,7 @@ window.PB = (() => {
     }
     // tap the tool of the chain that is asked for the most
     const gens = C.map((c, i) => ({ c, i })).filter(o => o.c && o.c.k === 'gen');
-    const want = needs.length ? needs[Math.floor(Math.random() * needs.length)].c : null;
+    const open = needs.filter(n => !met(n.c)), want = open.length ? open[Math.floor(Math.random() * open.length)].c : needs.length ? needs[0].c : null;
     const g = gens.find(o => o.c.g === want) || gens[Math.floor(Math.random() * gens.length)];
     if (g) { await PB.tap(g.i); return 'produce'; }
     return 'stuck';

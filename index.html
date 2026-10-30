@@ -623,6 +623,26 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
   .info .big{font-size:34px;width:42px}
   .card{width:44px;height:44px;font-size:28px}
 }
+/* Japanese line breaks: break between phrases where the browser can (word-break:auto-phrase), keep
+   punctuation off line starts (line-break:strict), and avoid one-character last lines (text-wrap:pretty). */
+.panel p,.panel li,.lore,.info p,.page small,.good small,.shard small,.figbox p,.lorebox p,details.myth p,.eline,.wline,.disc b,.toast,.rollin p{
+  line-break:strict;word-break:auto-phrase;text-wrap:pretty;overflow-wrap:anywhere}
+.panel h2,.kicker,.tname{word-break:auto-phrase;text-wrap:balance}
+/* Searching: the header steps aside so the picture gets the screen */
+body.focus .app{grid-template-rows:minmax(0,1fr)}
+body.focus .top{display:none}
+/* Seek-and-find: the eye and back buttons float on the picture instead of taking a row */
+.sview .mbtns{position:absolute;left:10px;top:10px;z-index:2;flex-direction:column;gap:8px}
+.sview .mbtns .btn{background:rgba(10,24,27,.86);backdrop-filter:blur(3px);min-height:44px}
+/* Spot the difference: one slim bar on top, the two pictures as large as the screen allows */
+#diffView .mission{flex-wrap:nowrap;align-items:center;padding:6px 10px;gap:8px}
+#diffView .mission h2{flex:1 1 auto;min-width:0;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#diffView .mission h2 small{display:none}
+#diffView .mbtns{flex-wrap:nowrap;flex:none}
+#diffView .mbtns .btn{padding:6px 10px;font-size:13px;min-height:44px}
+#diffView .sbar{width:90px}
+#diffView{gap:6px}
+.dpanes{gap:6px}
 /* Tablets: popups may use more of the width */
 @media (min-width:700px){.panel{width:min(680px,100%);padding:30px 32px 24px}.how li{font-size:16px}}
 /* Request cards: items and the delivery button share one row */
@@ -1240,6 +1260,7 @@ const THEMES = [
   { name: '夢の都', bg: 'bg-5', ground: .6,
     items: ['eye','octopus','squid','jellyfish','shell','idol','crystal','moon','hourglass','clock','watch','oldkey','key','scroll','book','candle','bone','skull','feather','fish','crab','compass','anchor','rose'] },
 ];
+const chName = ch => ch === FINAL_CH ? '最終章' : `第${ch + 1}章`;
 const FINAL_CH = 6;   // the last story chapter ("最終章"); after it come the endless "その後の調査" chapters
 const theme = ch => THEMES[ch === FINAL_CH ? 5 : ch % THEMES.length];
 // Where things can sit in each backdrop, in 0..1 image coordinates (traced from the pictures):
@@ -2999,7 +3020,9 @@ $('eyeBtn').addEventListener('click', useEye);
 const isDiffStage = () => stageOf() === 1;
 const DIFF_TITLES = ['記憶の中の酒場', '食いちがう朝市', 'ゆがんだ集会所', '月下の波止場', '祭りの夜の違和感', '夢の都のほころび'];
 const diffCount = ch => Math.min(5 + Math.floor(ch / 2), 8);
-const diffImg = ch => `assets/bg-df${ch === FINAL_CH ? 5 : ch % 6}.jpg`;
+const diffIdx = ch => ch === FINAL_CH ? 5 : ch % 6;   // the final chapter reuses the dream-city picture
+const diffImg = ch => `assets/bg-df${diffIdx(ch)}.jpg`;
+const diffTitle = ch => DIFF_TITLES[diffIdx(ch)];
 let dscn = null;
 async function renderDiff() {
   const s = S.search;
@@ -3098,7 +3121,7 @@ function renderDiffHead() {
   const s = S.search;
   if (!s || !dscn) return;
   const san = sanOf(s);
-  $('dTitle').textContent = `${DIFF_TITLES[s.ch % DIFF_TITLES.length]}　${s.found.length} / ${dscn.pts.length}`;
+  $('dTitle').textContent = `${diffTitle(s.ch)}　${s.found.length} / ${dscn.pts.length}`;
   paintSan($('dsan'), san, $('dpanes'));
   $('eyesD').textContent = S.eyes;
   $('dEye').disabled = S.eyes <= 0;
@@ -3156,6 +3179,7 @@ $('dBack').addEventListener('click', () => setView('merge'));
 window.addEventListener('resize', () => { if (S && S.view === 'search' && dscn) layoutDiff(); });
 
 function setView(v) {
+  document.body.classList.toggle('focus', v === 'search');
   S.view = v;
   $('mergeView').hidden = v !== 'merge';
   const diff = v === 'search' && S.search && S.search.mode === 'diff';
@@ -3180,6 +3204,8 @@ function setView(v) {
   save();
 }
 $('backBtn').addEventListener('click', () => setView('merge'));
+// The seek-and-find buttons live on the picture (see .sview .mbtns), freeing the row they used to take.
+$('sview').appendChild(document.querySelector('#searchView .mbtns'));
 $('goSearch').addEventListener('click', () => {
   if (S.search) { setView('search'); return; }
   // The how-to lives on the help page; it opens by itself only the first time a kind of search comes up.
@@ -3188,7 +3214,7 @@ $('goSearch').addEventListener('click', () => {
   const st = story(S.ch);
   showOverlay(`
     <p class="kicker">現場検証 ${stageOf() + 1} / ${STAGES} ―― ${STAGE_NAMES[stageOf()]}</p>
-    <h2>${diff ? DIFF_TITLES[S.ch % DIFF_TITLES.length] : st.mission}</h2>
+    <h2>${diff ? diffTitle(S.ch) : st.mission}</h2>
     <p class="lore">${diff ? 'あなたの記憶にある光景と、目の前の光景。どこかが、少しずつ食いちがっている。' : st.missionText}</p>
     <p class="muted">${diff ? `2枚の絵の<b>ちがい ${diffCount(S.ch)}か所</b>を探す。` : `リストの品 ${findCount(S.ch)}つを探す。`}</p>
     <button class="btn primary" type="button" data-go>${diff ? '見くらべる' : '探しはじめる'}</button>
@@ -3269,7 +3295,7 @@ function searchClear() {
     ${st.outro ? `<p class="lore">${st.outro}</p>` : ''}
     ${titleHtml}
     <ul class="rewards">${list.map(x => `<li>${x}</li>`).join('')}</ul>
-    <p class="muted">品や宝箱は、盤面の<b>贈りもの</b>に入っている。タップで開けよう。手帳に第${ch + 1}章の記録が残った。</p>
+    <p class="muted">品や宝箱は、盤面の<b>贈りもの</b>に入っている。タップで開けよう。手帳に${chName(ch)}の記録が残った。</p>
     <button class="btn primary" type="button" data-go>${ending ? '祭壇へ向かう' : 'つづきへ'}</button>
   `, ending ? () => { hideOverlay(); showAltar(); } : ch < SHARDS.length ? () => showShardGet(ch, showIntro) : showIntro);
 }
@@ -3296,7 +3322,7 @@ function stageClear(s, san, r) {
   afterChange();
   sfx.seal();
   showOverlay(`
-    <p class="kicker">第${ch + 1}章　現場検証 ${n + 1} / ${STAGES} 解決</p>
+    <p class="kicker">${chName(ch)}　現場検証 ${n + 1} / ${STAGES} 解決</p>
     <h2>${STAGE_NAMES[n]}</h2>
     ${rateHtml(r, san)}
     <p class="lore">${STAGE_BEATS[n]}</p>
@@ -3325,7 +3351,7 @@ function replayClear(s, san, r) {
   afterChange();
   sfx.seal();
   showOverlay(`
-    <p class="kicker">第${ch + 1}章 再調査</p>
+    <p class="kicker">${chName(ch)} 再調査</p>
     <h2>${story(ch).mission}</h2>
     ${rateHtml(r, san)}
     <p class="lore">${head}</p>
@@ -3589,8 +3615,8 @@ function showDex() {
   const log = S.log || {}, lv = titleLv(), next = TITLES[lv + 1];
   const pages = [...Array(S.ch + 1).keys()].map(ch => {
     const e = log[ch], st = story(ch);
-    if (ch === S.ch) return `<div class="page now"><div><b>第${ch + 1}章 ${st.title}</b><small>調査中…</small></div></div>`;
-    return `<div class="page"><div><b>第${ch + 1}章 ${st.title}</b><small>${e ? `${st.mission}　SAN ${e.san}　合体${e.m}・依頼${e.o}・しかけ${e.g}` : `${st.mission}（記録なし）`}</small></div>
+    if (ch === S.ch) return `<div class="page now"><div><b>${chName(ch)} ${st.title}</b><small>調査中…</small></div></div>`;
+    return `<div class="page"><div><b>${chName(ch)} ${st.title}</b><small>${e ? `${st.mission}　SAN ${e.san}　合体${e.m}・依頼${e.o}・しかけ${e.g}` : `${st.mission}（記録なし）`}</small></div>
       <span class="pstars r${e ? e.stars : 0}">${starsText(e ? e.stars : 0)}</span>
       <button class="btn tiny" type="button" data-replay="${ch}" ${S.search ? 'disabled' : ''}>再調査</button></div>`;
   }).join('');
@@ -3599,8 +3625,8 @@ function showDex() {
   const met = n => (S.met || []).includes(n);
   const people = [...NPCS, MERCHANT].map(p => met(p.n) ? `<div class="page">${FACE(p.n)}<div><b>${p.n}</b><small class="desc">${p.d}</small></div></div>` : `<div class="page now"><div><b>？？？</b><small>まだ会っていない</small></div></div>`).join("")
     + [...Array(BOSSES.length + (S.ch >= BOSSES.length ? 1 : 0)).keys()].map(ch => ch <= S.ch
-      ? `<div class="page">${FACE(bossOf(ch).n)}<div><b>${bossOf(ch).n}<em class="pch">${ch < BOSSES.length ? `第${ch + 1}章` : `第${BOSSES.length + 1}章〜`} 山場</em></b><small class="desc">${bossOf(ch).d}</small></div></div>`
-      : `<div class="page now"><div><b>？？？<em class="pch">第${ch + 1}章 山場</em></b><small>まだ会っていない</small></div></div>`).join('');
+      ? `<div class="page">${FACE(bossOf(ch).n)}<div><b>${bossOf(ch).n}<em class="pch">${ch < BOSSES.length ? `${chName(ch)}` : `第${BOSSES.length + 1}章〜`} 山場</em></b><small class="desc">${bossOf(ch).d}</small></div></div>`
+      : `<div class="page now"><div><b>？？？<em class="pch">${chName(ch)} 山場</em></b><small>まだ会っていない</small></div></div>`).join('');
   showOverlay(`
     <p class="kicker">調査手帳</p>
     <h2>${TITLES[lv][1]}</h2>
@@ -3684,7 +3710,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.34';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.35';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
