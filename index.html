@@ -92,7 +92,7 @@ body{height:100%;margin:0;background:radial-gradient(ellipse 120% 70% at 50% 115
 .npc .nm{font-size:12px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .needs{display:flex;gap:6px}
 .need{position:relative;width:44px;height:44px;display:grid;place-items:center;font-size:28px;background:var(--panel2);border:1px solid var(--line);border-radius:10px}
-.need i{position:absolute;right:-5px;top:-5px;width:18px;height:18px;border-radius:50%;background:var(--glow);color:var(--ink);font-size:12px;font-style:normal;font-weight:700;display:grid;place-items:center}
+.need i{position:absolute;right:-7px;top:-7px;width:22px;height:22px;background:url(assets/x-ui-check.png) center/contain no-repeat;filter:drop-shadow(0 1px 2px rgba(0,0,0,.8))}
 .foot{display:flex;align-items:center;justify-content:space-between;gap:6px}
 .rew{font-size:13px;font-weight:700;color:var(--gold);white-space:nowrap}
 .investigate{animation:beckon 2.2s ease-in-out infinite}
@@ -152,8 +152,8 @@ body{height:100%;margin:0;background:radial-gradient(ellipse 120% 70% at 50% 115
 .sp-tag{font-size:11px;font-weight:700;color:#fff;background:var(--stripe);border-radius:6px;padding:1px 6px;margin-left:auto;white-space:nowrap}
 .seal{width:88%;height:88%;border:2px solid #000;border-radius:6px;position:relative;
   background:repeating-linear-gradient(0deg,var(--wood) 0 30%,var(--wood-dark) 30% 34%);box-shadow:inset 0 0 8px rgba(0,0,0,.7)}
-.seal::after{content:"✴";position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--cell,48px)*.4);color:var(--glow);opacity:.5;
-  text-shadow:0 0 6px var(--glow);animation:sigil 3.5s ease-in-out infinite}
+.seal::after{content:"";position:absolute;inset:26%;background:url(assets/x-ui-seal.png) center/contain no-repeat;opacity:.55;
+  filter:drop-shadow(0 0 6px var(--glow));animation:sigil 3.5s ease-in-out infinite}
 .cell.want{background:radial-gradient(circle,rgba(201,163,74,.32),transparent 62%)}
 .cell.sel::after{content:"";position:absolute;inset:3%;border:3px solid var(--glow);border-radius:14px;box-shadow:0 0 10px var(--glow);pointer-events:none}
 .cell::before{content:"";position:absolute;inset:6%;border-radius:50%;pointer-events:none;opacity:0;transition:opacity .12s}
@@ -201,6 +201,7 @@ img.ic{display:block;width:100%;height:100%;object-fit:contain;pointer-events:no
 .dexitem .ic{width:100%;max-width:46px;height:auto;aspect-ratio:1;margin:0 auto}
 .dex h3 .ic{display:inline-block;width:28px;height:28px;vertical-align:middle;margin-right:4px}
 .how li > span .ic{width:32px;height:32px;margin:0 auto}
+.how li > span img.uic.t{width:32px;height:32px;margin:0 auto;display:block}   /* help page: the bullet icon at full size */
 .muted .ic,.rewards .ic,.info p .ic{display:inline-block;width:1.6em;height:1.6em;vertical-align:middle}
 img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 .ghost .ic{width:100%;height:100%}
@@ -237,7 +238,7 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 .find .cnt{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);background:var(--stripe);color:#fff;font-size:13px;font-weight:800;
   border-radius:999px;padding:1px 9px;white-space:nowrap;box-shadow:0 1px 0 rgba(0,0,0,.4)}
 .find.all::before{content:'全部';position:absolute;left:6px;top:6px;background:var(--stripe);color:#fff;font-size:11px;font-weight:800;border-radius:5px;padding:0 5px;z-index:1}
-.find.got::after{content:'✓';position:absolute;inset:0;display:grid;place-items:center;font-size:54px;font-weight:800;color:var(--stripe);text-shadow:0 2px 0 #fff}
+.find.got::after{content:'';position:absolute;inset:8%;background:url(assets/x-ui-check.png) center/contain no-repeat;filter:drop-shadow(0 2px 3px rgba(0,0,0,.7))}
 @keyframes missfade{0%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
 
 /* Discovery banner, toast */
@@ -285,6 +286,9 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 .relic-art .ic{width:120px;height:120px;filter:drop-shadow(0 0 22px rgba(232,196,104,.9));animation:beckon 2.2s ease-in-out infinite}
 
 /* Header: painted icons, counters as engraved brass plates, buttons as old bronze plaques */
+/* a painted icon inside a line of text: about the height of the letters */
+img.uic.t{width:1.35em;height:1.35em;margin:-.2em .08em 0;vertical-align:middle}
+img.uic.t.off{filter:grayscale(1) brightness(.45);opacity:.6}   /* a star not earned */
 img.uic{display:inline-block;width:26px;height:26px;object-fit:contain;vertical-align:middle;flex:none;pointer-events:none;-webkit-user-drag:none;user-select:none;
   filter:drop-shadow(0 1px 1px rgba(0,0,0,.7))}
 .prog img.uic{width:28px;height:28px;margin-right:-4px;filter:drop-shadow(0 0 6px rgba(114,224,178,.45))}
@@ -862,6 +866,35 @@ const CHAINS = [
 ];
 // Item art: assets/m-<chain>-<tier>.png and generators assets/g-<chain>.png, white backgrounds already cut out.
 const ICON = src => `<img class="ic" src="${src}" alt="" draggable="false">`;
+// Small painted icons that sit in a line of text, in place of emoji (the alt keeps the meaning for screen readers).
+const UI = (name, alt = '') => `<img class="uic t" src="assets/x-ui-${name}.png" alt="${alt}" draggable="false">`;
+// The game's text is written with a few emoji as shorthand; on screen each becomes its painted icon.
+// Every change to the page is swept: text nodes holding one of these get split around an <img>.
+const EMOJI_ICON = { '🪙': ['coin', 'コイン'], '👁️': ['eye', '千里眼'], '👁': ['eye', '千里眼'], '🔎': ['search', ''], '🔍': ['search', ''],
+  '📜': ['scroll', ''], '✴': ['seal', ''], '🎁': ['gift', ''], '🗝️': ['key', ''], '✉️': ['letter', ''], '✨': ['spark', ''], '📖': ['book', ''],
+  '🎖': ['star', ''], '🔢': ['many', ''], '🌀': ['swirl', ''], '🤏': ['pinch', ''], '🧠': ['mind', ''], '🖼️': ['frames', ''], '🎨': ['palette', ''],
+  '📅': ['calendar', ''], '★': ['star', '★'], '☆': ['star', '☆'] };
+const EMOJI_RX = new RegExp(Object.keys(EMOJI_ICON).sort((a, b) => b.length - a.length).join('|'), 'g');
+function iconize(root) {
+  const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), hits = [];
+  for (let n = walk.nextNode(); n; n = walk.nextNode()) { EMOJI_RX.lastIndex = 0; if (EMOJI_RX.test(n.nodeValue)) hits.push(n); }
+  hits.forEach(n => {
+    const frag = document.createDocumentFragment();
+    let last = 0; const s = n.nodeValue;
+    s.replace(EMOJI_RX, (m, at) => {
+      if (at > last) frag.appendChild(document.createTextNode(s.slice(last, at)));
+      const [name, alt] = EMOJI_ICON[m], img = document.createElement('img');
+      img.className = 'uic t' + (m === '☆' ? ' off' : ''); img.src = `assets/x-ui-${name}.png`; img.alt = alt; img.draggable = false;
+      frag.appendChild(img); last = at + m.length; return m;
+    });
+    if (last < s.length) frag.appendChild(document.createTextNode(s.slice(last)));
+    n.replaceWith(frag);
+  });
+}
+new MutationObserver(ms => ms.forEach(m => m.type === 'characterData' ? m.target.parentNode && iconize(m.target.parentNode)
+  : m.addedNodes.forEach(n => n.nodeType === 3 ? n.parentNode && iconize(n.parentNode) : n.nodeType === 1 && iconize(n))))
+  .observe(document.body, { childList: true, subtree: true, characterData: true });
+iconize(document.body);   // the page's own markup (the script runs after it)
 CHAINS.forEach((ch, c) => {
   ch.gen.e = ICON(`assets/g-${c}.png`);
   ch.items.forEach((it, t) => { it[0] = ICON(`assets/m-${c}-${t}.png`); });
@@ -1162,6 +1195,7 @@ const missCost = () => Math.max(1, (6 - resLv('san')) * (modOn('calm') ? .5 : 1)
 const sanOf = s => Math.max(0, 100 - missCost() * (s.miss || 0) - eyeCost() * (s.eyes || 0));
 const rateOf = san => san >= 75 ? 3 : san >= 45 ? 2 : 1;
 const RATE_COINS = ch => [0, 0, 20 + 10 * ch, 50 + 25 * ch].map(v => v * (modOn('dream') ? 2 : 1));
+// A rating of 0–3 as painted stars (faded for the ones not earned).
 const starsText = n => '★'.repeat(n) + '☆'.repeat(3 - n);
 const TITLES = [[0, '見習い探索者'], [3, '港町の探偵'], [6, '秘儀の学徒'], [9, '深淵の観測者'], [12, '星辰を読む者'], [16, 'ルルイエの踏破者'], [21, '旧き神々の証人']];
 const ratingSum = () => Object.values(S.log || {}).reduce((s, e) => s + e.stars, 0);
@@ -1894,7 +1928,7 @@ function floater(board, cols, i, text, cls = '') {
   const { x, y } = cellCenter(board, cols, i);
   const f = document.createElement('div');
   f.className = 'float ' + cls;
-  f.textContent = text;
+  f.innerHTML = text;   // the game's own text, which may carry icon images (COIN, EYE...)
   f.style.left = x + 'px'; f.style.top = y + 'px';
   board.appendChild(f);
   setTimeout(() => f.remove(), 1200);
@@ -1916,7 +1950,7 @@ function burst(board, cols, i, t) {
 let toastTimer = 0;
 function toast(msg) {
   const t = $('toast');
-  t.textContent = msg; t.hidden = false;
+  t.innerHTML = msg; t.hidden = false;   // the game's own text, which may carry icon images
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { t.hidden = true; }, 2400);
 }
@@ -2415,7 +2449,7 @@ function renderOrders() {
       const ok = have > 0;
       if (!ok) ready = false;
       (idx[k] || []).forEach(i => wantSet.add(i));
-      return `<span class="need" title="${ITEM(n.c, n.t)[1]}">${ITEM(n.c, n.t)[0]}${ok ? '<i>✓</i>' : ''}</span>`;
+      return `<span class="need" title="${ITEM(n.c, n.t)[1]}">${ITEM(n.c, n.t)[0]}${ok ? '<i></i>' : ''}</span>`;
     }).join('');
     return `<div class="order${ready ? ' ready' : ''}${o.sp ? ' special' : ''}${o.boss ? ' boss' : ''}${clash(o) ? ' clash' : ''}${o.rare ? ' rare' : ''}" data-oid="${o.id}">
       <div class="npc" data-who="${o.npc.n}">${FACE(o.npc.n)}<div class="whot"><span class="nm">${o.npc.n}</span><span class="say">「${askOf(o)}」</span></div>${o.sp ? '<span class="sp-tag">特別</span>' : o.boss ? '<span class="sp-tag boss-tag">山場</span>' : o.rare ? '<span class="sp-tag rare-tag">超レア</span>' : ''}</div>
@@ -3963,7 +3997,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.52';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.53';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
