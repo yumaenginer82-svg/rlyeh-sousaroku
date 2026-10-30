@@ -689,6 +689,8 @@ body.focus .top{display:none}
 #diffView{gap:6px}
 .dpanes{gap:6px}
 /* Tablets: popups may use more of the width */
+/* Phones: the header takes two rows (chapter, coins and buttons on top; progress or the search button below), as one row overlaps */@media (max-width:600px){  .top{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"ch res btn" "prog prog prog";gap:6px 8px;padding:6px 10px}  .top .chapter{grid-area:ch;min-width:0}  .top .res{grid-area:res;justify-self:end}  .top .hbtns{grid-area:btn;margin-left:0}  .top .prog{grid-area:prog;min-width:0}  .btn.hb{min-width:40px;min-height:40px;padding:3px 6px}  .btn.hb img.uic{width:26px;height:26px}  .top .pill{padding:1px 7px 1px 2px}}
+@media (max-width:400px){.btn.hb{min-width:36px;min-height:38px;padding:2px 4px}.btn.hb img.uic{width:24px;height:24px}.top .hbtns{gap:3px}.top .res{gap:3px}.top .pill{font-size:12px;padding:1px 6px 1px 1px}.top .pill img.uic{width:22px;height:22px}.top .chapter b{font-size:14px}}   /* the narrowest phones */
 @media (min-width:700px){.panel{width:min(680px,100%);padding:30px 32px 24px}.how li{font-size:16px}}
 /* Request cards: items and the delivery button share one row */
 .orow{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
@@ -4002,7 +4004,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.55';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.56';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
