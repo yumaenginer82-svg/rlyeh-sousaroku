@@ -913,13 +913,16 @@ function checkAchs() {
   got.forEach((a, k) => {
     S.ach.push(a.id);
     S.coins += a.c; S.eyes += a.e || 0;
-    setTimeout(() => {
+    // Wait for the banner to be free, so an achievement never covers a client's thanks or a new find.
+    const show = () => {
+      if (!$('disc').hidden) { setTimeout(show, 900); return; }
       const d = $('disc');
       d.innerHTML = `<span class="big"><img class="uic ach" src="assets/x-ui-star.png" alt=""></span><div><small>実績</small><b>${a.n}</b><em>🪙+${a.c}${a.e ? ` 👁️+${a.e}` : ''}</em></div>`;
       d.hidden = false; d.style.animation = 'none'; void d.offsetWidth; d.style.animation = '';
       clearTimeout(discTimer); discTimer = setTimeout(() => { d.hidden = true; }, 2600);
       sfx.discover();
-    }, 1500 + k * 2800);
+    };
+    setTimeout(show, 1500 + k * 2800);
   });
   return got.length;
 }
@@ -3255,7 +3258,7 @@ function hideTitle() {
 function showTitle(hasSave) {
   const t = $('title');
   t.hidden = false; t.classList.remove('gone');
-  const where = `第${S.ch + 1}章「${story(S.ch).title}」`;
+  const where = `${S.ch === FINAL_CH ? "最終章" : `第${S.ch + 1}章`}「${story(S.ch).title}」`;
   $('tbtns').innerHTML = hasSave
     ? `<button class="btn primary tgo" type="button" data-t="go">つづきから<small>${where}</small></button>
        <button class="btn tb" type="button" data-t="new">はじめから</button>`
