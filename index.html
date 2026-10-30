@@ -654,7 +654,9 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
   .info{height:76px;padding:4px 10px}
 }
 /* The search button floats over the bottom of the board instead of taking its own row */
-#mwrap #goSearch{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:4;max-width:calc(100% - 20px);white-space:nowrap}
+/* When a search is ready, the header's star bar and hint give way to the search button */
+.prog #goSearch{flex:1 1 auto;min-width:0;font-size:15px;padding:6px 14px;min-height:40px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog:has(#goSearch:not([hidden])) .pbar,.prog:has(#goSearch:not([hidden])) #ptext{display:none}
 /* Searching: the header steps aside so the picture gets the screen */
 body.focus .app{grid-template-rows:minmax(0,1fr)}
 body.focus .top{display:none}
@@ -1929,7 +1931,8 @@ function renderTop() {
   $("ptext").textContent = S.search ? `${Math.min(S.stars, g)} / ${g}　現場検証の途中` : ready ? `${g} / ${g}　現場検証へ進める` : S.stars >= g ? `${g} / ${g}　山場の依頼を果たすと最後の現場検証` : `${S.stars} / ${g}　あと★${g - S.stars}で現場検証`;
   $("seals").innerHTML = [0, 1, 2].map(i => `<i class="sm${i < st0 ? " done" : i === st0 ? " now" : ""}" title="${STAGE_NAMES[i]}"></i>`).join("");
   $('goSearch').hidden = !ready;
-  $('goSearch').textContent = S.search ? (S.search.replay ? '🔎 再調査のつづき' : '🔎 現場検証のつづき') : `🔎 現場検証へ ―― ${STAGE_NAMES[stageOf()]}`;
+  $('goSearch').textContent = S.search ? (S.search.replay ? '🔎 再調査のつづき' : '🔎 現場検証のつづき') : '🔎 現場検証へ';
+  $('goSearch').title = STAGE_NAMES[stageOf()];
 }
 
 /* ================= merge board ================= */
@@ -3233,8 +3236,8 @@ function setView(v) {
 $('backBtn').addEventListener('click', () => setView('merge'));
 // The seek-and-find buttons live on the picture (see .sview .mbtns), freeing the row they used to take.
 $('sview').appendChild(document.querySelector('#searchView .mbtns'));
-// The search button sits on the board (see #mwrap #goSearch), so it never steals a row from it.
-$('mwrap').appendChild($('goSearch'));
+// The search button sits in the header, in place of the star bar (see .prog #goSearch), so it covers nothing.
+document.querySelector('.top .prog').appendChild($('goSearch'));
 $('goSearch').addEventListener('click', () => {
   if (S.search) { setView('search'); return; }
   // The how-to lives on the help page; it opens by itself only the first time a kind of search comes up.
@@ -3739,7 +3742,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.37';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.38';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
