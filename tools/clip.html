@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Copy picture</title>
+<!-- Puts a project picture on the clipboard (as PNG) so it can be pasted into an image-editing chat.
+     Open tools/clip.html?src=assets/bg-df0.jpg and press the button. -->
+<style>body{font:16px sans-serif;background:#111;color:#eee;padding:20px}button{font-size:22px;padding:16px 28px}img{max-width:100%;margin-top:12px}</style>
+<button id="go" type="button">クリップボードにコピー</button>
+<p id="msg"></p>
+<img id="pic" alt="">
+<script>
+const src = new URLSearchParams(location.search).get('src');
+document.getElementById('pic').src = '../' + src;
+document.getElementById('go').addEventListener('click', async () => {
+  const im = document.getElementById('pic'), c = document.createElement('canvas');
+  c.width = im.naturalWidth; c.height = im.naturalHeight; c.getContext('2d').drawImage(im, 0, 0);
+  const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+  try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); document.getElementById('msg').textContent = 'copied ' + src; }
+  catch (e) { document.getElementById('msg').textContent = 'failed: ' + e.message; }
+});
+</script>

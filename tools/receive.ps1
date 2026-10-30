@@ -27,6 +27,14 @@ while ($listener.IsListening) {
       Write-Output ("saved {0}.{1} ({2:N0} KB)" -f $name, $ext, ($ms.Length / 1KB))
       $bytes = [System.Text.Encoding]::UTF8.GetBytes("ok $name.$ext $($ms.Length)")
     } else { $res.StatusCode = 400; $bytes = [System.Text.Encoding]::UTF8.GetBytes('bad name') }
+  } elseif ($req.HttpMethod -eq 'GET' -and $req.Url.AbsolutePath -eq '/file') {
+    # Hand a project picture to a page on another site (e.g. to attach it to an image-editing chat): assets\ and gen-raw\ only.
+    $rel = ($req.QueryString['path'] -replace '\\', '/')
+    $file = Join-Path $root $rel
+    if ($rel -match '^(assets|gen-raw)/[A-Za-z0-9_\-]+\.(jpg|png)$' -and (Test-Path $file)) {
+      $res.ContentType = if ($rel -like '*.jpg') { 'image/jpeg' } else { 'image/png' }
+      $bytes = [System.IO.File]::ReadAllBytes($file)
+    } else { $res.StatusCode = 404; $bytes = [System.Text.Encoding]::UTF8.GetBytes('not found') }
   } else { $bytes = [System.Text.Encoding]::UTF8.GetBytes('ready') }
   $res.OutputStream.Write($bytes, 0, $bytes.Length)
   $res.Close()

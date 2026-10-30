@@ -724,6 +724,10 @@ body.focus .top{display:none}
 .lorebox{height:150px;flex:none;box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain}
 .figbox{height:128px;flex:none;box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain}
 .lorebox > small,.figbox > small{align-self:center;margin:auto}
+/* Spot-the-difference answers: the picture with numbered circles, and what changed at each */
+.dans canvas{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);margin:6px 0 10px}
+.danslist{text-align:left;margin:0 0 14px;padding-left:1.6em;font-size:14px;line-height:1.7}
+.danslist .dkind{display:inline-block;min-width:3.6em;margin-right:8px;padding:0 6px;border-radius:6px;background:#3a2326;color:#ffb3a8;font-size:12px;font-weight:800;text-align:center}
 .panel > .btn.primary,.panel [data-later]{min-width:240px;height:56px;padding-top:0;padding-bottom:0;box-sizing:border-box}
 .panel [data-later]{font-family:var(--f-display);font-size:17px;letter-spacing:.06em;margin-top:8px}
 /* Frames only where they mean something: the board keeps its frame; the header, requests and info panel are plain
@@ -3097,83 +3101,159 @@ function useEye() {
 $('eyeBtn').addEventListener('click', useEye);
 
 /* ================= spot the difference (each chapter's second search) ================= */
-// Two copies of a coloured scene; the second gets N patches changed: an object rubbed out, recoloured, mirrored or turned.
-// Where to change is picked from the busiest (most detailed) parts of the picture, so changes land on things, not on sky.
+// Made like a printed puzzle: every difference is one whole object changed — its colour, gone or added, its size or
+// shape, how many, or where it stands. Each scene has a set of such changes, prepared beforehand by editing a copy of
+// the picture and cutting each change out as a piece (assets/df<scene>/p<n>.png, placed at x, y). Each play draws a
+// handful of them: a mix of easy, medium and hard, of different kinds, spread over the top, middle and bottom.
 const isDiffStage = () => stageOf() === 1;
 const DIFF_TITLES = ['記憶の中の酒場', '食いちがう朝市', 'ゆがんだ集会所', '月下の波止場', '祭りの夜の違和感', '夢の都のほころび'];
 const diffCount = ch => Math.min(5 + Math.floor(ch / 2), 8);
 const diffIdx = ch => ch === FINAL_CH ? 5 : ch % 6;   // the final chapter reuses the dream-city picture
 const diffImg = ch => `assets/bg-df${diffIdx(ch)}.jpg`;
 const diffTitle = ch => DIFF_TITLES[diffIdx(ch)];
+// kind of change → its name in the answers; lv: 1 easy (colour, gone/added), 2 medium (size, shape, count), 3 hard (position, fine detail)
+const DIFF_KIND = { color: '色', gone: '消えた', add: '増えた', size: '大きさ', shape: '形', count: '数', pos: '位置', detail: '模様' };
+// f: piece number, x/y/w/h: where it goes, k: kind, lv: difficulty, t: what changed (shown in the answers)
+const DIFF_SETS = [
+  [   // 0 tavern
+    { f: 0, x: 400, y: 713, w: 208, h: 175, k: 'size', lv: 2, t: 'クジラの置物が大きくなり、となりのドクロが消えた' },
+    { f: 1, x: 687, y: 652, w: 213, h: 153, k: 'color', lv: 1, t: '床のじゅうたんが赤から青に' },
+    { f: 2, x: 291, y: 770, w: 78, h: 82, k: 'color', lv: 1, t: 'フラスコの中身が赤から緑に' },
+    { f: 3, x: 771, y: 571, w: 109, h: 68, k: 'color', lv: 1, t: '眠っている猫が黒猫に' },
+    { f: 4, x: 148, y: 470, w: 88, h: 79, k: 'gone', lv: 2, t: 'ボトルシップの中の船が消えた' },
+    { f: 5, x: 1111, y: 212, w: 73, h: 130, k: 'color', lv: 1, t: '壁のタコの彫り物がオレンジから緑に' },
+    { f: 6, x: 849, y: 425, w: 57, h: 55, k: 'gone', lv: 3, t: 'ピアノの楽譜が消えた' },
+    { f: 7, x: 1038, y: 35, w: 69, h: 164, k: 'gone', lv: 1, t: '天井の大きな錨が消えた' },
+    { f: 8, x: 645, y: 275, w: 57, h: 60, k: 'shape', lv: 2, t: '振り子時計の文字盤が丸から四角に' },
+    { f: 9, x: 969, y: 182, w: 30, h: 71, k: 'count', lv: 3, t: '吊るした小魚が2匹から3匹に' },
+  ],
+  [   // 1 morning market
+    { f: 0, x: 756, y: 23, w: 98, h: 200, k: 'gone', lv: 1, t: '上に吊るした大きなランタンが消えた' },
+    { f: 1, x: 884, y: 144, w: 198, h: 141, k: 'color', lv: 1, t: '右上の日よけが赤から青に' },
+    { f: 2, x: 183, y: 547, w: 176, h: 110, k: 'color', lv: 1, t: '屋台のカニが赤から青に' },
+    { f: 3, x: 853, y: 587, w: 141, h: 89, k: 'shape', lv: 2, t: '台の上の丸い木鉢が四角い木箱に' },
+    { f: 4, x: 210, y: 35, w: 80, h: 109, k: 'color', lv: 1, t: '杭の上の黒い鵜が白に' },
+    { f: 5, x: 23, y: 13, w: 108, h: 80, k: 'gone', lv: 2, t: '左上の柱のカモメが消えた' },
+    { f: 6, x: 185, y: 307, w: 76, h: 122, k: 'size', lv: 2, t: '左の屋台のランタンが大きくなった' },
+    { f: 7, x: 845, y: 755, w: 123, h: 126, k: 'size', lv: 2, t: '右下の錨が大きくなった' },
+    { f: 8, x: 751, y: 530, w: 89, h: 49, k: 'gone', lv: 3, t: 'てんびんの左の皿の魚が消えた' },
+    { f: 9, x: 99, y: 81, w: 87, h: 86, k: 'gone', lv: 3, t: '梁の上のカモメが消えた' },
+    { f: 10, x: 1097, y: 463, w: 52, h: 60, k: 'color', lv: 2, t: '右はしの赤い浮き玉が緑に' },
+    { f: 11, x: 1118, y: 325, w: 42, h: 78, k: 'color', lv: 3, t: '右はしの吊るし浮きが緑に' },
+  ],
+  [   // 2 cult meeting hall
+    { f: 0, x: 1059, y: 554, w: 137, h: 285, k: 'size', lv: 2, t: '右下の魚の像が大きくなった' },
+    { f: 1, x: 36, y: 78, w: 195, h: 237, k: 'color', lv: 1, t: '左上の旗が緑から青に' },
+    { f: 2, x: 386, y: 368, w: 116, h: 84, k: 'gone', lv: 1, t: '祭壇の金の冠が消えた' },
+    { f: 3, x: 0, y: 366, w: 87, h: 87, k: 'gone', lv: 2, t: '左の壁のランタンが消えた' },
+    { f: 4, x: 865, y: 619, w: 112, h: 76, k: 'color', lv: 1, t: '机の右の本が赤茶から青に' },
+    { f: 5, x: 915, y: 330, w: 71, h: 49, k: 'gone', lv: 3, t: 'オルガンの楽譜が消えた' },
+    { f: 6, x: 1099, y: 84, w: 57, h: 106, k: 'color', lv: 2, t: '右上の旗が赤から緑に' },
+    { f: 7, x: 683, y: 527, w: 52, h: 74, k: 'color', lv: 3, t: '机の奥の杯が金から銀に' },
+    { f: 8, x: 855, y: 710, w: 74, h: 49, k: 'shape', lv: 3, t: '虫めがねのレンズが丸から四角に' },
+  ],
+  [   // 3 moonlit dock (p7, p8, p10 were stray cloud changes and are not used)
+    { f: 0, x: 522, y: 41, w: 345, h: 198, k: 'color', lv: 1, t: '満月が赤くなった' },
+    { f: 1, x: 1025, y: 614, w: 112, h: 138, k: 'color', lv: 1, t: '右下の浮き輪が赤白から青白に' },
+    { f: 2, x: 462, y: 318, w: 216, h: 112, k: 'color', lv: 1, t: '海の小舟が赤くぬられた' },
+    { f: 3, x: 921, y: 715, w: 130, h: 151, k: 'color', lv: 2, t: '木箱にかけた布が赤から緑に' },
+    { f: 4, x: 540, y: 650, w: 163, h: 72, k: 'add', lv: 2, t: 'カニが1匹増え、方位磁針が四角に' },
+    { f: 5, x: 832, y: 475, w: 79, h: 59, k: 'gone', lv: 3, t: '右の桟橋のカニが消えた' },
+    { f: 6, x: 1049, y: 264, w: 69, h: 131, k: 'gone', lv: 2, t: '柱に吊るした鐘が消えた' },
+    { f: 9, x: 201, y: 592, w: 34, h: 79, k: 'gone', lv: 3, t: '木箱の前の緑の瓶が消えた' },
+  ],
+  [   // 4 night festival (p15 = accordion, p16 = jars: each one change that came out in two parts)
+    { f: 0, x: 693, y: 9, w: 177, h: 135, k: 'gone', lv: 1, t: '夜空の満月が消えた' },
+    { f: 1, x: 625, y: 354, w: 193, h: 82, k: 'color', lv: 1, t: 'ダゴンの旗が緑から赤に' },
+    { f: 2, x: 579, y: 779, w: 113, h: 105, k: 'add', lv: 2, t: '石だたみに赤いカニが増えた' },
+    { f: 3, x: 564, y: 159, w: 77, h: 115, k: 'gone', lv: 2, t: '上の段のちょうちんがひとつ消えた' },
+    { f: 4, x: 283, y: 490, w: 102, h: 102, k: 'color', lv: 1, t: '太鼓をたたく魚頭がオレンジから紫に' },
+    { f: 5, x: 660, y: 157, w: 77, h: 97, k: 'gone', lv: 3, t: 'まん中のちょうちんがひとつ消えた' },
+    { f: 6, x: 371, y: 615, w: 90, h: 100, k: 'gone', lv: 2, t: '2つめの太鼓が消えた' },
+    { f: 7, x: 599, y: 631, w: 71, h: 91, k: 'shape', lv: 2, t: '踊り手のちょうちんが丸から四角に' },
+    { f: 8, x: 1074, y: 524, w: 62, h: 65, k: 'color', lv: 2, t: '右の棚の大きな瓶が緑から紫に' },
+    { f: 9, x: 72, y: 335, w: 95, h: 84, k: 'size', lv: 2, t: '左の棚のホタテ貝が大きくなった' },
+    { f: 12, x: 494, y: 188, w: 42, h: 59, k: 'detail', lv: 3, t: 'ちょうちんの絵が消えた' },
+    { f: 15, x: 784, y: 603, w: 116, h: 94, k: 'color', lv: 1, t: 'カエルのアコーディオンが赤から青に' },
+    { f: 16, x: 1077, y: 448, w: 92, h: 64, k: 'color', lv: 3, t: '右の棚の上の瓶が紫に' },
+  ],
+  [   // 5 sunken dream city (p11 = the added coins, which came out in three parts)
+    { f: 0, x: 941, y: 118, w: 92, h: 134, k: 'gone', lv: 2, t: '右上のクラゲが消えた' },
+    { f: 1, x: 713, y: 556, w: 93, h: 144, k: 'color', lv: 1, t: '潜水ヘルメットが銅色から銀に' },
+    { f: 2, x: 374, y: 738, w: 129, h: 151, k: 'size', lv: 2, t: '下の錨が大きくなった' },
+    { f: 3, x: 283, y: 289, w: 83, h: 91, k: 'gone', lv: 3, t: '左の塔の前のクラゲが消えた' },
+    { f: 4, x: 81, y: 148, w: 103, h: 70, k: 'color', lv: 1, t: '左上の魚が青からオレンジに' },
+    { f: 5, x: 687, y: 692, w: 67, h: 57, k: 'add', lv: 2, t: '階段にヒトデが増えた' },
+    { f: 6, x: 864, y: 448, w: 61, h: 151, k: 'gone', lv: 2, t: '右の像のそばの三つ叉の槍が消えた' },
+    { f: 7, x: 207, y: 472, w: 84, h: 55, k: 'detail', lv: 3, t: '左の像の目が赤く光った' },
+    { f: 11, x: 610, y: 614, w: 124, h: 128, k: 'count', lv: 3, t: '階段の金貨が増えた' },
+  ]
+];
+// Choose `want` changes: fill the easy / medium / hard shares, keep kinds varied, spread them over the picture's thirds,
+// and never put two close together.
+function pickDiffs(set, want, R, H) {
+  const pool = set.slice();
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const easy = Math.round(want * .3), hard = Math.round(want * .3), share = [0, easy, want - easy - hard, hard];
+  const out = [], third = d => Math.min(2, Math.floor((d.y + d.h / 2) / (H / 3)));
+  const near = (a, b) => a.x < b.x + b.w + 40 && b.x < a.x + a.w + 40 && a.y < b.y + b.h + 40 && b.y < a.y + a.h + 40;
+  const fits = (d, strict) => !out.includes(d) && !out.some(o => near(o, d))
+    && (!strict || (out.filter(o => o.k === d.k).length < Math.ceil(want / 3) && out.filter(o => third(o) === third(d)).length < Math.ceil(want / 2)));
+  for (const strict of [true, false]) {
+    for (const lv of [1, 2, 3]) for (const d of pool) if (out.length < want && out.filter(o => o.lv === lv).length < share[lv] && fits(d, strict) && d.lv === lv) out.push(d);
+    for (const d of pool) if (out.length < want && fits(d, strict)) out.push(d);   // a level ran short: take any
+  }
+  return out;
+}
 let dscn = null;
 async function renderDiff() {
   const s = S.search;
   $('dload').hidden = false;
   $('dpanes').querySelectorAll('.dmark,.dmiss,.hintring').forEach(el => el.remove());
   DZ.z = 1; DZ.x = DZ.y = 0;   // a new pair of pictures starts unzoomed
-  let im;
-  try { im = await loadImg(diffImg(s.ch)); } catch (e) { $('dload').textContent = '画像を読み込めませんでした。通信状態を確認して、もう一度開いてください。'; return; }
+  if (s.dv !== 2) { s.dv = 2; s.found = []; }   // a search begun with the old patch-style differences starts over
+  const idx = diffIdx(s.ch), R = mulberry(s.seed);
+  let im, chosen, pieces;
+  try {
+    im = await loadImg(diffImg(s.ch));
+    chosen = pickDiffs(DIFF_SETS[idx], diffCount(s.ch), R, im.naturalHeight);
+    pieces = await Promise.all(chosen.map(d => loadImg(`assets/df${idx}/p${d.f}.png`)));
+  } catch (e) { $('dload').textContent = '画像を読み込めませんでした。通信状態を確認して、もう一度開いてください。'; return; }
   if (!S.search || S.search.seed !== s.seed) return;
   const W = im.naturalWidth, H = im.naturalHeight;
   const A = $('dA'), B = $('dB');
   A.width = B.width = W; A.height = B.height = H;
-  const ga = A.getContext('2d'), gb = B.getContext('2d');
-  ga.drawImage(im, 0, 0); gb.drawImage(im, 0, 0);
-  // Detail map: luminance spread in 40px cells.
-  const px = ga.getImageData(0, 0, W, H).data, C = 40, cells = [];
-  for (let y = C; y < H - 2 * C; y += C) for (let x = C; x < W - 2 * C; x += C) {
-    let n = 0, sum = 0, sq = 0;
-    for (let yy = y; yy < y + C; yy += 4) for (let xx = x; xx < x + C; xx += 4) {
-      const i = (yy * W + xx) * 4, l = .3 * px[i] + .59 * px[i + 1] + .11 * px[i + 2];
-      sum += l; sq += l * l; n++;
-    }
-    const m = sum / n;
-    cells.push({ x: x + C / 2, y: y + C / 2, v: sq / n - m * m });
-  }
-  cells.sort((a, b) => b.v - a.v);
-  // Four kinds, as in printed spot-the-difference puzzles: something is gone, something was added, a colour changed,
-  // or a different thing stands in its place. Nothing is ever mirrored or turned upside down.
-  const R = mulberry(s.seed), n = cells.length, top = cells.slice(0, Math.floor(n * .35)), calm = cells.slice(Math.floor(n * .5), Math.floor(n * .85));
-  const want = diffCount(s.ch), pts = [], minD = Math.min(W, H) / (want > 6 ? 4.2 : 3.6);
-  const KINDS = ['gone', 'hue', 'add', 'swap', 'gone', 'hue', 'add', 'swap'];
-  for (let i = KINDS.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [KINDS[i], KINDS[j]] = [KINDS[j], KINDS[i]]; }
-  const pickFrom = (list, ok) => { for (let t = 0; t < 600; t++) { const c = list[Math.floor(R() * list.length)]; if (ok(c)) return c; } return null; };
-  const far = c => pts.every(p => Math.hypot(p.x - c.x, p.y - c.y) > minD);
-  for (let i = 0; pts.length < want && i < want * 3; i++) {
-    const k = KINDS[pts.length % KINDS.length], r = 34 + Math.floor(R() * 14);
-    const at = pickFrom(k === 'add' ? calm : top, far);
-    if (!at) continue;
-    // where the new look comes from: a quiet patch to cover with, or a busy patch elsewhere to copy in
-    const src = k === 'gone' ? calm.slice().sort((a, b) => Math.hypot(a.x - at.x, a.y - at.y) - Math.hypot(b.x - at.x, b.y - at.y)).find(c => Math.hypot(c.x - at.x, c.y - at.y) > r * 2.2)
-      : k === 'hue' ? at : pickFrom(top, c => Math.hypot(c.x - at.x, c.y - at.y) > r * 4);
-    if (!src) continue;
-    pts.push({ x: at.x, y: at.y, r, k, sx: src.x, sy: src.y });
-  }
-  pts.forEach(p => diffPatch(ga, gb, p, W, H));
+  const gb = B.getContext('2d');
+  A.getContext('2d').drawImage(im, 0, 0); gb.drawImage(im, 0, 0);
+  chosen.forEach((d, j) => gb.drawImage(pieces[j], d.x, d.y));
+  const pts = chosen.map(d => ({ x: d.x + d.w / 2, y: d.y + d.h / 2, r: Math.max(36, Math.max(d.w, d.h) * .55), k: d.k, t: d.t }));
   dscn = { seed: s.seed, pts, W, H };
   $('dload').hidden = true;
   layoutDiff();
   (s.found || []).forEach(i => markDiff(i, false));
   renderDiffHead();
 }
-// Paint one change into the second picture with a soft round edge.
-function diffPatch(ga, gb, p, W, H) {
-  const d = p.r * 2, pc = document.createElement('canvas');
-  pc.width = pc.height = d;
-  const g = pc.getContext('2d');
-  // gone: a nearby quiet patch covers the thing; add / swap: a detailed patch from elsewhere is copied in; hue: recoloured in place
-  const sx = (p.sx ?? p.x) - p.r, sy = (p.sy ?? p.y) - p.r;
-  g.drawImage(ga.canvas, sx, sy, d, d, 0, 0, d, d);
-  if (p.k === 'hue') {
-    const im = g.getImageData(0, 0, d, d), q = im.data;
-    for (let i = 0; i < q.length; i += 4) { const [r0, g0, b0] = [q[i], q[i + 1], q[i + 2]]; q[i] = b0; q[i + 1] = r0; q[i + 2] = g0; }
-    g.putImageData(im, 0, 0);
-  }
-  g.globalCompositeOperation = 'destination-in';
-  const grad = g.createRadialGradient(d / 2, d / 2, p.r * (p.k === 'gone' ? .6 : .55), d / 2, d / 2, p.r);
-  grad.addColorStop(0, 'rgba(0,0,0,1)'); grad.addColorStop(1, 'rgba(0,0,0,0)');
-  g.fillStyle = grad; g.fillRect(0, 0, d, d);
-  gb.drawImage(pc, p.x - p.r, p.y - p.r);
+// Answers: once every difference is found, each is numbered on the picture and named in a list, then the search ends.
+function showDiffAnswers(done) {
+  const B = $('dB'), c = document.createElement('canvas'), k = Math.min(1, 640 / dscn.W);
+  c.width = dscn.W * k; c.height = dscn.H * k;
+  const g = c.getContext('2d');
+  g.drawImage(B, 0, 0, c.width, c.height);
+  g.lineWidth = 3; g.font = 'bold 20px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  dscn.pts.forEach((p, i) => {
+    g.strokeStyle = '#ff5a4e'; g.beginPath(); g.arc(p.x * k, p.y * k, p.r * k * 1.1, 0, Math.PI * 2); g.stroke();
+    const lx = Math.min(c.width - 14, p.x * k + p.r * k * .8), ly = Math.max(14, p.y * k - p.r * k * .8);
+    g.fillStyle = '#ff5a4e'; g.beginPath(); g.arc(lx, ly, 13, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#fff'; g.fillText(i + 1, lx, ly + 1);
+  });
+  showOverlay(`
+    <p class="kicker">答え合わせ</p>
+    <h2>${diffTitle(S.search.ch)}</h2>
+    <div class="dans"></div>
+    <ol class="danslist">${dscn.pts.map(p => `<li><span class="dkind">${DIFF_KIND[p.k] || ''}</span>${p.t || ''}</li>`).join('')}</ol>
+    <button class="btn primary" type="button" data-go>結果を見る</button>
+  `, () => { hideOverlay(); done(); });
+  $('panel').querySelector('.dans').appendChild(c);
 }
 // Fit the pictures: both together (side by side or stacked, whichever is bigger), or one at a time filling the area.
 // Each picture's frame takes its whole slot (dark bands where the picture is narrower), so a zoomed-in picture fills it.
@@ -3306,7 +3386,7 @@ function diffTap(e) {
     sfx.found();
     renderDiffHead();
     save();
-    if (s.found.length >= dscn.pts.length) setTimeout(() => { dscn = null; searchClear(); }, 1300);
+    if (s.found.length >= dscn.pts.length) setTimeout(() => showDiffAnswers(() => { dscn = null; searchClear(); }), 1300);
   } else {
     s.miss = (s.miss || 0) + 1;
     const m = document.createElement('div'), kc = c.clientWidth / dscn.W;
@@ -3879,7 +3959,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.49';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.50';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
