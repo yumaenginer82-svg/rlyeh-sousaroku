@@ -721,6 +721,7 @@ body.focus .top{display:none}
   .find img{width:100%;height:auto;aspect-ratio:1}
   .mbtns{flex-direction:column}
 }
+.panel [data-later]{min-width:180px;min-height:44px;margin-top:8px}   /* the "later" of the search-ready window */
 /* Frames only where they mean something: the board keeps its frame; the header, requests and info panel are plain
    tinted areas, and a request gets a border only for its state (ready, rare, climax, clash). */
 .top,.info{border-color:transparent;box-shadow:none}
@@ -1922,6 +1923,26 @@ function showDiscovery(it, bonus) {
 }
 
 // A delivered request: the client's portrait and a word of thanks drop in from the top.
+// Once a search opens up, say so in a window of its own (after the thank-you and any other window has closed):
+// go now, or later from the header's search button.
+function searchReadyNotice(line) {
+  const when = () => {
+    if (!$('overlay').hidden || !$('ending').hidden) { setTimeout(when, 400); return; }
+    if (S.search || S.view !== 'merge' || $('goSearch').hidden) return;   // already under way, or no longer open
+    sfx.discover();
+    const diff = isDiffStage();
+    showOverlay(`
+      <p class="kicker">現場検証 ${stageOf() + 1} / ${STAGES} ―― ${STAGE_NAMES[stageOf()]}</p>
+      <h2>現場検証へ行けるようになった</h2>
+      <p class="lore">${line}${diff ? '記憶の中の光景と、いまの光景を見くらべに行こう。' : '現場で、手がかりの品を探しだそう。'}</p>
+      <button class="btn primary" type="button" data-go>いますぐ向かう</button>
+      <button class="btn" type="button" data-later>あとで</button>
+      <p class="muted">「あとで」にしても、上の <b>🔎 現場検証へ</b> からいつでも行ける。</p>
+    `, () => { hideOverlay(); $('goSearch').click(); });
+    $('panel').querySelector('[data-later]').addEventListener('click', hideOverlay);
+  };
+  setTimeout(when, 2000);   // let the thank-you (and a visit from Sena) open first
+}
 function showThanks(name, line, reward) {
   const d = $('disc');
   d.innerHTML = `<span class="big">${FACE(name)}</span><div><small>${name}</small><b class="thx">「${line}」</b><em>${reward}</em></div>`;
@@ -2435,13 +2456,13 @@ function deliver(id) {
     S.boss = null; S.bossDone = true;
     giveGift([{ k: 'chest', n: 3, lv: 4 + Math.min(2, Math.floor(S.ch / 2)) }]);
     showThanks(o.npc.n, thanksOf(o), `🪙+${coins} 👁️+${o.eyes} 宝箱`);
-    setTimeout(() => { sfx.discover(); toast('道がひらけた。現場検証へ向かおう'); }, 1400);
+    searchReadyNotice('道がひらけた。この章の最後の現場検証へ向かえる。');
   } else showThanks(o.npc.n, thanksOf(o), `🪙+${coins} ★+${o.stars}${o.eyes ? ` 👁️+${o.eyes}` : ""}`);
   if (o.rare) setTimeout(senaVisit, 1600);
   renderInfo();
   afterChange();
   if (before < g && S.stars >= g) {
-    if (!lastStage()) setTimeout(() => { sfx.discover(); toast(`手がかりがそろった。現場検証（${stageOf() + 1} / ${STAGES}）へ向かおう`); }, 1400);
+    if (!lastStage()) searchReadyNotice('町の人々から、手がかりがそろった。');
     else if (!S.bossDone && !S.boss) { makeBoss(); renderOrders(); setTimeout(showBoss, 900); }
   }
   setTimeout(() => { fillOrders(); renderOrders(); save(); }, 900);
@@ -3852,7 +3873,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.46';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.47';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
