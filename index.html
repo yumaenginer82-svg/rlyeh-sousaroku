@@ -3149,25 +3149,30 @@ function diffPatch(ga, gb, p, W, H) {
   g.fillStyle = grad; g.fillRect(0, 0, d, d);
   gb.drawImage(pc, p.x - p.r, p.y - p.r);
 }
-// Fit both pictures: side by side when that is bigger, otherwise one above the other.
 // Fit the pictures: both together (side by side or stacked, whichever is bigger), or one at a time filling the area.
+// Each picture's frame takes its whole slot (dark bands where the picture is narrower), so a zoomed-in picture fills it.
 // DZ is the shared zoom/pan, applied to both pictures so the same spot always lines up.
-const DZ = { z: 1, x: 0, y: 0, w: 0, h: 0 };
+const DZ = { z: 1, x: 0, y: 0, w: 0, h: 0, vw: 0, vh: 0 };
 function layoutDiff() {
   if (!dscn) return;
   const box = $('dpanes'), r = box.getBoundingClientRect(), gap = 6, ar = dscn.W / dscn.H, one = box.classList.contains('single');
   const side = Math.min((r.width - gap) / 2, r.height * ar), stack = Math.min(r.width, (r.height - gap) / 2 * ar);
+  const tall = !one && stack > side;
   const w = one ? Math.min(r.width, r.height * ar) : Math.max(side, stack), h = w / ar;
-  box.classList.toggle('stack', !one && stack > side);
-  box.querySelectorAll('.dvp,canvas').forEach(c => { c.style.width = w + 'px'; c.style.height = h + 'px'; });
-  DZ.w = w; DZ.h = h;
+  const vw = one || tall ? r.width : (r.width - gap) / 2, vh = one || !tall ? r.height : (r.height - gap) / 2;
+  box.classList.toggle('stack', tall);
+  box.querySelectorAll('.dvp').forEach(c => { c.style.width = vw + 'px'; c.style.height = vh + 'px'; });
+  box.querySelectorAll('canvas').forEach(c => { c.style.width = w + 'px'; c.style.height = h + 'px'; });
+  DZ.w = w; DZ.h = h; DZ.vw = vw; DZ.vh = vh;
   applyDZ();
   box.querySelectorAll('.dmark').forEach(el => placeMark(el));
 }
 function applyDZ(glide) {
   DZ.z = Math.min(5, Math.max(1, DZ.z));
-  DZ.x = Math.min(0, Math.max(DZ.w - DZ.w * DZ.z, DZ.x));
-  DZ.y = Math.min(0, Math.max(DZ.h - DZ.h * DZ.z, DZ.y));
+  // smaller than its frame: centred; larger: panned, but never past an edge
+  const fit = (pos, size, view) => size <= view ? (view - size) / 2 : Math.min(0, Math.max(view - size, pos));
+  DZ.x = fit(DZ.x, DZ.w * DZ.z, DZ.vw);
+  DZ.y = fit(DZ.y, DZ.h * DZ.z, DZ.vh);
   document.querySelectorAll('#dpanes .dlay').forEach(l => {
     l.classList.toggle('glide', !!glide);
     l.style.transform = `translate(${DZ.x}px,${DZ.y}px) scale(${DZ.z})`;
@@ -3213,8 +3218,8 @@ $('dpanes').addEventListener('pointerdown', e => {
   try { $('dpanes').setPointerCapture(e.pointerId); } catch (err) {}
   if (dptr.size === 2) {
     const [a, b] = [...dptr.values()];
-    dgest = { d: Math.hypot(a.x - b.x, a.y - b.y), moved: true };
-  } else dgest = { moved: false };
+    dgest = { d: Math.hypot(a.x - b.x, a.y - b.y), moved: true, vp: dgest && dgest.vp || e.target.closest('.dvp') };
+  } else dgest = { moved: false, vp: e.target.closest('.dvp') };
 });
 $('dpanes').addEventListener('pointermove', e => {
   const p = dptr.get(e.pointerId);
@@ -3223,7 +3228,7 @@ $('dpanes').addEventListener('pointermove', e => {
   p.x = e.clientX; p.y = e.clientY;
   if (dptr.size === 2 && dgest && dgest.d) {
     const [a, b] = [...dptr.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
-    const box = document.querySelector('#dpanes .dpane:not(.off) .dvp').getBoundingClientRect();
+    const box = dgest.vp.getBoundingClientRect();   // the picture the pinch started on
     zoomDZ(d / dgest.d, (a.x + b.x) / 2 - box.left, (a.y + b.y) / 2 - box.top);
     dgest.d = d;
   } else if (dptr.size === 1) {
@@ -3245,8 +3250,8 @@ $('dpanes').addEventListener('wheel', e => {
   const box = e.target.closest('.dvp').getBoundingClientRect();
   zoomDZ(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX - box.left, e.clientY - box.top);
 }, { passive: false });
-$('dzIn').addEventListener('click', () => zoomDZ(1.5, DZ.w / 2, DZ.h / 2, true));
-$('dzOut').addEventListener('click', () => zoomDZ(1 / 1.5, DZ.w / 2, DZ.h / 2, true));
+$('dzIn').addEventListener('click', () => zoomDZ(1.5, DZ.vw / 2, DZ.vh / 2, true));
+$('dzOut').addEventListener('click', () => zoomDZ(1 / 1.5, DZ.vw / 2, DZ.vh / 2, true));
 $('dzFit').addEventListener('click', () => { DZ.z = 1; DZ.x = DZ.y = 0; applyDZ(true); });
 // One picture at a time, as large as the area allows; ⇄ flips between memory and the scene now.
 $('dOne').addEventListener('click', () => {
@@ -3261,7 +3266,8 @@ $('dSwap').addEventListener('click', () => {
   sfx.move();
 });
 function diffTap(e) {
-  const c = e.target.closest('canvas');
+  // with the pointer captured by the picture area, the event's target is that area: find the picture under the finger
+  const c = e.target.closest('canvas') || document.elementsFromPoint(e.clientX, e.clientY).find(el => el.tagName === 'CANVAS' && el.closest('#dpanes'));
   if (!c || !dscn || !S.search || S.search.mode !== 'diff') return;
   const rc = c.getBoundingClientRect(), k = dscn.W / rc.width;
   const x = (e.clientX - rc.left) * k, y = (e.clientY - rc.top) * k, s = S.search;
@@ -3845,7 +3851,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.44';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.45';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');

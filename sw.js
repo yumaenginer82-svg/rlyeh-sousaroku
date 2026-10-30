@@ -1,7 +1,7 @@
 // Offline support for the home-screen install.
 // The page itself is network-first (so updates show up right away when online); images are cache-first.
 // Bump VERSION when assets change so old caches are dropped.
-const VERSION = 'rlyeh-v25';
+const VERSION = 'rlyeh-v26';
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(['./', 'index.html', 'manifest.webmanifest'])).then(() => self.skipWaiting()));
 });
