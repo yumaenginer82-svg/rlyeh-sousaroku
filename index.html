@@ -721,6 +721,11 @@ body.focus .top{display:none}
   .find img{width:100%;height:auto;aspect-ratio:1}
   .mbtns{flex-direction:column}
 }
+/* Frames only where they mean something: the board keeps its frame; the header, requests and info panel are plain
+   tinted areas, and a request gets a border only for its state (ready, rare, climax, clash). */
+.top,.info{border-color:transparent;box-shadow:none}
+.order{border-color:transparent;box-shadow:none}
+.orders{gap:10px}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 
@@ -3840,7 +3845,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.41';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.42';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
