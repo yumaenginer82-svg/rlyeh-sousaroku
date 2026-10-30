@@ -665,6 +665,14 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
 /* When a search is ready, the header's star bar and hint give way to the search button */
 .prog #goSearch{flex:1 1 auto;min-width:0;font-size:15px;padding:6px 14px;min-height:40px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .prog:has(#goSearch:not([hidden])) .pbar,.prog:has(#goSearch:not([hidden])) #ptext{display:none}
+/* Once a search can be opened, its button glows and the light spills over the header around it */
+.prog #goSearch{position:relative;animation:summon 1.8s ease-in-out infinite,summonin .6s cubic-bezier(.3,1.6,.5,1)}
+.prog #goSearch::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,236,200,.45),transparent);animation:raresweep 2.6s ease-in-out infinite;pointer-events:none}
+.top:has(#goSearch:not([hidden])){animation:headglow 1.8s ease-in-out infinite}
+@keyframes summon{0%,100%{box-shadow:0 3px 0 var(--ink),0 0 8px 1px rgba(232,90,80,.55),0 0 0 0 rgba(114,224,178,0);filter:brightness(1)}
+  50%{box-shadow:0 3px 0 var(--ink),0 0 18px 6px rgba(255,110,90,.85),0 0 34px 12px rgba(114,224,178,.35);filter:brightness(1.18)}}
+@keyframes summonin{0%{transform:scale(.6);opacity:0}100%{transform:none;opacity:1}}
+@keyframes headglow{0%,100%{border-color:var(--line);box-shadow:0 4px 0 var(--ink)}50%{border-color:rgba(255,120,100,.75);box-shadow:0 4px 0 var(--ink),0 0 22px rgba(232,90,80,.45)}}
 /* Searching: the header steps aside so the picture gets the screen */
 body.focus .app{grid-template-rows:minmax(0,1fr)}
 body.focus .top{display:none}
@@ -3834,7 +3842,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.39';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.40';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
