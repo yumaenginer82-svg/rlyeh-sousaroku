@@ -244,7 +244,7 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 /* Discovery banner, toast */
 .disc{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:65;display:flex;align-items:center;gap:12px;
   background:var(--paper);border:2px solid var(--gold);border-radius:16px;padding:10px 18px;box-shadow:0 0 24px rgba(201,163,74,.4),0 4px 0 var(--ink);
-  animation:drop .4s cubic-bezier(.3,1.5,.5,1);pointer-events:none;max-width:calc(100% - 32px)}
+  animation:drop .4s cubic-bezier(.3,1.5,.5,1);pointer-events:none;width:max-content;max-width:calc(100% - 32px);box-sizing:border-box}   /* sized to its text: a box placed from the centre would otherwise only get half the screen */
 .disc .big{font-size:42px;line-height:1}
 .disc small{display:block;font-size:12px;color:var(--gold);letter-spacing:.12em;font-weight:700}
 .disc b{font-family:var(--f-display);font-size:19px}
@@ -525,7 +525,7 @@ img.face{display:block;flex:none;width:38px;height:38px;object-fit:cover;object-
 .portrait img.face{width:120px;height:120px;border-width:3px;margin:0 auto;box-shadow:0 0 24px rgba(114,224,178,.25)}
 .info .big img.face{width:60px;height:60px;margin:0 auto}
 .disc img.face{width:56px;height:56px}
-.disc b.thx{font-size:16px;display:block;max-width:22em}
+.disc b.thx{font-size:16px;display:block;max-width:22em;text-wrap:balance}
 .page img.face{width:44px;height:44px}
 /* The dealer's shop */
 .goods{display:grid;gap:6px;width:100%;text-align:left}
@@ -773,7 +773,7 @@ body.focus .top{display:none}
   <section class="view search" id="diffView" hidden>
     <div class="side">
       <div class="mission">
-        <h2><small>現場検証 ―― 2枚の絵のちがいを探せ</small><span id="dTitle"></span><span class="san gauge r3" id="dsan"></span></h2>
+        <h2><small>記憶の照合 ―― 記憶と食いちがう歪みを探せ</small><span id="dTitle"></span><span class="san gauge r3" id="dsan"></span></h2>
         <div class="mbtns">
           <button id="dEye" class="btn" type="button"><img class="uic" src="assets/x-ui-eye.png" alt="">千里眼 ×<b id="eyesD">0</b></button>
           <button id="dOne" class="btn" type="button">1枚ずつ</button>
@@ -791,7 +791,7 @@ body.focus .top{display:none}
   <section class="view search" id="searchView" hidden>
     <div class="side">
       <div class="mission">
-        <h2><small>現場検証 ―― リストの品を探しだせ</small><span id="mTitle"></span><span class="san gauge r3" id="san"></span></h2>
+        <h2><small>遺物探索 ―― 手がかりの品を探しだせ</small><span id="mTitle"></span><span class="san gauge r3" id="san"></span></h2>
         <div class="finds" id="finds"></div>
         <div class="mbtns">
           <button id="eyeBtn" class="btn" type="button"><img class="uic" src="assets/x-ui-eye.png" alt="">千里眼 ×<b id="eyesS">0</b></button>
@@ -1132,7 +1132,7 @@ const RESEARCH = [
   { id: 'gen', n: '道具の改良', d: '道具から素材が2つ出ることがある（1段階ごとに +8%）', cost: [300, 800, 1500, 3000, 6000] },
   { id: 'order', n: '町の信頼', d: '依頼をこなすと、★がひとつ多くもらえることがある（+12%ずつ）', cost: [600, 1800, 4500] },
   { id: 'chest', n: '目利き', d: '宝箱から、ひとつ上の段階の品が出やすくなる（+12%ずつ）', cost: [800, 2200, 5000] },
-  { id: 'eye', n: '千里眼の研鑽', d: '千里眼の光が、品やちがいの場所により近く光る（-30%ずつ）', cost: [450, 1400, 3600] },
+  { id: 'eye', n: '千里眼の研鑽', d: '千里眼の光が、品や歪みの場所により近く光る（-30%ずつ）', cost: [450, 1400, 3600] },
   { id: 'san', n: '鋼の精神', d: 'まちがえたタップで減る正気度が小さくなる（6 → 5 → 4）', cost: [900, 3000] },
   { id: 'luck', n: '頁の嗅覚', d: '頁の切れ端が見つかりやすくなる（+50%ずつ）', cost: [450, 1400, 3800] },
 ];
@@ -1242,14 +1242,14 @@ const DAY_MODS = [
   { id: 'fog', n: '濃霧', d: 'しかけを解いたほうびが2倍。' },
   { id: 'stars', n: '星辰の夜', d: '依頼でもらえる🪙が3割増し。' },
   { id: 'calm', n: '凪', d: 'まちがえたタップで減る正気度が半分になる。' },
-  { id: 'dream', n: '夢見の日', d: '現場検証の評価ボーナスが2倍。' },
+  { id: 'dream', n: '夢見の日', d: '現場検証の評価のほうびが2倍。' },
 ];
 const DAY_TASKS = [
   { k: 'm', n: 30, t: '合体を30回する' }, { k: 'm', n: 60, t: '合体を60回する' },
   { k: 'o', n: 4, t: '依頼を4件こなす' }, { k: 'o', n: 8, t: '依頼を8件こなす' },
   { k: 'p', n: 50, t: '道具を50回タップする' }, { k: 'a', n: 5, t: '深淵へ品を5個還す' },
   { k: 'c', n: 6, t: '宝箱から6回とり出す' }, { k: 'hi', n: 2, t: '第5段階以上の品を2つ作る' },
-  { k: 'f', n: 8, t: '現場検証で品やちがいを8個見つける' },
+  { k: 'f', n: 8, t: '現場検証で品や歪みを8個見つける' },
 ];
 const dayKey = (d = new Date()) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 const hashStr = s => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7);
@@ -3289,7 +3289,7 @@ function showDiffAnswers(done) {
     g.fillStyle = '#fff'; g.fillText(i + 1, lx, ly + 1);
   });
   showOverlay(`
-    <p class="kicker">答え合わせ</p>
+    <p class="kicker">照合の記録</p>
     <h2>${diffTitle(S.search.ch)}</h2>
     <div class="dans"></div>
     <ol class="danslist">${dscn.pts.map(p => `<li><span class="dkind">${DIFF_KIND[p.k] || ''}</span>${p.t || ''}</li>`).join('')}</ol>
@@ -3508,7 +3508,7 @@ $('goSearch').addEventListener('click', () => {
     <p class="kicker">現場検証 ${stageOf() + 1} / ${STAGES} ―― ${STAGE_NAMES[stageOf()]}</p>
     <h2>${diff ? diffTitle(S.ch) : st.mission}</h2>
     <p class="lore">${diff ? 'あなたの記憶にある光景と、目の前の光景。どこかが、少しずつ食いちがっている。' : st.missionText}</p>
-    <p class="muted">${diff ? `2枚の絵の<b>ちがい ${diffCount(S.ch)}か所</b>を探す。` : `リストの品 ${findCount(S.ch)}つを探す。`}</p>
+    <p class="muted">${diff ? `記憶と食いちがう<b>歪み ${diffCount(S.ch)}か所</b>を探す。` : `手がかりの品 ${findCount(S.ch)}つを探しだす。`}</p>
     <button class="btn primary" type="button" data-go>${diff ? '見くらべる' : '探しはじめる'}</button>
     <button class="btn pair" type="button" data-help="${kind}">遊び方を見る</button>
   `, () => { S.search = newSearch(S.ch); hideOverlay(); setView('search'); });
@@ -3525,7 +3525,7 @@ function titleUp(list) {
   S.titleLv = lv;
   const coins = 40 * lv;
   S.coins += coins; S.eyes += 1;
-  list.push(`🎖 称号ボーナス 🪙${coins} 👁️1`);
+  list.push(`🎖 称号のほうび 🪙${coins} 👁️1`);
   return `<p class="title-up">称号が上がった：<b>${TITLES[lv][1]}</b></p>`;
 }
 
@@ -3542,7 +3542,7 @@ function searchClear() {
   const list = [`🪙 ${coins}`, '👁️ 千里眼 ×1'];
   S.coins += coins;
   S.eyes += 1;
-  if (RATE_COINS(ch)[r]) { S.coins += RATE_COINS(ch)[r]; list.push(`${starsText(r)} 評価ボーナス 🪙${RATE_COINS(ch)[r]}`); }
+  if (RATE_COINS(ch)[r]) { S.coins += RATE_COINS(ch)[r]; list.push(`${starsText(r)} 評価のほうび 🪙${RATE_COINS(ch)[r]}`); }
   if (r === 3) { S.eyes += 1; list.push('👁️ 正気を保ったほうび ×1'); }
   const stats = Object.assign({ m: 0, o: 0, g: 0 }, S.cs);
   const rates = S.rates.slice(), cr = Math.max(1, Math.round(rates.reduce((a, b) => a + b, 0) / rates.length));   // the chapter rating: all its searches
@@ -3600,7 +3600,7 @@ function stageClear(s, san, r) {
   const list = [`🪙 ${coins}`];
   S.coins += coins;
   findScrap(.45, '現場');
-  if (RATE_COINS(ch)[r]) { const b = Math.round(RATE_COINS(ch)[r] / 2); S.coins += b; list.push(`${starsText(r)} 評価ボーナス 🪙${b}`); }
+  if (RATE_COINS(ch)[r]) { const b = Math.round(RATE_COINS(ch)[r] / 2); S.coins += b; list.push(`${starsText(r)} 評価のほうび 🪙${b}`); }
   const avail = [0, 1, 2].filter(g => S.gens[g]), t = Math.min(1 + Math.floor(ch / 2), 4), c = pick(avail);
   list.push(`${ITEM(c, t)[0]} ${ITEM(c, t)[1]}`);
   S.used = (S.used || []).concat(scn ? scn.T.map(x => x.e) : []);
@@ -3787,7 +3787,7 @@ function showEnding(replay) {
         return;
       }
       T.onclick = null;
-      T.insertAdjacentHTML('beforeend', `${replay ? '' : '<p class="after">クリアのほうび：🪙1000　👁️5　実績「封印者」</p>'}
+      T.insertAdjacentHTML('beforeend', `${replay ? '' : '<p class="after">封印のほうび：🪙1000　👁️5　実績「封印者」</p>'}
         <button class="btn primary wbtn" type="button" id="eend">${replay ? 'とじる' : 'その後の調査へ'}</button>`);
       $('eend').addEventListener('click', e => {
         e.stopPropagation();
@@ -3834,12 +3834,12 @@ function showEnding(replay) {
 }
 
 /* ================= help: how to play, by topic ================= */
-const HELP_TOPICS = [['merge', '盤面と依頼'], ['flow', '章の進み方'], ['search', 'ミッケ'], ['diff', '間違い探し'], ['gim', 'しかけ'], ['daily', '今日の異変'], ['coins', 'コインの使い道']];
+const HELP_TOPICS = [['merge', '盤面と依頼'], ['flow', '章の進み方'], ['search', '遺物探索'], ['diff', '記憶の照合'], ['gim', 'しかけ'], ['daily', '今日の異変'], ['coins', 'コインの使い道']];
 function helpBody(k) {
   const li = (ic, t) => `<li><span>${ic}</span><div>${t}</div></li>`;
   if (k === 'merge') return [
     li(CHAINS[0].gen.e, '光る輪の<b>道具</b>をタップすると素材が出る。🪙で強化すると、上の段階が出やすくなる。'),
-    li(ITEM(0, 1)[0], '同じものを<b>ドラッグで重ねる</b>と合体して、ひとつ上のものになる。はじめて作ったものは図鑑に載り、ボーナスがもらえる。'),
+    li(ITEM(0, 1)[0], '同じものを<b>ドラッグで重ねる</b>と合体して、ひとつ上のものになる。はじめて作ったものは図鑑に載り、ほうびがもらえる。'),
     li('✨', '同じものを4つ以上となりあわせて並べ、そこへもう1つ重ねると<b>大合体</b>。ひとつ多くできる。高い段階の合体では、ときどき宝箱も出る。'),
     li(ITEM(1, 1)[0], '依頼主の品がそろったら「<b>納品</b>」。🪙と★がもらえる。依頼主の名前をタップすると、どんな人かわかる。'),
     li(GIFT, 'ほうびは盤面の<b>贈りもの</b>に入って届く。タップで開ける。贈りものどうしを重ねると、おまけが増える。'),
@@ -3848,12 +3848,12 @@ function helpBody(k) {
   ];
   if (k === 'flow') return [
     li('<img class="uic" src="assets/x-ui-star.png" alt="">', '依頼をこなして★を集めると、<b>現場検証</b>ができる。1つの章に現場検証は<b>3回</b>。'),
-    li('🔍', '1回目は<b>ミッケ</b>、2回目は<b>間違い探し</b>、3回目は<b>ミッケ</b>で真相に迫る。'),
+    li('🔍', '1回目は<b>遺物探索</b>（散らばる品を探す）、2回目は<b>記憶の照合</b>（2枚の光景を見くらべる）、3回目は<b>遺物探索</b>で真相に迫る。'),
     li(FACE(BOSSES[0].n), '3回目の前には、章の<b>山場の依頼</b>が届く。高い段階の品を納めると、最後の現場へ進める。'),
     li('📖', '解決した章は<b>手帳</b>の捜索録に残り、再調査でもっと良い評価を狙える。★の合計で<b>称号</b>が上がる。'),
   ];
   if (k === 'search') return [
-    li('🔍', '細かく描かれた情景の中から、<b>リストの品</b>を探してタップ。見つけた品には色がつく。'),
+    li('🔍', '細かく描かれた情景の中から、<b>手がかりの品</b>を探してタップ。見つけた品には色がつく。'),
     li('🔢', '「<b>全部</b>」の札の品は、絵の中にいくつもある。ぜんぶ見つけたら1つ完了。'),
     li('🌀', '「<b>おぼろ</b>」の札の品は、絵がぼやけている。名前を手がかりに探そう。'),
     li('🤏', '<b>ピンチで拡大</b>、ドラッグで移動。＋ − ボタンでも拡大できる。そっくりな品（鍵と古い鍵など）にも気をつけて。'),
@@ -3861,10 +3861,10 @@ function helpBody(k) {
     li('🧠', '<b>正気度</b>：まちがえたタップで −6。最後に残った正気度で★評価が決まる（75以上で★★★）。千里眼は使っても正気度は減らない。'),
   ];
   if (k === 'diff') return [
-    li('🖼️', '<b>記憶の光景</b>と<b>目の前の光景</b>、2枚の絵を見くらべて、<b>ちがう所</b>をタップ。どちらの絵をタップしてもいい。'),
-    li('🎨', 'ちがいは、<b>片方にしかない品</b>（消えている・増えている）、<b>色がちがう品</b>、<b>置いてある物がちがう所</b>の3種類。'),
-    li('🤏', 'iPadを横にすると、2枚が左右に並んで見くらべやすい。'),
-    li('<img class="uic" src="assets/x-ui-eye.png" alt="">', '困ったら<b>千里眼</b>。ちがいのあたりが光る。正気度は、まちがえたタップでだけ減る。'),
+    li('🖼️', '<b>記憶の光景</b>と<b>目の前の光景</b>、2枚の光景を見くらべて、記憶と食いちがう<b>歪み</b>をタップ。どちらの絵をタップしてもいい。'),
+    li('🎨', '歪みは、<b>消えた品・増えた品</b>、<b>色や大きさ・形が変わった品</b>、<b>数や模様が変わった所</b>など。どれも品まるごとが変わっている。'),
+    li('🤏', '<b>ピンチで拡大</b>すると、2枚が同じ所を同じ大きさで映す。「<b>1枚ずつ</b>」にすると1枚を大きく見られ、⇄で記憶といまを切りかえられる。'),
+    li('<img class="uic" src="assets/x-ui-eye.png" alt="">', '困ったら<b>千里眼</b>。歪みのあたりが光る。正気度は、まちがえたタップでだけ減る。'),
   ];
   if (k === 'gim') return Object.keys(GIMMICKS).map(g => li(g === 'fog' ? '<i class="fog mini"></i>' : g === 'stone' ? `<span class="stone-ic">${ITEM(0, 2)[0]}</span>` : TENT, `<b>${GIMMICKS[g].n}</b>：${GIMMICKS[g].d}`))
     .concat(li('🪙', '章のしかけをすべて解くと、🪙のほうびがある。'));
@@ -4004,7 +4004,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.56';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.57';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
