@@ -3115,7 +3115,7 @@ const diffTitle = ch => DIFF_TITLES[diffIdx(ch)];
 const DIFF_KIND = { color: '色', gone: '消えた', add: '増えた', size: '大きさ', shape: '形', count: '数', pos: '位置', detail: '模様' };
 // f: piece number, x/y/w/h: where it goes, k: kind, lv: difficulty, t: what changed (shown in the answers)
 // Bump when the pieces are rebuilt, so no cached copy of an older piece is used.
-const DIFF_BUILD = 2;
+const DIFF_BUILD = 3;
 const DIFF_SETS = [
   [   // 0 tavern (built by tools/diff-build.ps1 from gen-raw/df0-final.json)
     { f: 0, x: 681, y: 636, w: 237, h: 178, k: 'color', lv: 1, t: '床のじゅうたんが赤から青に' },
@@ -3126,7 +3126,6 @@ const DIFF_SETS = [
     { f: 5, x: 132, y: 469, w: 105, h: 81, k: 'gone', lv: 2, t: 'ボトルシップの中の船が消えた' },
     { f: 6, x: 1038, y: 20, w: 101, h: 181, k: 'gone', lv: 1, t: '天井の大きな錨が消えた' },
     { f: 7, x: 849, y: 426, w: 59, h: 59, k: 'gone', lv: 3, t: 'ピアノの楽譜が消えた' },
-    { f: 8, x: 954, y: 180, w: 56, h: 99, k: 'count', lv: 3, t: '吊るした小魚が2匹から3匹に' },
   ],
   [   // 1 morning market (built by tools/diff-build.ps1 from gen-raw/df1-final.json)
     { f: 0, x: 882, y: 73, w: 318, h: 214, k: 'color', lv: 1, t: '右上の日よけが赤から青に' },
@@ -3964,7 +3963,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.51';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.52';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
