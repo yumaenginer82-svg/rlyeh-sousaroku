@@ -41,6 +41,8 @@
       if (!open()) return;
       const P = $('panel');
       if (P.querySelector('[data-sh]') || (P.innerText.includes('封印の儀') && P.querySelector('[data-go]'))) { await altar(); continue; }
+      // the "search is ready" window: while filling the dex, stay on the board
+      if (R.phase === 'dex' && P.querySelector('[data-later]')) { R.log.push('close (later): ' + P.innerText.split('\n').filter(Boolean)[1]); P.querySelector('[data-later]').click(); await w(250); continue; }
       const go = P.querySelector('[data-go]');
       if (go) { const t = P.innerText.split('\n').filter(Boolean).slice(0, 2).join(' / '); PB.audit('画面: ' + t); R.log.push('close: ' + t); go.click();await w(250); } else return;
     }

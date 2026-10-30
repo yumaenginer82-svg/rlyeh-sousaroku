@@ -732,8 +732,9 @@ body.focus .top{display:none}
 .dans canvas{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);margin:6px 0 10px}
 .danslist{text-align:left;margin:0 0 14px;padding-left:1.6em;font-size:14px;line-height:1.7}
 .danslist .dkind{display:inline-block;min-width:3.6em;margin-right:8px;padding:0 6px;border-radius:6px;background:#3a2326;color:#ffb3a8;font-size:12px;font-weight:800;text-align:center}
-.panel > .btn.primary,.panel [data-later]{min-width:240px;height:56px;padding-top:0;padding-bottom:0;box-sizing:border-box}
-.panel [data-later]{font-family:var(--f-display);font-size:17px;letter-spacing:.06em;margin-top:8px}
+.panel > *{flex-shrink:0}   /* a long window scrolls; nothing in it gets squeezed */
+.panel > .btn.primary,.panel [data-later],.panel > .btn.pair{min-width:240px;height:56px;padding-top:0;padding-bottom:0;box-sizing:border-box}
+.panel [data-later],.panel > .btn.pair{font-family:var(--f-display);font-size:17px;letter-spacing:.06em;margin-top:8px}
 /* Frames only where they mean something: the board keeps its frame; the header, requests and info panel are plain
    tinted areas, and a request gets a border only for its state (ready, rare, climax, clash). */
 .top,.info{border-color:transparent;box-shadow:none}
@@ -1075,7 +1076,7 @@ function showDice(msg) {
     <div id="figOut"></div>
     <button class="btn primary" type="button" id="rollBtn" ${can ? '' : 'disabled'}>賽を振る　🪙${DICE_COST}</button>
     <p class="muted" id="diceHave"></p>
-    <button class="btn tiny" type="button" data-go>とじる</button>
+    <button class="btn pair" type="button" data-go>とじる</button>
   `, hideOverlay);
   const paintHave = () => { $('diceHave').textContent = `手持ち 🪙${S.coins}　／　飾り棚 ${(S.figs || []).length} / ${FIGS.length}`; };
   paintHave();
@@ -3264,7 +3265,8 @@ async function renderDiff() {
   const gb = B.getContext('2d');
   A.getContext('2d').drawImage(im, 0, 0); gb.drawImage(im, 0, 0);
   chosen.forEach((d, j) => gb.drawImage(pieces[j], d.x, d.y));
-  const pts = chosen.map(d => ({ x: d.x + d.w / 2, y: d.y + d.h / 2, r: Math.max(36, Math.max(d.w, d.h) * .55), k: d.k, t: d.t }));
+  const pts = chosen.map(d => ({ x: d.x + d.w / 2, y: d.y + d.h / 2, r: Math.max(36, Math.max(d.w, d.h) * .55), k: d.k, t: d.t,
+    x0: d.x, y0: d.y, x1: d.x + d.w, y1: d.y + d.h }));   // the box is what a tap must hit
   dscn = { seed: s.seed, pts, W, H };
   $('dload').hidden = true;
   layoutDiff();
@@ -3415,8 +3417,11 @@ function diffTap(e) {
   if (!c || !dscn || !S.search || S.search.mode !== 'diff') return;
   const rc = c.getBoundingClientRect(), k = dscn.W / rc.width;
   const x = (e.clientX - rc.left) * k, y = (e.clientY - rc.top) * k, s = S.search;
-  const hit = dscn.pts.map((p, i) => ({ p, i, d: Math.hypot(p.x - x, p.y - y) }))
-    .filter(o => o.d < o.p.r * 1.25 + 14 * k).sort((a, b) => a.d - b.d)[0];
+  // A tap counts when it lands on the changed object's own box, give or take a fingertip (about 14 screen px);
+  // a round area sized by the longer side would reach far past a tall or wide object.
+  const slop = 14 * k + 6;
+  const hit = dscn.pts.map((p, i) => ({ p, i, d: Math.hypot(Math.max(p.x0 - x, 0, x - p.x1), Math.max(p.y0 - y, 0, y - p.y1)) }))
+    .filter(o => o.d <= slop).sort((a, b) => a.d - b.d || Math.hypot(a.p.x - x, a.p.y - y) - Math.hypot(b.p.x - x, b.p.y - y))[0];
   if (hit && s.found.includes(hit.i)) return;
   if (hit) {
     s.found.push(hit.i);
@@ -3503,7 +3508,7 @@ $('goSearch').addEventListener('click', () => {
     <p class="lore">${diff ? 'あなたの記憶にある光景と、目の前の光景。どこかが、少しずつ食いちがっている。' : st.missionText}</p>
     <p class="muted">${diff ? `2枚の絵の<b>ちがい ${diffCount(S.ch)}か所</b>を探す。` : `リストの品 ${findCount(S.ch)}つを探す。`}</p>
     <button class="btn primary" type="button" data-go>${diff ? '見くらべる' : '探しはじめる'}</button>
-    <button class="btn tiny" type="button" data-help="${kind}">遊び方を見る</button>
+    <button class="btn pair" type="button" data-help="${kind}">遊び方を見る</button>
   `, () => { S.search = newSearch(S.ch); hideOverlay(); setView('search'); });
   $('panel').querySelector('[data-help]').addEventListener('click', () => showHelp(kind, false, () => $('goSearch').click()));
 });
@@ -3997,7 +4002,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.53';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.54';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
