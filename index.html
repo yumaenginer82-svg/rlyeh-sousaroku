@@ -721,7 +721,13 @@ body.focus .top{display:none}
   .find img{width:100%;height:auto;aspect-ratio:1}
   .mbtns{flex-direction:column}
 }
-.panel [data-later]{min-width:180px;min-height:44px;margin-top:8px}   /* the "later" of the search-ready window */
+/* Window buttons share one size: the main one and its alternative (e.g. "stay in town" of the search-ready window) */
+/* The journal's reading boxes keep one height whatever the text (a long note scrolls inside), so nothing below them moves */
+.lorebox{height:150px;flex:none;box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain}
+.figbox{height:128px;flex:none;box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain}
+.lorebox > small,.figbox > small{align-self:center;margin:auto}
+.panel > .btn.primary,.panel [data-later]{min-width:240px;height:56px;padding-top:0;padding-bottom:0;box-sizing:border-box}
+.panel [data-later]{font-family:var(--f-display);font-size:17px;letter-spacing:.06em;margin-top:8px}
 /* Frames only where they mean something: the board keeps its frame; the header, requests and info panel are plain
    tinted areas, and a request gets a border only for its state (ready, rare, climax, clash). */
 .top,.info{border-color:transparent;box-shadow:none}
@@ -1935,9 +1941,9 @@ function searchReadyNotice(line) {
       <p class="kicker">現場検証 ${stageOf() + 1} / ${STAGES} ―― ${STAGE_NAMES[stageOf()]}</p>
       <h2>現場検証へ行けるようになった</h2>
       <p class="lore">${line}${diff ? '記憶の中の光景と、いまの光景を見くらべに行こう。' : '現場で、手がかりの品を探しだそう。'}</p>
-      <button class="btn primary" type="button" data-go>いますぐ向かう</button>
-      <button class="btn" type="button" data-later>あとで</button>
-      <p class="muted">「あとで」にしても、上の <b>🔎 現場検証へ</b> からいつでも行ける。</p>
+      <button class="btn primary" type="button" data-go>現場へ向かう</button>
+      <button class="btn" type="button" data-later>もう少し町に残る</button>
+      <p class="muted">町に残っても、上の <b>🔎 現場検証へ</b> からいつでも向かえる。</p>
     `, () => { hideOverlay(); $('goSearch').click(); });
     $('panel').querySelector('[data-later]').addEventListener('click', hideOverlay);
   };
@@ -3814,11 +3820,13 @@ function showDex() {
   $('panel').querySelectorAll('[data-fig]').forEach(b => b.addEventListener('click', () => {
     const i = +b.dataset.fig, F = FIGS[i];
     $('figbox').innerHTML = `<span class="lart">${figArt(i)}</span><div><b>${F.n}<small>${FIG_TIERS[F.t].n}の像</small></b><p>${F.d}</p></div>`;
+    $('figbox').scrollTop = 0;
   }));
   if ($('jEnd')) $('jEnd').addEventListener('click', () => { hideOverlay(); showEnding(true); });
   $('panel').querySelectorAll('[data-lore]').forEach(b => b.addEventListener('click', () => {
     const [c, t] = b.dataset.lore.split('-').map(Number), it = ITEM(c, t);
     $('lorebox').innerHTML = `<span class="lart">${it[0]}</span><div><b>${it[1]}<small>${CHAINS[c].name} Lv${t + 1}</small></b><p class="flav">${it[2]}</p><p>${ITEM_LORE[c][t]}</p></div>`;
+    $('lorebox').scrollTop = 0;
     $('panel').querySelectorAll('.dexitem.on').forEach(x => x.classList.remove('on'));
     b.classList.add('on');
     $('lorebox').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -3873,7 +3881,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.47';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.48';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
