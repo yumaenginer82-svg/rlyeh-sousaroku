@@ -628,6 +628,33 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
 .panel p,.panel li,.lore,.info p,.page small,.good small,.shard small,.figbox p,.lorebox p,details.myth p,.eline,.wline,.disc b,.toast,.rollin p{
   line-break:strict;word-break:auto-phrase;text-wrap:pretty;overflow-wrap:anywhere}
 .panel h2,.kicker,.tname{word-break:auto-phrase;text-wrap:balance}
+/* Portrait merge screen: every pixel of height the panels give up widens the 7x9 board too */
+@media not all and (orientation:landscape) and (min-width:860px){
+  .app{gap:6px}
+  .merge{gap:6px}
+  .top{flex-wrap:nowrap;gap:8px;padding:6px 10px}
+  .top .brand{display:none}
+  .chapter{flex-direction:column;gap:0;flex:none}
+  .chapter span{font-size:10px;line-height:1.2}
+  .chapter b{font-size:15px;line-height:1.2}
+  .prog{flex:1 1 auto;min-width:0;gap:6px}
+  .prog span{font-size:11px;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .prog .pbar{min-width:40px}
+  .seals .sm{width:14px;height:14px}
+  .top .res{gap:4px}
+  .top .pill{font-size:13px;padding:1px 8px 1px 2px}
+  .top .pill img.uic{width:26px;height:26px}
+  .hbtns{gap:4px}
+  /* request cards: name and line share one row beside a smaller face */
+  .npc img.face{width:30px;height:30px}
+  .npc .whot{flex-direction:row;align-items:baseline;gap:6px}
+  .npc .nm{flex:none;max-width:45%}
+  .order{padding:5px 7px;gap:3px}
+  .need{width:42px;height:42px}
+  .info{height:76px;padding:4px 10px}
+}
+/* The search button floats over the bottom of the board instead of taking its own row */
+#mwrap #goSearch{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:4;max-width:calc(100% - 20px);white-space:nowrap}
 /* Searching: the header steps aside so the picture gets the screen */
 body.focus .app{grid-template-rows:minmax(0,1fr)}
 body.focus .top{display:none}
@@ -650,10 +677,10 @@ body.focus .top{display:none}
 .orow .foot{flex-direction:column;align-items:flex-end;gap:3px;flex:none}
 /* Portrait (tablet or phone): squeeze the panels, not the controls, so the board and the scene get the height */
 @media not all and (orientation:landscape) and (min-width:860px){
-  .view{gap:8px}
-  .order{padding:6px 8px;gap:4px}
-  .npc img.face{width:34px;height:34px}
-  .info{height:86px;padding:6px 12px}
+  .view{gap:6px}
+  .order{padding:5px 7px;gap:3px}
+  .npc img.face{width:30px;height:30px}
+  .info{height:76px;padding:4px 10px}
   .info .big{width:48px}
   .info .big .ic,.info .big img.face{width:46px;height:46px}
   .mission{padding:8px 12px;gap:6px 12px}
@@ -3206,6 +3233,8 @@ function setView(v) {
 $('backBtn').addEventListener('click', () => setView('merge'));
 // The seek-and-find buttons live on the picture (see .sview .mbtns), freeing the row they used to take.
 $('sview').appendChild(document.querySelector('#searchView .mbtns'));
+// The search button sits on the board (see #mwrap #goSearch), so it never steals a row from it.
+$('mwrap').appendChild($('goSearch'));
 $('goSearch').addEventListener('click', () => {
   if (S.search) { setView('search'); return; }
   // The how-to lives on the help page; it opens by itself only the first time a kind of search comes up.
@@ -3710,7 +3739,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.36';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.37';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
