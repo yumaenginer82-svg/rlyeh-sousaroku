@@ -89,7 +89,8 @@ window.PB = (() => {
     let pool = H.items.slice(); for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
     pool = pool.filter(it => !ex.includes(it.id)).concat(pool.filter(it => ex.includes(it.id)));
     const chosen = pool.slice(0, Math.min(count, pool.length));
-    const many0 = pool.filter(it => it.at.length >= 3), fresh = many0.filter(it => !ex.includes(it.id)), many = fresh.length ? fresh : many0;
+    const spread = it => it.at.every((a, i) => it.at.every((b, j) => i === j || Math.hypot(a[0] - b[0], a[1] - b[1]) > H.w * .08));
+    const many0 = pool.filter(it => it.at.length >= 3 && spread(it)), fresh = many0.filter(it => !ex.includes(it.id)), many = fresh.length ? fresh : many0;
     const all = many.length ? many[Math.floor(R() * many.length)] : null;
     if (all && !chosen.includes(all)) chosen[chosen.length - 1] = all;
     const sv = $('sview'), L = $('slayer');

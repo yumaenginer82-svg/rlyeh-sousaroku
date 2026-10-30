@@ -291,7 +291,7 @@ img.uic{display:inline-block;width:26px;height:26px;object-fit:contain;vertical-
 .top .pill{display:inline-flex;align-items:center;gap:5px;padding:2px 12px 2px 4px;border-radius:999px;color:#f1dfae;font-size:15px;
   background:linear-gradient(180deg,#3a2f1c,#1d170d);border:1px solid #8a6d2a;box-shadow:inset 0 1px 0 rgba(255,230,170,.25),inset 0 -2px 4px rgba(0,0,0,.6),0 2px 0 var(--ink)}
 .top .pill img.uic{width:30px;height:30px}
-.btn.hb{gap:5px;padding:4px 12px 4px 6px;color:#f1dfae;font-family:var(--f-display);letter-spacing:.06em;border-radius:10px;
+.btn.hb{gap:5px;padding:4px 8px;min-width:46px;min-height:44px;color:#f1dfae;font-family:var(--f-display);letter-spacing:.06em;border-radius:10px;
   background:linear-gradient(180deg,#46391f 0%,#2a2113 55%,#1b150c 100%);border:1px solid #9a7b35;
   box-shadow:inset 0 1px 0 rgba(255,230,170,.3),inset 0 -2px 5px rgba(0,0,0,.55),0 3px 0 var(--ink);text-shadow:0 1px 0 #000}
 .btn.hb img.uic{width:28px;height:28px}
@@ -301,6 +301,19 @@ img.uic{display:inline-block;width:26px;height:26px;object-fit:contain;vertical-
 .btn.hb.snd.off::after{content:"";position:absolute;left:18%;right:18%;top:50%;height:2px;background:var(--stripe);transform:rotate(-40deg);border-radius:2px;box-shadow:0 0 0 1px #000}
 .btn.hb.snd{position:relative}
 #eyeBtn img.uic{width:26px;height:26px}
+
+/* Getting a seal shard */
+.shardget{position:relative;width:200px;height:200px;display:grid;place-items:center}
+.shardget .ic{position:relative;width:160px;height:160px;filter:drop-shadow(0 0 24px rgba(232,196,104,.9));animation:shardrise 1.2s cubic-bezier(.2,1.4,.4,1) both}
+.shardget .rays{position:absolute;inset:-30px;border-radius:50%;background:repeating-conic-gradient(rgba(255,230,160,.0) 0 10deg,rgba(255,230,160,.22) 10deg 16deg);animation:swirl 9s linear infinite,shardfade 1.2s ease both;
+  -webkit-mask:radial-gradient(circle,#000 30%,transparent 70%);mask:radial-gradient(circle,#000 30%,transparent 70%)}
+@keyframes shardrise{0%{transform:translateY(40px) scale(.4);opacity:0}100%{transform:none;opacity:1}}
+@keyframes shardfade{from{opacity:0}to{opacity:1}}
+.shardrow{display:flex;gap:6px;justify-content:center}
+.shardrow span{width:40px;height:40px;border-radius:50%;border:2px dashed #3d5a56;display:grid;place-items:center;background:#071012}
+.shardrow span.got{border-style:solid;border-color:var(--gold)}
+.shardrow span.new{box-shadow:0 0 14px rgba(232,196,104,.9);animation:smpulse 1.4s ease-in-out infinite}
+.shardrow .ic{width:32px;height:32px}
 
 /* Sena, the very rare guest: a gold card with a light sweeping across it */
 .order.rare{border-color:#f0c860;background:linear-gradient(160deg,#3a2c10,var(--paper) 70%);overflow:hidden;
@@ -540,7 +553,10 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
 @keyframes drift{0%,100%{transform:translateX(-3%) scale(1)}50%{transform:translateX(3%) scale(1.04)}}
 .cell .stone .e,.info .big.stone .ic{filter:grayscale(1) brightness(.75) contrast(1.2) drop-shadow(0 0 2px #000)}
 .cell .stone::after{content:"";position:absolute;inset:10%;border-radius:20%;background:repeating-linear-gradient(35deg,transparent 0 9px,rgba(0,0,0,.35) 9px 11px);pointer-events:none}
-.stone-ic{display:block;font-style:normal;font-family:var(--f-display);font-size:18px;color:#aab;background:#3a4044;border-radius:8px;width:30px;margin:0 auto}
+.stone-ic{display:block;width:32px;height:32px;margin:0 auto;position:relative}
+.stone-ic .ic{width:100%;height:100%;filter:grayscale(1) brightness(.8) contrast(1.25) drop-shadow(0 0 1px #000)}
+.stone-ic::after{content:"";position:absolute;inset:8%;border-radius:20%;background:repeating-linear-gradient(35deg,transparent 0 5px,rgba(0,0,0,.4) 5px 6px);pointer-events:none}
+.tver{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));margin:0;font-size:11px;letter-spacing:.1em;opacity:.55;font-family:var(--f-display)}
 .cell .tent .asks{position:absolute;right:2%;top:2%;width:42%;height:42%;background:var(--paper);border:2px solid var(--stripe);border-radius:50%;padding:2px;display:grid;place-items:center}
 .cell .tent .asks .ic{width:100%;height:100%}
 .cell .tent .e{animation:sway 3s ease-in-out infinite}
@@ -607,6 +623,8 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
   .info .big{font-size:34px;width:42px}
   .card{width:44px;height:44px;font-size:28px}
 }
+/* Tablets: popups may use more of the width */
+@media (min-width:700px){.panel{width:min(680px,100%);padding:30px 32px 24px}.how li{font-size:16px}}
 /* Request cards: items and the delivery button share one row */
 .orow{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
 .orow .foot{flex-direction:column;align-items:flex-end;gap:3px;flex:none}
@@ -650,9 +668,9 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
     <div class="hbtns">
       <button id="storeBtn" class="btn small hb" type="button" aria-label="封印の櫃（しまっておく場所）"><img class="uic" src="assets/x-vault.png" alt="">櫃 <b id="storeN">0</b></button>
       <button id="inboxBtn" class="btn small hb" type="button" aria-label="もらったアイテムを出す"><img class="uic" src="assets/x-gift.png" alt=""><b id="inboxN">0</b></button>
-      <button id="dayBtn" class="btn small hb" type="button" aria-label="今日の異変"><img class="uic" src="assets/m-2-5.png" alt="">今日</button>
-      <button id="shopBtn" class="btn small hb" type="button" aria-label="骨董商の店"><img class="uic" src="assets/x-ui-shop.png" alt="">店</button>
-      <button id="dexBtn" class="btn small hb" type="button"><img class="uic" src="assets/x-ui-book.png" alt="">手帳</button>
+      <button id="dayBtn" class="btn small hb" type="button" aria-label="今日の異変"><img class="uic" src="assets/m-2-5.png" alt="今日の異変"></button>
+      <button id="shopBtn" class="btn small hb" type="button" aria-label="骨董商の店"><img class="uic" src="assets/x-ui-shop.png" alt="骨董商の店"></button>
+      <button id="dexBtn" class="btn small hb" type="button" aria-label="調査手帳"><img class="uic" src="assets/x-ui-book.png" alt="調査手帳"></button>
       <button id="mute" class="btn small hb snd" type="button" aria-label="音のオン・オフ"><img class="uic" src="assets/x-ui-sound.png" alt=""></button>
     </div>
   </header>
@@ -714,6 +732,7 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
     <div class="tbtns" id="tbtns"></div>
   </div>
   <p class="tfoot">ホーム画面に追加すると、アプリのように遊べます</p>
+  <p class="tver" id="tver"></p>
 </div>
 <div class="ending" id="ending" hidden>
   <div class="ebg"></div><div class="eshade"></div>
@@ -802,19 +821,19 @@ const NPCS = [
 const LINES = {
   '探偵ダニエル': [['記者の足どりを追うのに、これが要る。', '手がかりになりそうな品を集めてくれ。'], ['助かった。これで一歩前進だ。', 'さすがだな。きみに頼んでよかった。']],
   'アーミテッジ教授': [['研究のために、この品を調べたいの。', '文献と照らし合わせたい品があるのです。'], ['すばらしい。やはり記録どおりだわ。', 'これで、また一つ謎が解けそう。']],
-  '老漁師ザドック': [['一杯おごるかわりに、こいつを持ってきな。', '昔話の続きを聞きたけりゃ、これだ。'], ['ひっひ…あんた、見どころがあるのう。', 'よし、ではあの晩の話をしてやろう。']],
+  '老漁師ザドック': [['一杯おごるかわりに、こいつを持ってきな。', '昔話の続きを聞きたけりゃ、これだ。'], ['ひっひ…あんた、見どころがあるのう。', 'よし、ではあの晩の話をしてやろう。', 'そういや、耳のでかい小さな犬が、暗礁のほうを向いてずっと吠えておったぞ。']],
   '保安官マーシュ': [['町の決まりでね。これを出してもらう。', 'よそ者でも、役に立つなら使ってあげる。'], ['……まあ、いいでしょう。', '余計なことは嗅ぎまわらないことね。']],
   '画家ウィルコックス': [['夢で見たものを描くのに、これが要るんだ。', 'この形…夢に出てきた。どうか持ってきて。'], ['ああ、これだ！ 夢のとおりだ…', 'ありがとう。今夜はもっと深く描ける。']],
   '町医者ハリエット': [['診療に使うの。手を貸してくださる？', '町の人の具合が悪いの。これが要るわ。'], ['ありがとう。これで何人か助けられる。', 'あなたも、体には気をつけて。']],
-  '灯台守エズラ': [['灯りを絶やすわけにはいかん。これを頼めるか。', '沖の光の正体を確かめたい。これがいるんじゃ。'], ['助かった。今夜も灯りは守られる。', '……沖の光が、少し遠のいた気がするのう。']],
-  '古書店のアビゲイル': [['父の本を読み解くのに、これが必要なの。', 'お店の棚がひとつ空いてしまって。これを探してくれる？'], ['ありがとう。父も喜ぶと思う。', 'この本、あなたに読んでほしい気もするの……いいえ、やっぱりだめ。']],
-  '聖歌隊のトビー': [['神父さまに頼まれたんだ。これ、見つけてくれる？', 'あの歌を忘れたいんだ。これがあれば、きっと……'], ['ありがとう！ 今夜はぐっすり眠れそう。', 'ねえ、あなたにも聞こえる？ 海のほうから……ううん、なんでもない。']],
+  '灯台守エズラ': [['灯りを絶やすわけにはいかん。これを頼めるか。', '沖の光の正体を確かめたい。これがいるんじゃ。'], ['助かった。今夜も灯りは守られる。', '……沖の光が、少し遠のいた気がするのう。', '昨夜、灯台の下を小さな犬が駆けていった。何かを追いかけるようにな。']],
+  '古書店のアビゲイル': [['父の本を読み解くのに、これが必要なの。', 'お店の棚がひとつ空いてしまって。これを探してくれる？'], ['ありがとう。父も喜ぶと思う。', 'この本、あなたに読んでほしい気もするの……いいえ、やっぱりだめ。', 'お店の前に、小さな足あとがあったの。あなたの探している子じゃない？']],
+  '聖歌隊のトビー': [['神父さまに頼まれたんだ。これ、見つけてくれる？', 'あの歌を忘れたいんだ。これがあれば、きっと……'], ['ありがとう！ 今夜はぐっすり眠れそう。', 'ねえ、あなたにも聞こえる？ 海のほうから……ううん、なんでもない。', 'きのう、耳がぴんと立った犬を見たよ！ 海のほうへ走っていっちゃった。']],
   '密輸船のブラック船長': [['荷を一つ落としちまってな。代わりを探してくれ。', '口は堅いほうか？ なら、こいつを用意してくれ。'], ['上出来だ。分け前ははずむぜ。', '暗礁には近づくなよ。あそこで泳いでるのは、魚じゃねえ。']],
   '編集長ハーグレイヴ': [['記者の原稿を確かめたい。これが手がかりになる。', '記事にできるかどうか、これを見てから決める。'], ['ふむ……やはりあいつの書いたことは本当だったのか。', '助かる。だが、このことはまだ記事にはできん。']],
   '学生ピーズリー': [['教授に頼まれた資料なんです。お願いできますか？', '伝承の裏づけに、これがどうしても必要で。'], ['ありがとうございます！ 論文が一歩進みました。', 'この町の人たち、ぼくのこと、ずっと見てる気がするんです。']],
 };
 // The very rare guest: Sena the Yorkshire Terrier. Each visit adds a page to her album in the journal.
-const SENA = { n: 'ヨークシャテリア セナ', d: 'どこからともなく現れる、小さなヨークシャテリア。大きな耳で、人には聞こえない海の歌を聞いているらしい。' };
+const SENA = { n: 'ヨークシャテリア セナ', d: 'あなたの相棒のヨークシャテリア。町に着いた夜、何かを追って霧の中へ消えた。ときどき姿を見せては、また駆けていく。' };
 LINES[SENA.n] = [['わん！（何かを探してほしいみたいだ）', 'くぅん……（じっとこちらを見上げている）'], ['わんわん！（しっぽをぶんぶん振っている）', '（うれしそうに足もとをくるくる回っている）']];
 const SENA_ALBUM = [
   { n: 'はじめての出会い', d: 'はじめて出会った日のセナ。大きな耳が、ぴんと立っていた。' },
@@ -835,7 +854,7 @@ const FACE = (n, cls = '') => `<img class="face ${cls}" src="${picOf(n)}" alt=""
 // Who a client is, by name (saved orders only keep the name).
 const whoIs = n => ([...NPCS, ...BOSSES, bossOf(99), MERCHANT, SENA].find(p => p.n === n) || {}).d || '';
 const askOf = o => o.boss ? bossOf(S.ch).say : LINES[o.npc.n] ? LINES[o.npc.n][0][o.id % 2] : '';
-const thanksOf = o => LINES[o.npc.n] ? LINES[o.npc.n][1][rnd(2)] : '…いいだろう。';
+const thanksOf = o => LINES[o.npc.n] ? pick(LINES[o.npc.n][1]) : '…いいだろう。';
 
 /* ---- Mythos notes: one per item in the dex, plus a guide that opens chapter by chapter (or from the dealer) ---- */
 const ITEM_LORE = [
@@ -985,8 +1004,8 @@ function senaVisit() {
     <p class="kicker">特別な依頼主</p>
     <div class="senapic"><img class="ic" src="assets/x-sena${i}.png" alt=""></div>
     <h2>${fresh ? SENA_ALBUM[i].n : 'またね、セナ'}</h2>
-    <p class="lore">${fresh ? SENA_ALBUM[i].d : 'セナはしっぽを振って、霧の向こうへ駆けていった。足あとに、小さな金貨が落ちていた。'}</p>
-    <p class="muted">${fresh ? `手帳の「セナのアルバム」に1枚加わった（${S.sena} / ${SENA_ALBUM.length}）` : 'アルバムはもう全部そろっている。かわりに 🪙200 と 👁️1'}</p>
+    <p class="lore">${fresh ? SENA_ALBUM[i].d : 'セナはしっぽを振って、また霧の向こうへ駆けていった。何かを追っているようだ。足あとに、小さな金貨が落ちていた。'}</p>
+    <p class="muted">${fresh ? `セナは何かを伝えたそうにこちらを見てから、また霧の中へ駆けていった。<br>手帳の「セナのアルバム」に1枚加わった（${S.sena} / ${SENA_ALBUM.length}）` : 'アルバムはもう全部そろっている。かわりに 🪙200 と 👁️1'}</p>
     <button class="btn primary" type="button" data-go>なでてあげる</button>
   `, hideOverlay);
 }
@@ -996,38 +1015,38 @@ const RESEARCH = [
   { id: 'gen', n: '道具の改良', d: '道具から素材が2つ出ることがある（1段階ごとに +8%）', cost: [200, 500, 1000, 2000, 4000] },
   { id: 'order', n: '町の信頼', d: '依頼をこなすと、★がひとつ多くもらえることがある（+12%ずつ）', cost: [400, 1200, 3000] },
   { id: 'chest', n: '目利き', d: '宝箱から、ひとつ上の段階の品が出やすくなる（+12%ずつ）', cost: [500, 1500, 3500] },
-  { id: 'eye', n: '千里眼の研鑽', d: '千里眼で減る正気度が小さくなる（12 → 9 → 6 → 3）', cost: [300, 900, 2400] },
+  { id: 'eye', n: '千里眼の研鑽', d: '千里眼の光が、品やちがいの場所により近く光る（-30%ずつ）', cost: [300, 900, 2400] },
   { id: 'san', n: '鋼の精神', d: 'まちがえたタップで減る正気度が小さくなる（6 → 5 → 4）', cost: [600, 2000] },
   { id: 'luck', n: '頁の嗅覚', d: '頁の切れ端が見つかりやすくなる（+50%ずつ）', cost: [300, 900, 2500] },
 ];
 const resLv = id => (S && S.res && S.res[id]) || 0;
 const STORY = [
   { title: '霧の港町',
-    intro: '行方不明になった記者を追って、あなたは寂れた港町インスマスへやって来た。町の人々はよそ者に冷たい。まずは依頼をこなして、信頼を集めよう。',
+    intro: '行方不明になった記者を追って、あなたは寂れた港町インスマスへやって来た。相棒のヨークシャテリア、セナは、町に着いた夜、何かのにおいを追って霧の中へ駆けていったきり戻らない。町の人々はよそ者に冷たい。まずは依頼をこなして、信頼を集めよう。',
     mission: '酒場の証拠品', missionText: '記者が最後に立ち寄った酒場。がらくただらけの店内に、密売人の手がかりがまぎれている。',
     outro: '密売人の荷から、奇妙な金の冠が見つかった。人の頭には合わない、いびつな形だ。' },
   { title: '金の冠',
-    intro: '冠の出どころを調べるうち、町はずれの古い教会が浮かんできた。老漁師ザドックは、酒が入ると昔話を始める。',
+    intro: '冠の出どころを調べるうち、町はずれの古い教会が浮かんできた。老漁師ザドックは、酒が入ると昔話を始める。朝市では、耳の大きな小犬が魚屋の前を駆けぬけていった、という噂を聞いた。',
     mission: '朝市の落とし物', missionText: '教会の使い走りが、朝市で荷をばらまいて逃げた。散らばった品を探しだせ。',
     outro: '使い走りは「ダゴン秘密教団」の名を口にして、逃げていった。' },
   { title: 'ダゴン秘密教団',
-    intro: '教団は、海の底の「何か」に祈りを捧げているという。教授は古い文献に、よく似た儀式の記録を見つけた。',
+    intro: '教団は、海の底の「何か」に祈りを捧げているという。教授は古い文献に、よく似た儀式の記録を見つけた。集会所へ向かう道に、金色の毛が一筋、落ちていた。',
     mission: '夜の集会所', missionText: '集会が終わったあとの集会所。祭具の山から、儀式の証拠を見つけだせ。',
     outro: '祈りの言葉は、どの国の言葉でもなかった。何人もが、沖の暗礁を指さしていた。' },
   { title: '悪魔の暗礁',
-    intro: '沖に黒く浮かぶ岩礁。満月の夜になると、そこへ舟を出す者たちがいる。',
+    intro: '沖に黒く浮かぶ岩礁。満月の夜になると、そこへ舟を出す者たちがいる。波止場の霧の向こうから、聞きおぼえのある小さな遠吠えがした。',
     mission: '満月の波止場', missionText: '波止場に積まれた荷の中に、暗礁へ運ばれる品がまぎれている。',
     outro: '暗礁の上で、人ではない影が泳いでいるのを見た。' },
   { title: '深きものども',
-    intro: '町の人々の顔つきが、少しずつ魚に似ていく理由が、わかりかけてきた。',
+    intro: '町の人々の顔つきが、少しずつ魚に似ていく理由が、わかりかけてきた。祭りの人混みの向こうに、ぴんと立った二つの耳が見えた気がした。',
     mission: '仮面の祭り', missionText: '祭りのにぎわいの中に、「深きもの」が残した品がまぎれている。',
     outro: '仮面の下の顔は、もう人のものではなかった。そしてそこに、記者の手帳が落ちていた。' },
   { title: 'ルルイエの夢',
-    intro: '手帳の最後のページには、海に沈んだ都の地図が描かれていた。その夜から、あなたも同じ夢を見る。',
+    intro: '手帳の最後のページには、海に沈んだ都の地図が描かれていた。その夜から、あなたも同じ夢を見る。夢の都の石段に、小さな足あとが点々と続いている。セナは、ずっと先を歩いている。',
     mission: '夢の都', missionText: 'ゆがんだ夢の都に、行方不明の記者の持ち物が散らばっている。',
     outro: '記者の手を引いた瞬間、目が覚めた。机の上には、濡れた海藻が残っていた。そして夜空では、星々がゆっくりと、正しい位置へ動きはじめていた…' },
   { title: '星辰の刻',
-    intro: '星々が正しい位置にそろった。沖の海が割れ、沈んだ都ルルイエが姿を現しはじめる。町の人々の力を借りて、都を再び眠りへ還す「三つの封印の品」を集めよう。',
+    intro: '星々が正しい位置にそろった。沖の海が割れ、沈んだ都ルルイエが姿を現しはじめる。町の人々の力を借りて、都を再び眠りへ還す「三つの封印の品」を集めよう。都の門の前で、セナが振り返って、こちらを待っていた。',
     mission: '浮上する都', missionText: '海から浮かび上がった都。濡れた石のあいだに、封印の手がかりが眠っている。',
     outro: '' },
 ];
@@ -1057,7 +1076,8 @@ const GIMMICKS = {
 };
 const gimmicksOf = ch => [[], ['fog'], ['stone'], ['tent'], ['fog', 'tent'], ['stone', 'tent']][ch] || [['fog', 'stone'], ['fog', 'tent'], ['stone', 'tent']][ch % 3];
 // Seek-and-find rating: misses and the clairvoyant eye cost sanity; how much is left sets the stars.
-const missCost = () => 6 - resLv('san'), eyeCost = () => 12 - 3 * resLv('eye');
+// The clairvoyant eye costs only the eye itself; sanity falls only on wrong taps.
+const missCost = () => Math.max(1, (6 - resLv('san')) * (modOn('calm') ? .5 : 1)), eyeCost = () => 0;
 const sanOf = s => Math.max(0, 100 - missCost() * (s.miss || 0) - eyeCost() * (s.eyes || 0));
 const rateOf = san => san >= 75 ? 3 : san >= 45 ? 2 : 1;
 const RATE_COINS = ch => [0, 0, 20 + 10 * ch, 50 + 25 * ch].map(v => v * (modOn('dream') ? 2 : 1));
@@ -1103,7 +1123,7 @@ const DAY_MODS = [
   { id: 'market', n: '古書市', d: '骨董商の店の品が、すべて3割引。' },
   { id: 'fog', n: '濃霧', d: 'しかけを解いたほうびが2倍。' },
   { id: 'stars', n: '星辰の夜', d: '依頼でもらえる🪙が3割増し。' },
-  { id: 'calm', n: '凪', d: '千里眼を使っても、正気度が減らない。' },
+  { id: 'calm', n: '凪', d: 'まちがえたタップで減る正気度が半分になる。' },
   { id: 'dream', n: '夢見の日', d: '現場検証の評価ボーナスが2倍。' },
 ];
 const DAY_TASKS = [
@@ -1481,7 +1501,9 @@ function layoutHidden(s, th) {
   pool = pool.filter(it => !ex.includes(it.id)).concat(pool.filter(it => ex.includes(it.id)));
   const chosen = pool.slice(0, Math.min(findCount(s.ch), pool.length));
   // One "find them all" item: something the picture holds several of; every copy must be found.
-  const many0 = pool.filter(it => it.at.length >= 3), fresh = many0.filter(it => !ex.includes(it.id)), many = fresh.length ? fresh : many0;
+  // "Find them all" only for things scattered around the picture: copies bunched together can't be told apart by a finger.
+  const spread = it => it.at.every((a, i) => it.at.every((b, j) => i === j || Math.hypot(a[0] - b[0], a[1] - b[1]) > H.w * .08));
+  const many0 = pool.filter(it => it.at.length >= 3 && spread(it)), fresh = many0.filter(it => !ex.includes(it.id)), many = fresh.length ? fresh : many0;
   const all = many.length ? many[Math.floor(R() * many.length)] : null;
   if (all && !chosen.includes(all)) chosen[chosen.length - 1] = all;
   const T = chosen.map((it, n) => {
@@ -2277,6 +2299,7 @@ function renderOrders() {
   const bossKeys = new Set(S.boss ? S.boss.need.map(n => key(n.c, n.t)) : []);
   const clash = o => !o.boss && o.need.some(n => bossKeys.has(key(n.c, n.t)));
   const html = [S.boss, ...S.orders].filter(Boolean).map(o => {
+    if (!(S.met = S.met || []).includes(o.npc.n)) S.met.push(o.npc.n);
     const used = {};
     let ready = true;
     const needs = o.need.map(n => {
@@ -2460,13 +2483,14 @@ function shopGoods() {
   ].filter(Boolean).map(g => Object.assign(g, { cost: Math.round(g.cost * (modOn('market') ? .7 : 1)) }));
 }
 function showShop(line) {
+  if (!(S.met = S.met || []).includes(MERCHANT.n)) S.met.push(MERCHANT.n);
   const goods = shopGoods();
   showOverlay(`
     <div class="portrait">${FACE(MERCHANT.n)}</div>
     <p class="kicker">骨董商の店</p>
     <h2>${MERCHANT.n}</h2>
     <p class="lore">「${line || SHOP_LINES[rnd(SHOP_LINES.length)]}」</p>
-    <button class="btn gold dicebtn" type="button" id="toDice"><img class="ic" src="assets/x-die.png" alt="">星辰の賽を振る（ミニチュアの像）</button>
+    <button class="btn gold dicebtn" type="button" id="toDice"><img class="ic" src="assets/x-die.png" alt="">星辰の賽を振る</button>
     <p class="muted">手持ち 🪙${S.coins}</p>
     <div class="goods">${goods.map(g => `<div class="good"><span class="gart">${g.art}</span><div><b>${g.n}</b><small>${g.d}</small></div>
       <button class="btn tiny gold" type="button" data-buy="${g.id}" ${S.coins < g.cost ? 'disabled' : ''}>🪙${g.cost}</button></div>`).join('')}</div>
@@ -2926,7 +2950,8 @@ function paintSan(el, san, scene) {
   el.innerHTML = `<b>正気度</b><span class="sbar"><i style="width:${san}%"></i></span><em>${san}</em><span class="srate">${starsText(r)}</span>`;
   scene.classList.toggle('shaken', san < 45);
   if (san < prev) {
-    [el, scene].forEach(x => { x.classList.remove('hit'); void x.offsetWidth; x.classList.add('hit'); });
+    // the shake plays once; leaving the class on would replay it whenever the view is shown again
+    [el, scene].forEach(x => { x.classList.remove('hit'); void x.offsetWidth; x.classList.add('hit'); x.addEventListener('animationend', () => x.classList.remove('hit'), { once: true }); });
     if (san < 45) osc(55, { type: 'sine', vol: .12, dur: .35, slide: .7 });   // a low thump
   }
 }
@@ -2955,7 +2980,8 @@ function useEye() {
   const pt = pick(left), r = sv.getBoundingClientRect();
   const done = (S.search.parts || {})[pt.t] || [];
   const t = (pt.at || [pt]).find((p, n) => !done.includes(n)) || pt;   // for "find them all", a copy not yet found
-  const ox = (Math.random() - .5) * t.s * 2.2, oy = (Math.random() - .5) * t.s * 2.2;
+  const near = 1 - .3 * resLv('eye');   // research brings the glow closer to the spot
+  const ox = (Math.random() - .5) * t.s * 2.2 * near, oy = (Math.random() - .5) * t.s * 2.2 * near;
   V.z = Math.min(V.max, Math.max(V.z, V.min * 3));
   V.x = r.width / 2 - (t.x + ox) * V.z;
   V.y = r.height / 2 - (t.y + oy) * V.z;
@@ -2999,14 +3025,25 @@ async function renderDiff() {
     cells.push({ x: x + C / 2, y: y + C / 2, v: sq / n - m * m });
   }
   cells.sort((a, b) => b.v - a.v);
-  const R = mulberry(s.seed), top = cells.slice(0, Math.floor(cells.length * .35));
+  // Four kinds, as in printed spot-the-difference puzzles: something is gone, something was added, a colour changed,
+  // or a different thing stands in its place. Nothing is ever mirrored or turned upside down.
+  const R = mulberry(s.seed), n = cells.length, top = cells.slice(0, Math.floor(n * .35)), calm = cells.slice(Math.floor(n * .5), Math.floor(n * .85));
   const want = diffCount(s.ch), pts = [], minD = Math.min(W, H) / (want > 6 ? 4.2 : 3.6);
-  for (let tries = 0; pts.length < want && tries < 4000; tries++) {
-    const c = top[Math.floor(R() * top.length)];
-    if (pts.every(p => Math.hypot(p.x - c.x, p.y - c.y) > minD)) pts.push({ x: c.x, y: c.y, r: 34 + Math.floor(R() * 14) });
+  const KINDS = ['gone', 'hue', 'add', 'swap', 'gone', 'hue', 'add', 'swap'];
+  for (let i = KINDS.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [KINDS[i], KINDS[j]] = [KINDS[j], KINDS[i]]; }
+  const pickFrom = (list, ok) => { for (let t = 0; t < 600; t++) { const c = list[Math.floor(R() * list.length)]; if (ok(c)) return c; } return null; };
+  const far = c => pts.every(p => Math.hypot(p.x - c.x, p.y - c.y) > minD);
+  for (let i = 0; pts.length < want && i < want * 3; i++) {
+    const k = KINDS[pts.length % KINDS.length], r = 34 + Math.floor(R() * 14);
+    const at = pickFrom(k === 'add' ? calm : top, far);
+    if (!at) continue;
+    // where the new look comes from: a quiet patch to cover with, or a busy patch elsewhere to copy in
+    const src = k === 'gone' ? calm.slice().sort((a, b) => Math.hypot(a.x - at.x, a.y - at.y) - Math.hypot(b.x - at.x, b.y - at.y)).find(c => Math.hypot(c.x - at.x, c.y - at.y) > r * 2.2)
+      : k === 'hue' ? at : pickFrom(top, c => Math.hypot(c.x - at.x, c.y - at.y) > r * 4);
+    if (!src) continue;
+    pts.push({ x: at.x, y: at.y, r, k, sx: src.x, sy: src.y });
   }
-  const KINDS = ['gone', 'hue', 'flip', 'tint', 'rot', 'gone'];
-  pts.forEach((p, i) => { p.k = KINDS[(i + Math.floor(R() * 6)) % KINDS.length]; diffPatch(ga, gb, p, W, H); });
+  pts.forEach(p => diffPatch(ga, gb, p, W, H));
   dscn = { seed: s.seed, pts, W, H };
   $('dload').hidden = true;
   layoutDiff();
@@ -3018,25 +3055,16 @@ function diffPatch(ga, gb, p, W, H) {
   const d = p.r * 2, pc = document.createElement('canvas');
   pc.width = pc.height = d;
   const g = pc.getContext('2d');
-  let sx = p.x - p.r, sy = p.y - p.r;
-  if (p.k === 'gone') { sx += (p.x + p.r * 3 < W ? 1 : -1) * p.r * 2.4; }   // a nearby patch of background covers the thing
-  if (p.k === 'flip' || p.k === 'rot') {
-    g.translate(d / 2, d / 2);
-    if (p.k === 'flip') g.scale(-1, 1); else g.rotate(Math.PI);
-    g.drawImage(ga.canvas, sx, sy, d, d, -d / 2, -d / 2, d, d);
-    g.setTransform(1, 0, 0, 1, 0, 0);
-  } else g.drawImage(ga.canvas, sx, sy, d, d, 0, 0, d, d);
-  if (p.k === 'hue' || p.k === 'tint') {
+  // gone: a nearby quiet patch covers the thing; add / swap: a detailed patch from elsewhere is copied in; hue: recoloured in place
+  const sx = (p.sx ?? p.x) - p.r, sy = (p.sy ?? p.y) - p.r;
+  g.drawImage(ga.canvas, sx, sy, d, d, 0, 0, d, d);
+  if (p.k === 'hue') {
     const im = g.getImageData(0, 0, d, d), q = im.data;
-    for (let i = 0; i < q.length; i += 4) {
-      const [r0, g0, b0] = [q[i], q[i + 1], q[i + 2]];
-      if (p.k === 'hue') { q[i] = b0; q[i + 1] = r0; q[i + 2] = g0; }
-      else { q[i] = Math.min(255, r0 * 1.25 + 50); q[i + 1] = g0 * .62; q[i + 2] = b0 * .62; }
-    }
+    for (let i = 0; i < q.length; i += 4) { const [r0, g0, b0] = [q[i], q[i + 1], q[i + 2]]; q[i] = b0; q[i + 1] = r0; q[i + 2] = g0; }
     g.putImageData(im, 0, 0);
   }
   g.globalCompositeOperation = 'destination-in';
-  const grad = g.createRadialGradient(d / 2, d / 2, p.r * .55, d / 2, d / 2, p.r);
+  const grad = g.createRadialGradient(d / 2, d / 2, p.r * (p.k === 'gone' ? .6 : .55), d / 2, d / 2, p.r);
   grad.addColorStop(0, 'rgba(0,0,0,1)'); grad.addColorStop(1, 'rgba(0,0,0,0)');
   g.fillStyle = grad; g.fillRect(0, 0, d, d);
   gb.drawImage(pc, p.x - p.r, p.y - p.r);
@@ -3115,7 +3143,8 @@ $('dEye').addEventListener('click', () => {
   document.querySelectorAll('#dpanes .dpane').forEach(pane => {
     const h = document.createElement('div');
     h.className = 'dmark hint';
-    h.dataset.x = p.x + (Math.random() - .5) * p.r * 1.5; h.dataset.y = p.y + (Math.random() - .5) * p.r * 1.5; h.dataset.r = p.r * 2.4;
+    const near = 1 - .3 * resLv('eye');
+    h.dataset.x = p.x + (Math.random() - .5) * p.r * 1.5 * near; h.dataset.y = p.y + (Math.random() - .5) * p.r * 1.5 * near; h.dataset.r = p.r * 2.4;
     h.dataset.i = -1;
     pane.appendChild(h); placeMark(h);
     setTimeout(() => h.remove(), 3500);
@@ -3130,6 +3159,14 @@ function setView(v) {
   S.view = v;
   $('mergeView').hidden = v !== 'merge';
   const diff = v === 'search' && S.search && S.search.mode === 'diff';
+  // Opening a new search: wipe the previous one's marks, red edges and gauge before the view shows, so nothing flashes.
+  if (v === 'search' && (diff ? !dscn || dscn.seed !== S.search.seed : !scn || scn.seed !== S.search.seed)) {
+    document.querySelectorAll('#slayer .mark,#slayer .hintring,#slayer .miss,#slayer .float,#dpanes .dmark,#dpanes .dmiss').forEach(el => el.remove());
+    ['sview', 'dpanes', 'san', 'dsan'].forEach(id => $(id).classList.remove('hit', 'shaken'));
+    delete $('san').dataset.v; delete $('dsan').dataset.v;
+    $('finds').innerHTML = '';
+    $(diff ? 'dload' : 'sload').hidden = false;
+  }
   $('searchView').hidden = v !== 'search' || diff;
   $('diffView').hidden = !diff;
   if (diff) setTimeout(() => { if (!dscn || dscn.seed !== S.search.seed) renderDiff(); else layoutDiff(); }, 0);
@@ -3234,7 +3271,7 @@ function searchClear() {
     <ul class="rewards">${list.map(x => `<li>${x}</li>`).join('')}</ul>
     <p class="muted">品や宝箱は、盤面の<b>贈りもの</b>に入っている。タップで開けよう。手帳に第${ch + 1}章の記録が残った。</p>
     <button class="btn primary" type="button" data-go>${ending ? '祭壇へ向かう' : 'つづきへ'}</button>
-  `, ending ? () => { hideOverlay(); showAltar(); } : showIntro);
+  `, ending ? () => { hideOverlay(); showAltar(); } : ch < SHARDS.length ? () => showShardGet(ch, showIntro) : showIntro);
 }
 
 // An earlier search of the chapter: a smaller reward, and the chapter goes on to its next search.
@@ -3345,6 +3382,20 @@ function giveShard(ch, list) {
   S.shards.push(ch);
   list.push(`${shardArt(ch)} 封印の欠片「${SHARDS[ch].n}」`);
 }
+// The moment a shard is won: it rises out of the dark with a burst of light, and the six slots show how many are left.
+function showShardGet(ch, then) {
+  const have = S.shards || [];
+  sfx.relic();
+  showOverlay(`
+    <p class="kicker">封印の欠片を手に入れた！</p>
+    <div class="shardget"><span class="rays"></span>${shardArt(ch)}</div>
+    <h2>${SHARDS[ch].n}</h2>
+    <p class="lore">${SHARDS[ch].d}</p>
+    <div class="shardrow">${SHARDS.map((_, i) => `<span class="${have.includes(i) ? 'got' : ''}${i === ch ? ' new' : ''}">${have.includes(i) ? shardArt(i) : ''}</span>`).join('')}</div>
+    <p class="muted">${have.length < SHARDS.length ? `欠片は ${have.length} / ${SHARDS.length}。すべてそろえば、都を眠りへ還す封印ができる。` : '六つの欠片がそろった。あとは、星辰の刻を待つだけだ。'}</p>
+    <button class="btn primary" type="button" data-go>大切にしまう</button>
+  `, then);
+}
 // The offering: put the six shards on the altar in the order the verse tells. A wrong one costs a little sanity.
 function showAltar() {
   const placed = [], order = SHARDS.map((_, i) => i);
@@ -3391,6 +3442,7 @@ const EPILOGUE = [
   'すべては、長い夢だったのだろうか。',
   '机の上に、あの手帳が開いたまま置かれていた。',
   '最後のページに、書いた覚えのない都の地図。インクは、まだ乾いていない。',
+  'ベッドの足もとで、セナが丸くなって眠っている。その毛は、まだ潮の香りがした。',
   '窓の外を見る。港を行き交う人々が、いっせいに足を止め、こちらを見上げていた。',
   'ふんぐるい　むぐるうなふ　くとぅるう　るるいえ　うがふなぐる　ふたぐん',
 ];
@@ -3488,15 +3540,15 @@ function helpBody(k) {
     li('🌀', '「<b>おぼろ</b>」の札の品は、絵がぼやけている。名前を手がかりに探そう。'),
     li('🤏', '<b>ピンチで拡大</b>、ドラッグで移動。＋ − ボタンでも拡大できる。そっくりな品（鍵と古い鍵など）にも気をつけて。'),
     li('<img class="uic" src="assets/x-ui-eye.png" alt="">', '困ったら<b>千里眼</b>。だいたいの場所まで連れていってくれる。'),
-    li('🧠', '<b>正気度（SAN）</b>：まちがえたタップは −6、千里眼は −12。最後に残った正気度で★評価が決まる（75以上で★★★）。'),
+    li('🧠', '<b>正気度</b>：まちがえたタップで −6。最後に残った正気度で★評価が決まる（75以上で★★★）。千里眼は使っても正気度は減らない。'),
   ];
   if (k === 'diff') return [
     li('🖼️', '<b>記憶の光景</b>と<b>目の前の光景</b>、2枚の絵を見くらべて、<b>ちがう所</b>をタップ。どちらの絵をタップしてもいい。'),
-    li('🎨', 'ちがいは、品が<b>消えている</b>、<b>色が変わっている</b>、<b>向きが逆</b>になっている、など。'),
+    li('🎨', 'ちがいは、<b>片方にしかない品</b>（消えている・増えている）、<b>色がちがう品</b>、<b>置いてある物がちがう所</b>の3種類。'),
     li('🤏', 'iPadを横にすると、2枚が左右に並んで見くらべやすい。'),
-    li('<img class="uic" src="assets/x-ui-eye.png" alt="">', '困ったら<b>千里眼</b>。ちがいのあたりが光る。正気度のルールはミッケと同じ。'),
+    li('<img class="uic" src="assets/x-ui-eye.png" alt="">', '困ったら<b>千里眼</b>。ちがいのあたりが光る。正気度は、まちがえたタップでだけ減る。'),
   ];
-  if (k === 'gim') return Object.keys(GIMMICKS).map(g => li(g === 'fog' ? '<i class="fog mini"></i>' : g === 'stone' ? '<i class="stone-ic">石</i>' : TENT, `<b>${GIMMICKS[g].n}</b>：${GIMMICKS[g].d}`))
+  if (k === 'gim') return Object.keys(GIMMICKS).map(g => li(g === 'fog' ? '<i class="fog mini"></i>' : g === 'stone' ? `<span class="stone-ic">${ITEM(0, 2)[0]}</span>` : TENT, `<b>${GIMMICKS[g].n}</b>：${GIMMICKS[g].d}`))
     .concat(li('🪙', '章のしかけをすべて解くと、🪙のほうびがある。'));
   if (k === 'daily') return [
     li('<img class="uic" src="assets/m-2-5.png" alt="">', '毎日、町に<b>異変</b>が起こる。満月の夜は宝箱が出やすい、など、その日だけの効果がある。'),
@@ -3543,7 +3595,9 @@ function showDex() {
       <button class="btn tiny" type="button" data-replay="${ch}" ${S.search ? 'disabled' : ''}>再調査</button></div>`;
   }).join('');
   // Clients: the townsfolk, then each chapter's climax client once that chapter is reached.
-  const people = [...NPCS, MERCHANT].map(p => `<div class="page">${FACE(p.n)}<div><b>${p.n}</b><small class="desc">${p.d}</small></div></div>`).join('')
+  // Townsfolk appear in the list once they have asked for something; the dealer once the shop has been visited.
+  const met = n => (S.met || []).includes(n);
+  const people = [...NPCS, MERCHANT].map(p => met(p.n) ? `<div class="page">${FACE(p.n)}<div><b>${p.n}</b><small class="desc">${p.d}</small></div></div>` : `<div class="page now"><div><b>？？？</b><small>まだ会っていない</small></div></div>`).join("")
     + [...Array(BOSSES.length + (S.ch >= BOSSES.length ? 1 : 0)).keys()].map(ch => ch <= S.ch
       ? `<div class="page">${FACE(bossOf(ch).n)}<div><b>${bossOf(ch).n}<em class="pch">${ch < BOSSES.length ? `第${ch + 1}章` : `第${BOSSES.length + 1}章〜`} 山場</em></b><small class="desc">${bossOf(ch).d}</small></div></div>`
       : `<div class="page now"><div><b>？？？<em class="pch">第${ch + 1}章 山場</em></b><small>まだ会っていない</small></div></div>`).join('');
@@ -3630,7 +3684,9 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
+const APP_VERSION = 'ver 1.34';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
+  $('tver').textContent = APP_VERSION;
   const t = $('title');
   t.hidden = false; t.classList.remove('gone');
   const where = `${S.ch === FINAL_CH ? "最終章" : `第${S.ch + 1}章`}「${story(S.ch).title}」`;
