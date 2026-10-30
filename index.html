@@ -302,6 +302,36 @@ img.uic{display:inline-block;width:26px;height:26px;object-fit:contain;vertical-
 .btn.hb.snd{position:relative}
 #eyeBtn img.uic{width:26px;height:26px}
 
+/* Title screen */
+.title{position:fixed;inset:0;z-index:55;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:#050b0d;
+  transition:opacity .6s ease;touch-action:manipulation}
+.title.gone{opacity:0;pointer-events:none}
+.title[hidden]{display:none}
+.tbg{position:absolute;inset:-3%;background:url(assets/bg-title.jpg) 62% 50%/cover no-repeat;animation:tdrift 28s ease-in-out infinite alternate;filter:saturate(.9)}
+.tbg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 35%,rgba(5,11,13,.15),rgba(5,11,13,.55) 60%,rgba(5,11,13,.9) 100%),
+  linear-gradient(180deg,rgba(5,11,13,.35),transparent 30%,transparent 60%,rgba(5,11,13,.85))}
+.tfog{position:absolute;inset:0;pointer-events:none;opacity:.55;
+  background:radial-gradient(ellipse 60% 18% at 20% 75%,rgba(190,215,205,.35),transparent 70%),radial-gradient(ellipse 50% 14% at 80% 82%,rgba(170,200,190,.3),transparent 70%);
+  animation:tfog 14s ease-in-out infinite alternate}
+@keyframes tdrift{from{transform:scale(1.04) translate(0,0)}to{transform:scale(1.1) translate(-1.5%,-1%)}}
+@keyframes tfog{from{transform:translateX(-4%)}to{transform:translateX(5%)}}
+.tin{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:24px;text-align:center;margin-top:-6vh}
+.tkick{margin:0;font-size:13px;letter-spacing:.3em;color:var(--gold);text-shadow:0 1px 3px #000}
+.tname{margin:0;font-family:var(--f-display);font-weight:800;font-size:clamp(46px,9vw,92px);line-height:1.1;letter-spacing:.12em;color:#cfeee2;
+  text-shadow:0 0 18px rgba(114,224,178,.65),0 0 46px rgba(114,224,178,.35),4px 4px 0 #000;animation:tglow 4s ease-in-out infinite}
+@keyframes tglow{0%,100%{text-shadow:0 0 18px rgba(114,224,178,.55),0 0 46px rgba(114,224,178,.25),4px 4px 0 #000}50%{text-shadow:0 0 26px rgba(114,224,178,.85),0 0 70px rgba(114,224,178,.45),4px 4px 0 #000}}
+.tsub{margin:0 0 18px;font-family:var(--f-display);font-size:14px;letter-spacing:.2em;opacity:.8;text-shadow:0 1px 3px #000}
+.tbtns{display:flex;flex-direction:column;align-items:center;gap:12px;width:min(340px,86vw)}
+.tbtns .tgo{width:100%;flex-direction:column;gap:2px;font-size:22px;padding:14px 20px;animation:beckon 2.6s ease-in-out infinite}
+.tbtns .tgo small{font-family:var(--f-body);font-size:12px;letter-spacing:.05em;opacity:.9}
+.tbtns .tb{width:100%;color:#f1dfae;font-family:var(--f-display);letter-spacing:.08em;background:linear-gradient(180deg,#46391f,#2a2113 55%,#1b150c);border:1px solid #9a7b35;
+  box-shadow:inset 0 1px 0 rgba(255,230,170,.3),inset 0 -2px 5px rgba(0,0,0,.55),0 3px 0 var(--ink)}
+.tbtns .tb.danger{background:#5a1a1e;border-color:var(--stripe);font-size:13px}
+.trow{display:flex;gap:10px;width:100%}
+.trow .tb{flex:1}
+.trow .tb.snd.off img.uic{filter:grayscale(1) brightness(.5)}
+.tfoot{position:absolute;bottom:calc(12px + env(safe-area-inset-bottom,0px));margin:0;font-size:11px;opacity:.55}
+
 /* Achievements */
 .page.ach .rew{font-size:12px}
 .page.ach.done{border-color:var(--gold);background:linear-gradient(90deg,rgba(201,163,74,.18),var(--panel2) 70%)}
@@ -487,6 +517,16 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
       <div class="sload" id="sload" hidden>情景を描いています…</div>
     </div>
   </section>
+</div>
+<div class="title" id="title">
+  <div class="tbg"></div><div class="tfog"></div>
+  <div class="tin">
+    <p class="tkick">クトゥルフ神話 ×  マージ ×  さがしもの</p>
+    <h1 class="tname">ルルイエ<br>捜索録</h1>
+    <p class="tsub">― The R'lyeh Inquiry ―</p>
+    <div class="tbtns" id="tbtns"></div>
+  </div>
+  <p class="tfoot">ホーム画面に追加すると、アプリのように遊べます</p>
 </div>
 <div class="overlay" id="overlay" hidden><div class="panel" id="panel"></div></div>
 <div class="disc" id="disc" hidden></div>
@@ -2693,9 +2733,7 @@ function showDex() {
   let armed = false;
   $('resetBtn').addEventListener('click', () => {
     if (!armed) { armed = true; $('resetBtn').textContent = '本当に消す（もとに戻せません）'; return; }
-    try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
-    freshState(); sel = -1;
-    setView('merge'); buildMerge(); renderAll(); showIntro();
+    newGame();
   });
 }
 $('dexBtn').addEventListener('click', showDex);
@@ -2723,6 +2761,47 @@ if ('serviceWorker' in navigator && window.top === window && location.protocol =
   try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {}
 }
 
+/* ================= title screen ================= */
+function newGame() {
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  freshState(); sel = -1; scn = null;
+  setView('merge'); buildMerge(); renderAll();
+  hideTitle();
+  showIntro();
+}
+function hideTitle() {
+  const t = $('title');
+  t.classList.add('gone');
+  setTimeout(() => { t.hidden = true; }, 600);
+}
+function showTitle(hasSave) {
+  const t = $('title');
+  t.hidden = false; t.classList.remove('gone');
+  const where = `第${S.ch + 1}章「${story(S.ch).title}」`;
+  $('tbtns').innerHTML = hasSave
+    ? `<button class="btn primary tgo" type="button" data-t="go">つづきから<small>${where}</small></button>
+       <button class="btn tb" type="button" data-t="new">はじめから</button>`
+    : `<button class="btn primary tgo" type="button" data-t="go">ゲームスタート</button>`;
+  $('tbtns').insertAdjacentHTML('beforeend', `<div class="trow">
+    ${hasSave ? `<button class="btn tb" type="button" data-t="dex"><img class="uic" src="assets/x-ui-book.png" alt="">手帳</button>` : ''}
+    <button class="btn tb snd${muted ? ' off' : ''}" type="button" data-t="snd"><img class="uic" src="assets/x-ui-sound.png" alt="">${muted ? '音：オフ' : '音：オン'}</button></div>`);
+  let armed = false;
+  $('tbtns').onclick = e => {
+    const b = e.target.closest('[data-t]');
+    if (!b) return;
+    const k = b.dataset.t;
+    if (k === 'go') {
+      if (!muted) { sfx.seal(); startDrone(); }
+      hideTitle();
+      if (S.introCh !== S.ch) setTimeout(showIntro, 300);
+    } else if (k === 'new') {
+      if (!armed) { armed = true; b.classList.add('danger'); b.textContent = '本当に最初から？（セーブが消えます）'; return; }
+      newGame();
+    } else if (k === 'dex') showDex();
+    else if (k === 'snd') { $('mute').click(); showTitle(hasSave); }
+  };
+}
+
 /* ================= boot ================= */
 function renderAll() {
   renderOrders();
@@ -2732,6 +2811,7 @@ function renderAll() {
 }
 function boot(data) {
   S = (data && data.S && data.S.v === 2) ? data.S : loadSave();
+  const saved = S;
   if (!S) freshState();
   // Older saves: the climax request, chapter twists, board vault and board gifts are new.
   // Saves from before the three-search chapters: a search already under way is the chapter's last one.
@@ -2750,7 +2830,7 @@ function boot(data) {
   renderAll();
   if (S.search && !S.search.seed) S.search = null;   // saves from the crowd-search version
   setView(S.search && S.view === 'search' ? 'search' : 'merge');
-  if (S.introCh !== S.ch) showIntro();
+  showTitle(!!saved);
 }
 const hot = window.claude && window.claude.hot;
 try { if (hot && hot.snapshot) hot.snapshot(() => ({ S })); } catch (e) {}
