@@ -11,6 +11,27 @@
   window.addEventListener('error', e => R.errors.push(String(e.message)));
   window.addEventListener('unhandledrejection', e => R.errors.push('promise: ' + String(e.reason)));
   const open = () => !$('overlay').hidden;
+
+  // Layout audit of whatever is on screen: text under 11px, things poking out past the screen edge,
+  // and tap targets under 36px. Results are kept per screen in R.audit.
+  R.audit = {};
+  PB.audit = where => {
+    const out = new Set(), W = innerWidth;
+    const scroller = el => el.closest('.finds,.eroll,#slayer,.panel,.shelf,.dpanes');
+    document.querySelectorAll('body *').forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (!r.width || !r.height || getComputedStyle(el).visibility === 'hidden') return;
+      if (el.closest('[hidden]')) return;
+      const cs = getComputedStyle(el), own = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
+      const txt = (el.textContent || el.getAttribute('aria-label') || el.className || el.tagName).trim().replace(/\s+/g, ' ').slice(0, 18);
+      if (own && parseFloat(cs.fontSize) < 11) out.add(`文字が小さい ${cs.fontSize}: ${txt}`);
+      if (!scroller(el) && (r.right > W + 2 || r.left < -2)) out.add(`はみ出し (${Math.round(r.left)}〜${Math.round(r.right)} / ${W}): ${txt}`);
+      if ((el.tagName === 'BUTTON') && (r.height < 36 || r.width < 36) && !el.closest('.finds')) out.add(`小さいボタン ${Math.round(r.width)}x${Math.round(r.height)}: ${txt}`);
+    });
+    if (document.documentElement.scrollWidth > W + 1) out.add(`ページが横にはみ出し: ${document.documentElement.scrollWidth}px`);
+    const key = where.slice(0, 30);
+    R.audit[key] = [...new Set([...(R.audit[key] || []), ...out])];
+  };
   const click = el => { if (el && !el.disabled) { el.click(); return true; } return false; };
 
   // Close whatever popup is up; the altar and the ending need their own handling.
@@ -21,7 +42,7 @@
       const P = $('panel');
       if (P.querySelector('[data-sh]') || (P.innerText.includes('封印の儀') && P.querySelector('[data-go]'))) { await altar(); continue; }
       const go = P.querySelector('[data-go]');
-      if (go) { R.log.push('close: ' + P.innerText.split('\n').filter(Boolean).slice(0, 2).join(' / ')); go.click(); await w(250); } else return;
+      if (go) { const t = P.innerText.split('\n').filter(Boolean).slice(0, 2).join(' / '); PB.audit('画面: ' + t); R.log.push('close: ' + t); go.click();await w(250); } else return;
     }
   }
   async function altar() {
@@ -35,6 +56,7 @@
     note('ending: watching');
     R.phase = 'ending';
     for (let t = 0; t < 400 && !$('eend'); t++) await w(500);   // let the whole ending play
+    PB.audit('エンディング（目覚め）');
     note('ending: epilogue lines ' + document.querySelectorAll('#etext .wline').length);
     $('eend').click(); await w(800);
   }
@@ -52,6 +74,7 @@
       const B = $('dB'), r = B.getBoundingClientRect();
       B.dispatchEvent(new PointerEvent('pointerup', { clientX: r.left + 6, clientY: r.top + 6, pointerId: 77, bubbles: true }));   // deliberate miss at a corner
       await w(300);
+      PB.audit('間違い探し');
       const n = await PB.solveDiff(160);
       note(`diff solved (${n} blobs), SAN ${$('dsan').innerText.replace(/\n/g, ' ')}`);
     } else {
@@ -59,6 +82,7 @@
       const ch = S.search.ch, i = ch === 6 ? 5 : ch % 6, th = i === 0 ? 'hs-0b' : 'hs-' + i;   // same scene rule as theme()
       click($('eyeBtn')); await w(500); R.did.eye = 1;
       await missLookalike(th, ch);
+      PB.audit('ミッケ');
       const found = await PB.solveSeek(th, Math.min(8 + ch, 12), 110);
       note(`seek solved ${found.length} in ${th}, SAN ${$('san').innerText.replace(/\n/g, ' ')}`);
     }
@@ -105,6 +129,7 @@
     PB.pace = 35;
     R.phase = 'title';
     if (!$('title').hidden) {
+      PB.audit('タイトル');
       const nb = document.querySelector('[data-t="new"]');
       if (nb) { nb.click(); await w(200); nb.click(); } else document.querySelector('[data-t="go"]').click();
       await w(600);
@@ -117,7 +142,7 @@
       if (S.ch !== lastCh) { note('chapter start: ' + document.getElementById('chTitle').textContent); lastCh = S.ch; }
       if (S.cleared && S.ch > 6) break;
       if (!$('goSearch').hidden && !open()) { await search(); continue; }
-      if (guard % 25 === 0) await chores();
+      if (guard % 25 === 0) { PB.audit('盤面'); await chores(); }
       const r = await PB.step(); R.steps++;
       if (r === 'stuck') { note('stuck'); await w(200); }
     }

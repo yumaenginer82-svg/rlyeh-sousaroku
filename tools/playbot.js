@@ -21,6 +21,17 @@ window.PB = (() => {
     for (let k = 1; k <= 6; k++) { await w(45); ev(mb(), 'pointermove', { x: p.x + (q.x - p.x) * k / 6, y: p.y + (q.y - p.y) * k / 6 }); }
     ev(mb(), 'pointerup', q); await w(PB.pace);
   };
+  // Drag a board item onto a drop zone of the info panel ('abyss' or 'store'), which shows once the drag starts.
+  PB.dropOn = async (a, zone) => {
+    pid++; const p = pt(a);
+    ev(mb(), 'pointerdown', p); ev(mb(), 'pointermove', { x: p.x + 12, y: p.y }); await w(60);
+    const z = document.querySelector(`#info [data-dz="${zone}"]`);
+    if (!z) { ev(mb(), 'pointerup', p); await w(PB.pace); return false; }
+    const r = z.getBoundingClientRect(), q = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    for (let k = 1; k <= 6; k++) { await w(45); ev(mb(), 'pointermove', { x: p.x + (q.x - p.x) * k / 6, y: p.y + (q.y - p.y) * k / 6 }); }
+    ev(mb(), 'pointerup', q); await w(PB.pace); return true;
+  };
+  PB.toAbyss = a => PB.dropOn(a, 'abyss');
   const overlayOpen = () => !$('overlay').hidden;
   PB.closeOverlay = async () => { const b = document.querySelector('#panel [data-go]'); if (overlayOpen() && b) { b.click(); await w(PB.pace); return true; } return false; };
 
@@ -39,6 +50,9 @@ window.PB = (() => {
     const met = c => needs.filter(n => n.c === c).every(n => count(n.c, n.t) >= needs.filter(m => m.c === n.c && m.t === n.t).length);
     // open presents and chests while there is room
     const box = C.findIndex(c => c && (c.k === 'gift' || c.k === 'chest'));
+    // short on room: stack chests into one
+    const chests = C.map((c, i) => c && c.k === 'chest' ? i : -1).filter(i => i >= 0);
+    if (chests.length >= 2 && empties.length < 8) { await PB.drag(chests[1], chests[0]); return 'stack'; }
     if (box >= 0 && empties.length > 14) { await PB.tap(box); return 'open'; }   // merge first; open boxes only with room to spare
     // merge the lowest pair that is still useful
     const groups = {};
@@ -52,11 +66,7 @@ window.PB = (() => {
     if (empties.length < (PB.targets ? 12 : 2)) {   // working toward one item: keep plenty of room
       const junk = C.map((c, i) => ({ c, i })).filter(o => o.c && o.c.k === 'item' && o.c.t > maxNeed(o.c.c)).sort((a, b) => a.c.t - b.c.t)[0]
         || C.map((c, i) => ({ c, i })).filter(o => o.c && o.c.k === 'item').sort((a, b) => a.c.t - b.c.t)[0];
-      if (junk) {
-        await PB.tap(junk.i);
-        const s = document.querySelector('#info [data-act="sell"]'); if (s) { s.click(); await w(250); const s2 = document.querySelector('#info [data-act="sell"]'); if (s2) s2.click(); }
-        await w(PB.pace); return 'abyss';
-      }
+      if (junk) { await PB.toAbyss(junk.i); return 'abyss'; }
     }
     // tap the tool of the chain that is asked for the most
     const gens = C.map((c, i) => ({ c, i })).filter(o => o.c && o.c.k === 'gen');

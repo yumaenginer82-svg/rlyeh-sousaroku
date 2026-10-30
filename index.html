@@ -68,7 +68,7 @@ body{height:100%;margin:0;background:radial-gradient(ellipse 120% 70% at 50% 115
 .btn:disabled{opacity:.38;cursor:default;transform:none;box-shadow:0 3px 0 var(--ink)}
 .btn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 .btn.small{padding:6px 10px;font-size:14px}
-.btn.tiny{padding:4px 10px;font-size:13px;border-radius:10px}
+.btn.tiny{padding:6px 12px;font-size:13px;border-radius:10px;min-height:40px}   /* big enough for a fingertip */
 .btn.gold{background:var(--gold);color:var(--ink);border-color:#e3c77a}
 .btn.danger{background:#5a1a1e;border-color:var(--stripe)}
 .btn.primary{background:var(--stripe);color:#fff;border-color:#e0646b;font-family:var(--f-display);font-size:19px;padding:12px 26px;letter-spacing:.08em}
@@ -124,7 +124,7 @@ body{height:100%;margin:0;background:radial-gradient(ellipse 120% 70% at 50% 115
 .slot{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:var(--panel2);border:1px solid var(--line);
   border-radius:10px;padding:4px;color:inherit;font:inherit;cursor:pointer}
 .slot .ic{width:70%;height:auto;aspect-ratio:1}
-.slot small{font-size:10px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.slot small{font-size:11px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .slot.empty{border-style:dashed;opacity:.5;cursor:default}
 .muted{opacity:.7}
 
@@ -271,7 +271,7 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 .dex h3{margin:0 0 6px;font-size:14px;letter-spacing:.06em}
 .dexrow{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px}
 .dexitem{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 2px;text-align:center;font-size:28px;line-height:1.1}
-.dexitem small{display:block;font-size:10px;margin-top:4px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dexitem small{display:block;font-size:11px;margin-top:4px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dexitem.unknown{color:#4d6a64;font-family:var(--f-display)}
 .dex h3 small{font-weight:500;font-size:11px;letter-spacing:0;margin-left:6px}
 .relics{display:grid;gap:6px}
@@ -331,7 +331,7 @@ img.uic{display:inline-block;width:26px;height:26px;object-fit:contain;vertical-
 .apage:nth-child(even){transform:rotate(1.5deg)}
 .apage .ic{width:100%;height:auto;aspect-ratio:1;background:#fff8e8;border-radius:4px}
 .apage figcaption b{display:block;font-size:12px;margin-top:4px}
-.apage figcaption small{display:block;font-size:10px;line-height:1.4;opacity:.8}
+.apage figcaption small{display:block;font-size:11px;line-height:1.4;opacity:.8}
 .apage.locked{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#2a2418;border-color:#5a4a2a;color:#8a7a5a}
 .apage.locked span{font-size:30px;font-family:var(--f-display);aspect-ratio:1;display:grid;place-items:center}
 
@@ -361,7 +361,7 @@ b.t0{color:#c89a62}b.t1{color:#7fe0b0}b.t2{color:var(--gold)}
 .shelf{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
 .fig{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 2px;border-radius:10px;border:1px solid var(--line);background:linear-gradient(180deg,#132124,#0a1315);color:inherit;font:inherit;cursor:pointer;min-width:0}
 .fig .ic{width:100%;max-width:58px;aspect-ratio:1;height:auto}
-.fig small{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.fig small{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .fig.bronze{border-color:#6a5030}.fig.jade{border-color:#2f8a6a}.fig.gold{border-color:#a8873a}
 .fig.unknown .ic{filter:brightness(0) opacity(.45)}
 .fig.unknown{cursor:default;opacity:.8}
@@ -396,7 +396,7 @@ b.t0{color:#c89a62}b.t1{color:#7fe0b0}b.t2{color:var(--gold)}
 .dpanes.shaken::before{content:"";position:absolute;inset:-6px;z-index:1;pointer-events:none;box-shadow:inset 0 0 70px rgba(150,20,40,.55);animation:breathe 1.2s ease-in-out infinite}
 /* Requests */
 .order.clash{border-color:#a0603a}
-.order.clash .needs::after{content:"山場の品を使う";align-self:center;margin-left:auto;font-size:10px;font-weight:800;color:#fff;background:#8a4a28;border-radius:6px;padding:1px 6px;white-space:nowrap}
+.order.clash .needs::after{content:"山場の品を使う";align-self:center;margin-left:auto;font-size:11px;font-weight:800;color:#fff;background:#8a4a28;border-radius:6px;padding:1px 6px;white-space:nowrap}
 .info p.ask{font-family:var(--f-display);font-size:14px;color:#e8dcc0}
 /* Seal shards and the altar */
 .pshard .ic{width:44px;height:44px;flex:none}
@@ -415,16 +415,22 @@ b.t0{color:#c89a62}b.t1{color:#7fe0b0}b.t2{color:var(--gold)}
 .good.res .gart .ic{width:34px;height:34px}
 
 /* Spot the difference */
-.dpanes{grid-area:board;position:relative;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;gap:10px;touch-action:manipulation}
+.dpanes{grid-area:board;position:relative;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;gap:10px;touch-action:none}
 .dpanes.stack{flex-direction:column}
 .dpane{position:relative;flex:none}
-.dpane canvas{display:block;border:2px solid var(--line);border-radius:12px;box-shadow:0 4px 0 var(--ink),0 0 30px rgba(0,0,0,.5);cursor:crosshair}
+.dvp{position:relative;overflow:hidden;border:2px solid var(--line);border-radius:12px;box-shadow:0 4px 0 var(--ink),0 0 30px rgba(0,0,0,.5);background:#050b0d}
+.dlay{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;--inv:1}
+.dlay.glide{transition:transform .3s ease}
+.dpane canvas{display:block;cursor:crosshair}
+.dpane.off{display:none}
+.dzoom{position:absolute;right:8px;bottom:8px;z-index:3;display:flex;flex-direction:column;gap:6px}
+.dzoom .btn{width:46px;height:46px;padding:0;font-size:20px;background:rgba(10,24,27,.86)}
 .dpane[data-p="0"] canvas{filter:sepia(.18) brightness(.95)}
 .dlab{position:absolute;left:10px;top:8px;font-size:12px;font-weight:700;letter-spacing:.1em;padding:2px 10px;border-radius:999px;background:rgba(3,9,11,.75);pointer-events:none}
-.dmark{position:absolute;transform:translate(-50%,-50%);border:4px solid var(--stripe);border-radius:50%;pointer-events:none;box-shadow:0 0 0 2px rgba(255,255,255,.75),0 0 12px rgba(192,53,61,.6)}
+.dmark{position:absolute;transform:translate(-50%,-50%);border:calc(4px * var(--inv,1)) solid var(--stripe);border-radius:50%;pointer-events:none;box-shadow:0 0 0 2px rgba(255,255,255,.75),0 0 12px rgba(192,53,61,.6)}
 .dmark.fresh{animation:markring .45s ease-out}
 .dmark.hint{border:3px dashed var(--glow);box-shadow:0 0 24px var(--glow);animation:scope 3.4s ease-out forwards}
-.dmiss{position:absolute;transform:translate(-50%,-50%);color:var(--stripe);font-weight:800;font-size:34px;text-shadow:0 0 4px #fff;pointer-events:none;animation:missfade .7s forwards}
+.dmiss{position:absolute;transform:translate(-50%,-50%);color:var(--stripe);font-weight:800;font-size:calc(34px * var(--inv,1));text-shadow:0 0 4px #fff;pointer-events:none;animation:missfade .7s forwards}
 #dEye img.uic{width:26px;height:26px}
 
 /* Ending */
@@ -593,9 +599,9 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
 .page.now{border-style:dashed;opacity:.7}
 .pstars{color:var(--gold);font-size:16px;white-space:nowrap}
 .page small.desc{white-space:normal;line-height:1.5}
-.pch{font-style:normal;font-weight:500;font-size:10px;color:#c9a8ee;margin-left:8px}
+.pch{font-style:normal;font-weight:500;font-size:11px;color:#c9a8ee;margin-left:8px}
 .npc[data-who]{cursor:pointer}
-.npc .who{font-style:normal;display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--line);font-size:10px;margin-left:2px;vertical-align:1px;opacity:.8}
+.npc .who{font-style:normal;display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--line);font-size:11px;margin-left:2px;vertical-align:1px;opacity:.8}
 .pstars.r0{color:#4d6a64}
 
 @keyframes pop{0%{transform:scale(.3)}60%{transform:scale(1.28)}100%{transform:scale(1)}}
@@ -635,7 +641,7 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
   .top{flex-wrap:nowrap;gap:8px;padding:6px 10px}
   .top .brand{display:none}
   .chapter{flex-direction:column;gap:0;flex:none}
-  .chapter span{font-size:10px;line-height:1.2}
+  .chapter span{font-size:11px;line-height:1.2}
   .chapter b{font-size:15px;line-height:1.2}
   .prog{flex:1 1 auto;min-width:0;gap:6px}
   .prog span{font-size:11px;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -652,6 +658,8 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
   .order{padding:5px 7px;gap:3px}
   .need{width:42px;height:42px}
   .info{height:76px;padding:4px 10px}
+  .info p{line-height:1.4;margin-top:1px}
+  .info .txt b{line-height:1.3}
 }
 /* The search button floats over the bottom of the board instead of taking its own row */
 /* When a search is ready, the header's star bar and hint give way to the search button */
@@ -683,6 +691,8 @@ body.focus .top{display:none}
   .order{padding:5px 7px;gap:3px}
   .npc img.face{width:30px;height:30px}
   .info{height:76px;padding:4px 10px}
+  .info p{line-height:1.4;margin-top:1px}
+  .info .txt b{line-height:1.3}
   .info .big{width:48px}
   .info .big .ic,.info .big img.face{width:46px;height:46px}
   .mission{padding:8px 12px;gap:6px 12px}
@@ -739,13 +749,15 @@ body.focus .top{display:none}
         <h2><small>現場検証 ―― 2枚の絵のちがいを探せ</small><span id="dTitle"></span><span class="san gauge r3" id="dsan"></span></h2>
         <div class="mbtns">
           <button id="dEye" class="btn" type="button"><img class="uic" src="assets/x-ui-eye.png" alt="">千里眼 ×<b id="eyesD">0</b></button>
+          <button id="dOne" class="btn" type="button">1枚ずつ</button>
           <button id="dBack" class="btn" type="button">← 依頼にもどる</button>
         </div>
       </div>
     </div>
     <div class="dpanes" id="dpanes">
-      <div class="dpane" data-p="0"><canvas id="dA"></canvas><span class="dlab">記憶の光景</span></div>
-      <div class="dpane" data-p="1"><canvas id="dB"></canvas><span class="dlab">目の前の光景</span></div>
+      <div class="dpane" data-p="0"><div class="dvp"><div class="dlay"><canvas id="dA"></canvas></div></div><span class="dlab">記憶の光景</span></div>
+      <div class="dpane" data-p="1"><div class="dvp"><div class="dlay"><canvas id="dB"></canvas></div></div><span class="dlab">目の前の光景</span></div>
+      <div class="dzoom"><button class="btn small" id="dSwap" type="button" hidden aria-label="もう一枚に切りかえ">⇄</button><button class="btn small" id="dzIn" type="button" aria-label="拡大">＋</button><button class="btn small" id="dzOut" type="button" aria-label="縮小">−</button><button class="btn small" id="dzFit" type="button" aria-label="全体を表示">⤢</button></div>
       <div class="sload" id="dload" hidden>情景を描いています…</div>
     </div>
   </section>
@@ -1756,7 +1768,7 @@ document.addEventListener('pointerdown', () => { if (!muted) startDrone(); }, { 
 
 /* ================= state ================= */
 let S = null;
-let sel = -1, sellArm = false;
+let sel = -1;
 let wantSet = new Set();
 let mEls = [], sEls = [];
 
@@ -1963,7 +1975,7 @@ function paintM(i, anim) {
 
 function select(i) {
   const prev = sel;
-  sel = i; sellArm = false;
+  sel = i;
   if (prev >= 0 && mEls[prev]) mEls[prev].classList.remove('sel');
   if (i >= 0) mEls[i].classList.add('sel');
   renderInfo();
@@ -1978,9 +1990,7 @@ function renderInfo() {
   if (c.k === 'item') {
     const it = ITEM(c.c, c.t);
     const next = c.t < MAXT ? (S.dex[key(c.c, c.t + 1)] ? `${ITEM(c.c, c.t + 1)[0]} ${ITEM(c.c, c.t + 1)[1]}` : '？？？（まだ見ぬもの）') : `古き秘宝「${RELICS[c.c].n}」（ずっと効く力）`;
-    box.innerHTML = `<div class="big">${it[0]}</div><div class="txt"><b>${it[1]}<small>Lv${c.t + 1}</small></b><p>${it[2]}</p><p class="muted">2つ重ねると → ${next}</p></div>
-      <div class="acts"><button class="btn tiny" data-act="stash" type="button" ${storeFull() ? 'disabled' : ''}>櫃にしまう</button>
-        <button class="btn tiny${sellArm ? ' danger' : ''}" data-act="sell" type="button">${sellArm ? '本当に還す？' : '深淵へ還す'} 🪙${SELL[c.t]}</button></div>`;
+    box.innerHTML = `<div class="big">${it[0]}</div><div class="txt"><b>${it[1]}<small>Lv${c.t + 1}</small></b><p>${it[2]}</p><p class="muted">2つ重ねると → ${next}</p></div>`;   // storing and discarding are done by dragging (the drop zones show then)
   } else if (c.k === 'gen') {
     const g = CHAINS[c.g].gen, odds = GEN_LV[c.lv];
     const oddsText = odds.map((p, t) => p ? `${ITEM(c.g, t)[0]}${Math.round(p * 100)}%` : '').filter(Boolean).join('　');
@@ -1988,8 +1998,7 @@ function renderInfo() {
     box.innerHTML = `<div class="big">${g.e}</div><div class="txt"><b>${g.n}<small>Lv${c.lv}</small></b><p>タップで「${CHAINS[c.g].name}」の素材が出る。強化すると、はじめから上の段階が出やすくなる。</p><p class="muted">${oddsText}</p></div>
       <div class="acts">${up}</div>`;
   } else if (c.k === 'chest') {
-    box.innerHTML = `<div class="big">${CHEST}</div><div class="txt"><b>宝箱<small>あと${c.n}回</small></b><p>タップすると中身が飛び出す。高い段階の合体で、ときどき見つかる。</p></div>
-      <div class="acts"><button class="btn tiny" data-act="stash" type="button" ${storeFull() ? 'disabled' : ''}>櫃にしまう</button></div>`;
+    box.innerHTML = `<div class="big">${CHEST}</div><div class="txt"><b>宝箱<small>あと${c.n}回</small></b><p>タップすると中身が飛び出す。高い段階の合体で、ときどき見つかる。宝箱どうしを重ねると、ひとつにまとまる。</p></div>`;
   } else if (c.k === 'gift') {
     box.innerHTML = `<div class="big">${GIFT}</div><div class="txt"><b>贈りもの<small>中身 ${c.in.length}つ</small></b><p>タップするたびに中身がひとつ出る。贈りものどうしを重ねると、ひとつにまとまって<b>おまけの品</b>が増える。</p></div>`;
   } else if (c.k === 'vault') {
@@ -2008,12 +2017,7 @@ $('info').addEventListener('click', e => {
   const b = e.target.closest('[data-act]');
   if (!b || sel < 0) return;
   const c = S.cells[sel];
-  if (b.dataset.act === 'sell' && c && c.k === 'item') {
-    if (!sellArm) { sellArm = true; renderInfo(); return; }
-    toAbyss(sel);
-  } else if (b.dataset.act === 'stash' && c) {
-    stash(sel);
-  } else if (b.dataset.act === 'upgrade' && c && c.k === 'gen' && c.lv < 5 && S.coins >= GEN_COST[c.lv + 1]) {
+  if (b.dataset.act === 'upgrade' && c && c.k === 'gen' && c.lv < 5 && S.coins >= GEN_COST[c.lv + 1]) {
     S.coins -= GEN_COST[c.lv + 1];
     c.lv++;
     paintM(sel, 'pop');
@@ -2077,6 +2081,7 @@ function drop(a, b) {
   if (d && d.k === 'lock') { paintM(a); sfx.bump(); return; }
   if (d && d.k === 'vault' && (s.k === 'item' || s.k === 'chest' || s.k === 'gift')) { stash(a); paintM(b, 'land'); return; }
   if (d && d.k === 'gift' && s.k === 'gift') { mergeGifts(a, b); return; }
+  if (d && d.k === 'chest' && s.k === 'chest') { mergeChests(a, b); return; }
   if (d && (d.k === 'fog' || d.k === 'stone' || d.k === 'tent')) {
     if (!gimFits(s, d)) {
       paintM(a); paintM(b, 'shake'); sfx.bump();
@@ -2258,6 +2263,16 @@ function mergeGifts(a, b) {
   burst($('mboard'), COLS, b, 4);
   floater($('mboard'), COLS, b, `まとまった！ おまけ ${ITEM(all[all.length - 1].c, t)[1]}`, 'gold');
   sfx.merge(3);
+  afterChange(); renderInfo();
+}
+// Two chests stack into one (all the opens of both), so a board full of chests never locks up.
+function mergeChests(a, b) {
+  const C = S.cells;
+  C[b] = { k: 'chest', n: C[a].n + C[b].n, lv: Math.max(C[a].lv, C[b].lv) };
+  C[a] = null; sel = b;
+  paintM(a); paintM(b, 'pop');
+  floater($('mboard'), COLS, b, `宝箱がまとまった（あと${C[b].n}回）`, 'gold');
+  sfx.merge(2);
   afterChange(); renderInfo();
 }
 // The sealed chest lives on the board as a piece of its own.
@@ -2637,7 +2652,7 @@ mb.addEventListener('pointermove', e => {
         const g = cluster(over, drag.i);
         drag.hl = g.length + 1 >= 5 ? g : [over];
       } else drag.hl = [over];   // final stage pairs make a relic, one at a time
-      const fits = sameItem(s, oc) || (oc && (gimFits(s, oc) || (oc.k === 'vault' && s.k !== 'gen') || (oc.k === 'gift' && s.k === 'gift')));
+      const fits = sameItem(s, oc) || (oc && (gimFits(s, oc) || (oc.k === 'vault' && s.k !== 'gen') || (oc.k === 'gift' && s.k === 'gift') || (oc.k === 'chest' && s.k === 'chest')));
       drag.hl.forEach(j => mEls[j].classList.add(fits ? 'can' : 'hover'));
     }
   }
@@ -3057,7 +3072,8 @@ let dscn = null;
 async function renderDiff() {
   const s = S.search;
   $('dload').hidden = false;
-  $('dpanes').querySelectorAll('.dmark,.miss,.hintring').forEach(el => el.remove());
+  $('dpanes').querySelectorAll('.dmark,.dmiss,.hintring').forEach(el => el.remove());
+  DZ.z = 1; DZ.x = DZ.y = 0;   // a new pair of pictures starts unzoomed
   let im;
   try { im = await loadImg(diffImg(s.ch)); } catch (e) { $('dload').textContent = '画像を読み込めませんでした。通信状態を確認して、もう一度開いてください。'; return; }
   if (!S.search || S.search.seed !== s.seed) return;
@@ -3123,27 +3139,48 @@ function diffPatch(ga, gb, p, W, H) {
   gb.drawImage(pc, p.x - p.r, p.y - p.r);
 }
 // Fit both pictures: side by side when that is bigger, otherwise one above the other.
+// Fit the pictures: both together (side by side or stacked, whichever is bigger), or one at a time filling the area.
+// DZ is the shared zoom/pan, applied to both pictures so the same spot always lines up.
+const DZ = { z: 1, x: 0, y: 0, w: 0, h: 0 };
 function layoutDiff() {
   if (!dscn) return;
-  const box = $('dpanes'), r = box.getBoundingClientRect(), gap = 10, ar = dscn.W / dscn.H;
+  const box = $('dpanes'), r = box.getBoundingClientRect(), gap = 6, ar = dscn.W / dscn.H, one = box.classList.contains('single');
   const side = Math.min((r.width - gap) / 2, r.height * ar), stack = Math.min(r.width, (r.height - gap) / 2 * ar);
-  const w = Math.max(side, stack), h = w / ar;
-  box.classList.toggle('stack', stack > side);
-  box.querySelectorAll('canvas').forEach(c => { c.style.width = w + 'px'; c.style.height = h + 'px'; });
+  const w = one ? Math.min(r.width, r.height * ar) : Math.max(side, stack), h = w / ar;
+  box.classList.toggle('stack', !one && stack > side);
+  box.querySelectorAll('.dvp,canvas').forEach(c => { c.style.width = w + 'px'; c.style.height = h + 'px'; });
+  DZ.w = w; DZ.h = h;
+  applyDZ();
   box.querySelectorAll('.dmark').forEach(el => placeMark(el));
+}
+function applyDZ(glide) {
+  DZ.z = Math.min(5, Math.max(1, DZ.z));
+  DZ.x = Math.min(0, Math.max(DZ.w - DZ.w * DZ.z, DZ.x));
+  DZ.y = Math.min(0, Math.max(DZ.h - DZ.h * DZ.z, DZ.y));
+  document.querySelectorAll('#dpanes .dlay').forEach(l => {
+    l.classList.toggle('glide', !!glide);
+    l.style.transform = `translate(${DZ.x}px,${DZ.y}px) scale(${DZ.z})`;
+    l.style.setProperty('--inv', 1 / DZ.z);
+  });
+}
+// Zoom by f around a point given in the picture box's own pixels.
+function zoomDZ(f, cx, cy, glide) {
+  const z = Math.min(5, Math.max(1, DZ.z * f)), k = z / DZ.z;
+  DZ.x = cx - (cx - DZ.x) * k; DZ.y = cy - (cy - DZ.y) * k; DZ.z = z;
+  applyDZ(glide);
 }
 function placeMark(el) {
   const c = el.parentNode.querySelector('canvas'), k = c.clientWidth / dscn.W;
   const p = dscn.pts[+el.dataset.i] || { x: +el.dataset.x, y: +el.dataset.y, r: +el.dataset.r };
-  el.style.left = c.offsetLeft + p.x * k + 'px'; el.style.top = c.offsetTop + p.y * k + 'px';
+  el.style.left = p.x * k + 'px'; el.style.top = p.y * k + 'px';
   el.style.width = el.style.height = p.r * 2.3 * k + 'px';
 }
 function markDiff(i, fresh) {
-  document.querySelectorAll('#dpanes .dpane').forEach(pane => {
+  document.querySelectorAll('#dpanes .dlay').forEach(lay => {
     const m = document.createElement('div');
     m.className = 'dmark' + (fresh ? ' fresh' : '');
     m.dataset.i = i;
-    pane.appendChild(m);
+    lay.appendChild(m);
     placeMark(m);
   });
 }
@@ -3156,7 +3193,63 @@ function renderDiffHead() {
   $('eyesD').textContent = S.eyes;
   $('dEye').disabled = S.eyes <= 0;
 }
-$('dpanes').addEventListener('pointerup', e => {
+// Gestures on the pictures: one finger drags (when zoomed), two fingers pinch; a touch that hardly moved is a tap.
+const dptr = new Map();
+let dgest = null;
+$('dpanes').addEventListener('pointerdown', e => {
+  if (!e.target.closest('.dvp') || e.target.closest('button')) return;
+  dptr.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY });
+  try { $('dpanes').setPointerCapture(e.pointerId); } catch (err) {}
+  if (dptr.size === 2) {
+    const [a, b] = [...dptr.values()];
+    dgest = { d: Math.hypot(a.x - b.x, a.y - b.y), moved: true };
+  } else dgest = { moved: false };
+});
+$('dpanes').addEventListener('pointermove', e => {
+  const p = dptr.get(e.pointerId);
+  if (!p) return;
+  const dx = e.clientX - p.x, dy = e.clientY - p.y;
+  p.x = e.clientX; p.y = e.clientY;
+  if (dptr.size === 2 && dgest && dgest.d) {
+    const [a, b] = [...dptr.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
+    const box = document.querySelector('#dpanes .dpane:not(.off) .dvp').getBoundingClientRect();
+    zoomDZ(d / dgest.d, (a.x + b.x) / 2 - box.left, (a.y + b.y) / 2 - box.top);
+    dgest.d = d;
+  } else if (dptr.size === 1) {
+    if (Math.hypot(e.clientX - p.x0, e.clientY - p.y0) > 8) dgest.moved = true;
+    if (dgest.moved && DZ.z > 1) { DZ.x += dx; DZ.y += dy; applyDZ(); }
+  }
+});
+const dEnd = e => {
+  const had = dptr.has(e.pointerId), moved = dgest && dgest.moved;
+  dptr.delete(e.pointerId);
+  if (!dptr.size) dgest = null;
+  if (e.type === 'pointerup' && (!had || !moved)) diffTap(e);   // synthetic taps without a pointerdown still count
+};
+$('dpanes').addEventListener('pointerup', dEnd);
+$('dpanes').addEventListener('pointercancel', dEnd);
+$('dpanes').addEventListener('wheel', e => {
+  if (!e.target.closest('.dvp')) return;
+  e.preventDefault();
+  const box = e.target.closest('.dvp').getBoundingClientRect();
+  zoomDZ(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX - box.left, e.clientY - box.top);
+}, { passive: false });
+$('dzIn').addEventListener('click', () => zoomDZ(1.5, DZ.w / 2, DZ.h / 2, true));
+$('dzOut').addEventListener('click', () => zoomDZ(1 / 1.5, DZ.w / 2, DZ.h / 2, true));
+$('dzFit').addEventListener('click', () => { DZ.z = 1; DZ.x = DZ.y = 0; applyDZ(true); });
+// One picture at a time, as large as the area allows; ⇄ flips between memory and the scene now.
+$('dOne').addEventListener('click', () => {
+  const box = $('dpanes'), one = box.classList.toggle('single');
+  $('dOne').textContent = one ? '2枚ならべる' : '1枚ずつ';
+  $('dSwap').hidden = !one;
+  box.querySelectorAll('.dpane').forEach((p, i) => p.classList.toggle('off', one && i === 0));
+  layoutDiff();
+});
+$('dSwap').addEventListener('click', () => {
+  document.querySelectorAll('#dpanes .dpane').forEach(p => p.classList.toggle('off'));
+  sfx.move();
+});
+function diffTap(e) {
   const c = e.target.closest('canvas');
   if (!c || !dscn || !S.search || S.search.mode !== 'diff') return;
   const rc = c.getBoundingClientRect(), k = dscn.W / rc.width;
@@ -3173,17 +3266,16 @@ $('dpanes').addEventListener('pointerup', e => {
     if (s.found.length >= dscn.pts.length) setTimeout(() => { dscn = null; searchClear(); }, 1300);
   } else {
     s.miss = (s.miss || 0) + 1;
-    const m = document.createElement('div');
+    const m = document.createElement('div'), kc = c.clientWidth / dscn.W;
     m.className = 'dmiss'; m.textContent = '×';
-    m.style.left = e.clientX - c.parentNode.getBoundingClientRect().left + 'px';
-    m.style.top = e.clientY - c.parentNode.getBoundingClientRect().top + 'px';
+    m.style.left = x * kc + 'px'; m.style.top = y * kc + 'px';
     c.parentNode.appendChild(m);
     setTimeout(() => m.remove(), 700);
     sfx.wrong();
     renderDiffHead();
     save();
   }
-});
+}
 $('dEye').addEventListener('click', () => {
   const s = S.search;
   if (!dscn || S.eyes <= 0) return;
@@ -3193,7 +3285,7 @@ $('dEye').addEventListener('click', () => {
   if (!modOn('calm')) s.eyes = (s.eyes || 0) + 1;
   sfx.eye();
   const i = pick(left), p = dscn.pts[i];
-  document.querySelectorAll('#dpanes .dpane').forEach(pane => {
+  document.querySelectorAll('#dpanes .dlay').forEach(pane => {
     const h = document.createElement('div');
     h.className = 'dmark hint';
     const near = 1 - .3 * resLv('eye');
@@ -3742,7 +3834,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.38';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.39';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
