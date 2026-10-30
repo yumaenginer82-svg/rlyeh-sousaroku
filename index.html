@@ -812,7 +812,7 @@ const COLS = 7, ROWS = 9;
 const SELL = [1, 2, 4, 8, 16, 32, 64, 128];
 // Generator level → chance of producing tier 0 / 1 / 2.
 const GEN_LV = [null, [1, 0, 0], [.8, .2, 0], [.62, .33, .05], [.5, .4, .1], [.4, .42, .18]];
-const GEN_COST = [0, 0, 30, 90, 240, 600];
+const GEN_COST = [0, 0, 40, 120, 320, 800];
 // Relics: two final-stage items of a chain merge into that chain's relic, which leaves the board
 // and grants a permanent perk that stacks up to max.
 const RELICS = [
@@ -959,7 +959,7 @@ const FIGS = [
   { n: 'ハスター', t: 2, d: '「名状しがたきもの」。黄衣の王とも呼ばれ、遠い星の湖のほとりに住む。読んだ者を狂わせる戯曲『黄衣の王』とともに語られる。' },
   { n: 'クトゥルフ', t: 2, d: 'ルルイエの館で夢見る旧支配者の大祭司。タコの頭に竜の翼、鱗の体。星がそろう日、夢から覚めて世界を取り戻すという。あなたは、その夢の一端に触れてしまった。' },
 ];
-const DICE_COST = 150;
+const DICE_COST = 200;
 const figArt = i => ICON(`assets/x-m${i}.png`);
 const pipsHtml = n => `<span class="pips p${n}">${'<i></i>'.repeat(n)}</span>`;
 // Roll two dice: the total picks the material (2-6 bronze, 7-10 jade, 11-12 gold) and doubles raise it one step.
@@ -1032,12 +1032,12 @@ function senaVisit() {
 
 /* ---- Research: donations to Miskatonic University buy lasting upgrades (the long-term use for coins) ---- */
 const RESEARCH = [
-  { id: 'gen', n: '道具の改良', d: '道具から素材が2つ出ることがある（1段階ごとに +8%）', cost: [200, 500, 1000, 2000, 4000] },
-  { id: 'order', n: '町の信頼', d: '依頼をこなすと、★がひとつ多くもらえることがある（+12%ずつ）', cost: [400, 1200, 3000] },
-  { id: 'chest', n: '目利き', d: '宝箱から、ひとつ上の段階の品が出やすくなる（+12%ずつ）', cost: [500, 1500, 3500] },
-  { id: 'eye', n: '千里眼の研鑽', d: '千里眼の光が、品やちがいの場所により近く光る（-30%ずつ）', cost: [300, 900, 2400] },
-  { id: 'san', n: '鋼の精神', d: 'まちがえたタップで減る正気度が小さくなる（6 → 5 → 4）', cost: [600, 2000] },
-  { id: 'luck', n: '頁の嗅覚', d: '頁の切れ端が見つかりやすくなる（+50%ずつ）', cost: [300, 900, 2500] },
+  { id: 'gen', n: '道具の改良', d: '道具から素材が2つ出ることがある（1段階ごとに +8%）', cost: [300, 800, 1500, 3000, 6000] },
+  { id: 'order', n: '町の信頼', d: '依頼をこなすと、★がひとつ多くもらえることがある（+12%ずつ）', cost: [600, 1800, 4500] },
+  { id: 'chest', n: '目利き', d: '宝箱から、ひとつ上の段階の品が出やすくなる（+12%ずつ）', cost: [800, 2200, 5000] },
+  { id: 'eye', n: '千里眼の研鑽', d: '千里眼の光が、品やちがいの場所により近く光る（-30%ずつ）', cost: [450, 1400, 3600] },
+  { id: 'san', n: '鋼の精神', d: 'まちがえたタップで減る正気度が小さくなる（6 → 5 → 4）', cost: [900, 3000] },
+  { id: 'luck', n: '頁の嗅覚', d: '頁の切れ端が見つかりやすくなる（+50%ずつ）', cost: [450, 1400, 3800] },
 ];
 const resLv = id => (S && S.res && S.res[id]) || 0;
 const STORY = [
@@ -1756,7 +1756,7 @@ function makeOrder() {
   // Very rarely, Sena turns up with a small request and a big reward (never two at once).
   if (!S.orders.some(o => o.rare) && Math.random() < .035) {
     const t = Math.max(1, minT);
-    return { id: S.nextId++, npc: { n: SENA.n }, need: [{ c: pick(avail), t }, { c: pick(avail), t: Math.max(0, t - 1) }], coins: 300 + 60 * S.ch, stars: 2, eyes: 2, rare: true };
+    return { id: S.nextId++, npc: { n: SENA.n }, need: [{ c: pick(avail), t }, { c: pick(avail), t: Math.max(0, t - 1) }], coins: 200 + 40 * S.ch, stars: 2, eyes: 1, rare: true };
   }
   const npc = pick(NPCS.filter(p => !used.includes(p.n)));
   // High-stage requests, so big items have a use: often for one already on the board (6th stage and up),
@@ -1764,7 +1764,7 @@ function makeOrder() {
   const asked = x => S.orders.some(o => o.need.some(n => n.c === x.c && n.t === x.t));
   const tops = S.cells.filter(c => c && c.k === 'item' && c.t >= 5 && avail.includes(c.c) && !asked(c));
   const hiChance = Math.min(.6, .4 + .04 * S.ch);
-  if (tops.length && Math.random() < hiChance) { const x = pick(tops); return { id: S.nextId++, npc, need: [{ c: x.c, t: x.t }], coins: 5 * 2 ** x.t + 40, stars: 2 }; }
+  if (tops.length && Math.random() < hiChance) { const x = pick(tops); return { id: S.nextId++, npc, need: [{ c: x.c, t: x.t }], coins: 4 * 2 ** x.t + 25, stars: 2 }; }
   const n = S.ch >= 1 && Math.random() < .35 ? 2 : 1;
   const need = [];
   for (let k = 0; k < n; k++) {
@@ -1775,9 +1775,9 @@ function makeOrder() {
   // Occasional special request: one high-tier item, big payout.
   if (S.ch >= 1 && Math.random() < .18 && !S.orders.some(o => o.sp)) {
     const t = Math.min(MAXT - 1, maxT + 1);
-    return { id: S.nextId++, npc, need: [{ c: pick(avail), t }], coins: 10 * 2 ** t + 20, stars: 3, eyes: 1, sp: true };
+    return { id: S.nextId++, npc, need: [{ c: pick(avail), t }], coins: 7 * 2 ** t + 20, stars: 3, eyes: 1, sp: true };
   }
-  const coins = need.reduce((s, x) => s + 5 * 2 ** x.t, 5);
+  const coins = need.reduce((s, x) => s + 4 * 2 ** x.t, 5);
   return { id: S.nextId++, npc, need, coins, stars: n };
 }
 // While the climax request is up it takes one of the three order slots.
@@ -1999,7 +1999,7 @@ function discover(c, t) {
   const k = key(c, t);
   if (S.dex[k]) return;
   S.dex[k] = true;
-  const bonus = 5 * (t + 1) ** 2;
+  const bonus = 3 * (t + 1) ** 2;
   S.coins += bonus;
   showDiscovery(ITEM(c, t), bonus);
   setTimeout(sfx.discover, 120);
@@ -2270,7 +2270,7 @@ function openChest(i) {
   const item = { k: 'item', c: pick(avail), t: Math.max(0, t) };
   c.n--;
   bumpTot('c', 1);
-  findScrap(.08, '宝箱の底');
+  findScrap(.03, '宝箱の底');
   if (c.n <= 0) {
     S.cells[i] = item;
     sel = -1;
@@ -2369,7 +2369,7 @@ function deliver(id) {
   S.coins += coins;
   S.stars += o.stars;
   if (o.stars && Math.random() < .12 * resLv('order')) { S.stars++; setTimeout(() => toast('町の信頼が厚い。★がひとつ多くもらえた'), 1500); }
-  if (!o.boss) findScrap(.05, '依頼主の荷物');
+  if (!o.boss) findScrap(.03, '依頼主の荷物');
   if (o.eyes) S.eyes += o.eyes;
   S.orders = S.orders.filter(x => x.id !== id);
   S.cs = S.cs || {}; S.cs.o = (S.cs.o || 0) + 1; bumpTot('o', 1);
@@ -3231,7 +3231,7 @@ function titleUp(list) {
   const lv = titleLv();
   if (lv <= (S.titleLv || 0)) return '';
   S.titleLv = lv;
-  const coins = 60 * lv;
+  const coins = 40 * lv;
   S.coins += coins; S.eyes += 1;
   list.push(`🎖 称号ボーナス 🪙${coins} 👁️1`);
   return `<p class="title-up">称号が上がった：<b>${TITLES[lv][1]}</b></p>`;
@@ -3247,9 +3247,9 @@ function searchClear() {
   if (!lastStage()) return stageClear(s, san, r);
   const ch = S.ch, st = story(ch);
   const coins = 40 + 30 * ch;
-  const list = [`🪙 ${coins}`, '👁️ 千里眼 ×2'];
+  const list = [`🪙 ${coins}`, '👁️ 千里眼 ×1'];
   S.coins += coins;
-  S.eyes += 2;
+  S.eyes += 1;
   if (RATE_COINS(ch)[r]) { S.coins += RATE_COINS(ch)[r]; list.push(`${starsText(r)} 評価ボーナス 🪙${RATE_COINS(ch)[r]}`); }
   if (r === 3) { S.eyes += 1; list.push('👁️ 正気を保ったほうび ×1'); }
   const stats = Object.assign({ m: 0, o: 0, g: 0 }, S.cs);
@@ -3257,7 +3257,7 @@ function searchClear() {
   S.log[ch] = { stars: cr, san, m: stats.m, o: stats.o, g: stats.g };
   const titleHtml = titleUp(list);
   giveShard(ch, list);
-  findScrap(1, '現場');
+  findScrap(.45, '現場');
   const row = unlockRow();
   if (row !== false) list.push('✴ 盤面の封印が一列とけた');
   const gift = [];
@@ -3305,9 +3305,9 @@ const STAGE_BEATS = ['一つ目の手がかりを見つけた。だが、まだ�
 function stageClear(s, san, r) {
   const ch = S.ch, n = stageOf();
   const coins = 20 + 15 * ch;
-  const list = [`🪙 ${coins}`, '👁️ 千里眼 ×1'];
-  S.coins += coins; S.eyes += 1;
-  findScrap(1, '現場');
+  const list = [`🪙 ${coins}`];
+  S.coins += coins;
+  findScrap(.45, '現場');
   if (RATE_COINS(ch)[r]) { const b = Math.round(RATE_COINS(ch)[r] / 2); S.coins += b; list.push(`${starsText(r)} 評価ボーナス 🪙${b}`); }
   const avail = [0, 1, 2].filter(g => S.gens[g]), t = Math.min(1 + Math.floor(ch / 2), 4), c = pick(avail);
   list.push(`${ITEM(c, t)[0]} ${ITEM(c, t)[1]}`);
@@ -3710,7 +3710,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.35';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.36';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');

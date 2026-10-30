@@ -85,7 +85,7 @@
   async function chores() {   // reads the save afresh before each spend
     const S = st(), D = R.did;
     // tool upgrades whenever affordable
-    const gi = S.cells.findIndex(c => c && c.k === 'gen' && c.lv < 5 && st().coins >= [0, 0, 30, 90, 240, 600][c.lv + 1]);
+    const gi = S.cells.findIndex(c => c && c.k === 'gen' && c.lv < 5 && st().coins >= [0, 0, 40, 120, 320, 800][c.lv + 1]);
     if (gi >= 0) { await PB.tap(gi); if (click($('info').querySelector('[data-act="upgrade"]'))) { D.upgrade = (D.upgrade || 0) + 1; } await w(150); }
     if (!D.daily) { $('dayBtn').click(); await w(250); click($('dLogin')); await w(250); await settle(); D.daily = 1; note('daily: login reward'); }
     if (S.daily && S.daily.tasks.some(t => !t.got)) { $('dayBtn').click(); await w(200); for (const b of $('panel').querySelectorAll('[data-task]')) if (!b.disabled) { b.click(); D.dailyTask = 1; note('daily task claimed'); await w(250); break; } await settle(); }
