@@ -686,11 +686,6 @@ body.focus .top{display:none}
 #diffView .sbar{width:90px}
 #diffView{gap:6px}
 .dpanes{gap:6px}
-/* The spot-the-difference buttons float over the pictures (top right), so the bar is one thin line and the pictures grow */
-.dpanes .mbtns{position:absolute;right:8px;top:8px;z-index:3;flex-direction:row;gap:6px}
-.dpanes .mbtns .btn{background:rgba(10,24,27,.86);backdrop-filter:blur(3px)}
-#diffView .mission{padding:4px 12px;min-height:0}
-#diffView .mission h2{font-size:14px}
 /* Tablets: popups may use more of the width */
 @media (min-width:700px){.panel{width:min(680px,100%);padding:30px 32px 24px}.how li{font-size:16px}}
 /* Request cards: items and the delivery button share one row */
@@ -3344,7 +3339,6 @@ function setView(v) {
 $('backBtn').addEventListener('click', () => setView('merge'));
 // The seek-and-find buttons live on the picture (see .sview .mbtns), freeing the row they used to take.
 $('sview').appendChild(document.querySelector('#searchView .mbtns'));
-$('dpanes').appendChild(document.querySelector('#diffView .mbtns'));
 // The search button sits in the header, in place of the star bar (see .prog #goSearch), so it covers nothing.
 document.querySelector('.top .prog').appendChild($('goSearch'));
 $('goSearch').addEventListener('click', () => {
@@ -3851,7 +3845,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.43';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.44';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
