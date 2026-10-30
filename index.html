@@ -1805,8 +1805,9 @@ function makeOrder() {
   const avail = [0, 1, 2].filter(g => S.gens[g]);
   const maxT = Math.min(5, 2 + S.ch), minT = Math.max(1, maxT - 2);   // everyday requests stay below the top stages
   const used = S.orders.map(o => o.npc.n);
-  // Very rarely, Sena turns up with a small request and a big reward (never two at once).
-  if (!S.orders.some(o => o.rare) && Math.random() < .035) {
+  // Very rarely, Sena turns up with a small request and a big reward (never two at once). Not in chapter 1:
+  // she first has to be hinted at (the dog with big ears at the fish market, chapter 2's opening).
+  if (S.ch >= 1 && !S.orders.some(o => o.rare) && Math.random() < .025) {
     const t = Math.max(1, minT);
     return { id: S.nextId++, npc: { n: SENA.n }, need: [{ c: pick(avail), t }, { c: pick(avail), t: Math.max(0, t - 1) }], coins: 200 + 40 * S.ch, stars: 2, eyes: 1, rare: true };
   }
@@ -3851,7 +3852,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.45';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.46';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
