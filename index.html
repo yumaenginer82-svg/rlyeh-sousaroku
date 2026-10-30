@@ -53,7 +53,7 @@ body{height:100%;margin:0;background:radial-gradient(ellipse 120% 70% at 50% 115
 .chapter{display:flex;align-items:baseline;gap:8px;min-width:0}
 .chapter span{font-size:12px;opacity:.7;letter-spacing:.08em}
 .chapter b{font-family:var(--f-display);font-size:17px;white-space:nowrap}
-.prog{display:flex;align-items:center;gap:8px;flex:1 1 140px;min-width:120px}
+.prog{display:flex;align-items:center;gap:8px;flex:1 1 340px;min-width:260px}
 .pbar{flex:1;height:12px;border-radius:999px;background:#071012;border:1px solid var(--line);overflow:hidden}
 .pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#8a6d2a,var(--gold));transition:width .4s}
 .prog span{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--gold)}
@@ -302,6 +302,49 @@ img.uic{display:inline-block;width:26px;height:26px;object-fit:contain;vertical-
 .btn.hb.snd{position:relative}
 #eyeBtn img.uic{width:26px;height:26px}
 
+/* Seals for the chapter's three searches */
+.seals{display:flex;gap:4px;flex:none}
+.sm{display:block;width:18px;height:18px;border-radius:50%;border:2px solid #3d5a56;background:radial-gradient(circle,#0b1517,#050b0d);position:relative}
+.sm.done{border-color:var(--gold);background:radial-gradient(circle at 40% 35%,#fff3c4,var(--gold) 45%,#7a5a1c);box-shadow:0 0 8px rgba(232,196,104,.8)}
+.sm.done::after{content:"";position:absolute;inset:4px;border:1.5px solid rgba(60,40,10,.7);transform:rotate(45deg)}
+.sm.now{border-color:var(--glow);animation:smpulse 1.6s ease-in-out infinite}
+@keyframes smpulse{0%,100%{box-shadow:0 0 0 rgba(114,224,178,0)}50%{box-shadow:0 0 10px rgba(114,224,178,.9)}}
+/* Sanity gauge */
+.san.gauge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;color:#cfeee2}
+.san.gauge b{font-size:11px;letter-spacing:.1em;opacity:.85}
+.sbar{display:block;width:120px;height:10px;border-radius:999px;background:#1a0a0c;border:1px solid #4a2a2c;overflow:hidden}
+.sbar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#3fae8a,#72e0b2);transition:width .5s ease,background .5s}
+.san.r2 .sbar i{background:linear-gradient(90deg,#b07a1c,#e0b060)}
+.san.r1 .sbar i{background:linear-gradient(90deg,#8a1424,#ff5a6a);animation:sanbeat 1s ease-in-out infinite}
+@keyframes sanbeat{0%,100%{filter:brightness(1)}45%{filter:brightness(1.6)}55%{filter:brightness(1.2)}}
+.san.gauge em{font-style:normal;font-weight:800;font-variant-numeric:tabular-nums;min-width:2em;text-align:right}
+.san.gauge .srate{color:var(--gold);font-size:12px;letter-spacing:.05em}
+.san.r1 em{color:#ff8a8f}
+.hit{animation:sanhit .45s ease}
+@keyframes sanhit{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+.sview.hit::after,.dpanes.hit::after{content:"";position:absolute;inset:0;pointer-events:none;background:rgba(190,30,50,.28);animation:redflash .45s ease forwards;z-index:3}
+@keyframes redflash{to{opacity:0}}
+.dpanes.shaken::before{content:"";position:absolute;inset:-6px;z-index:1;pointer-events:none;box-shadow:inset 0 0 70px rgba(150,20,40,.55);animation:breathe 1.2s ease-in-out infinite}
+/* Requests */
+.order.clash{border-color:#a0603a}
+.order.clash .needs::after{content:"山場の品を使う";align-self:center;margin-left:auto;font-size:10px;font-weight:800;color:#fff;background:#8a4a28;border-radius:6px;padding:1px 6px;white-space:nowrap}
+.info p.ask{font-family:var(--f-display);font-size:14px;color:#e8dcc0}
+/* Seal shards and the altar */
+.pshard .ic{width:44px;height:44px;flex:none}
+.verse{font-size:15px;line-height:2}
+.altar{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;width:100%}
+.pedestal{aspect-ratio:1;border-radius:12px;border:2px dashed #3d5a56;background:radial-gradient(circle at 50% 80%,#13262a,#060d0f);display:grid;place-items:center;font-family:var(--f-display);color:#4d6a64;font-size:18px}
+.pedestal.lit{border-style:solid;border-color:var(--gold);box-shadow:0 0 16px rgba(232,196,104,.6),inset 0 0 18px rgba(114,224,178,.35);animation:pop .5s ease}
+.pedestal .ic{width:86%;height:86%}
+.shards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;width:100%}
+.shard{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:inherit;font:inherit;cursor:pointer}
+.shard .ic{width:64px;height:64px}
+.shard b{font-size:13px;color:var(--gold)}
+.shard small{font-size:11px;line-height:1.5;opacity:.85}
+.shard.nope{animation:shake .4s ease;border-color:var(--stripe)}
+.rlv{margin-left:8px;color:var(--gold);font-size:11px;letter-spacing:.1em}
+.good.res .gart .ic{width:34px;height:34px}
+
 /* Spot the difference */
 .dpanes{grid-area:board;position:relative;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;gap:10px;touch-action:manipulation}
 .dpanes.stack{flex-direction:column}
@@ -529,7 +572,7 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
   <header class="top">
     <div class="brand">ルルイエ捜索録</div>
     <div class="chapter"><span id="chNo">第1章</span><b id="chTitle">霧の港町</b></div>
-    <div class="prog" title="依頼をこなすと★がたまる"><div class="pbar"><i id="pfill"></i></div><img class="uic" src="assets/x-ui-star.png" alt="★"><span id="ptext">0 / 4</span></div>
+    <div class="prog" title="依頼をこなすと★がたまる"><div class="seals" id="seals" aria-label="この章の現場検証"></div><div class="pbar"><i id="pfill"></i></div><img class="uic" src="assets/x-ui-star.png" alt="★"><span id="ptext">0 / 4</span></div>
     <div class="res"><span class="pill"><img class="uic" src="assets/x-ui-coin.png" alt="コイン"><b id="coins">0</b></span><span class="pill"><img class="uic" src="assets/x-ui-eye.png" alt="千里眼"><b id="eyes">3</b></span></div>
     <div class="hbtns">
       <button id="storeBtn" class="btn small hb" type="button" aria-label="封印の櫃（しまっておく場所）"><img class="uic" src="assets/x-vault.png" alt="">櫃 <b id="storeN">0</b></button>
@@ -553,7 +596,7 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
   <section class="view search" id="diffView" hidden>
     <div class="side">
       <div class="mission">
-        <h2><small>現場検証 ―― 2枚の絵のちがいを探せ</small><span id="dTitle"></span><span class="san" id="dsan">SAN 100</span></h2>
+        <h2><small>現場検証 ―― 2枚の絵のちがいを探せ</small><span id="dTitle"></span><span class="san gauge r3" id="dsan"></span></h2>
         <div class="mbtns">
           <button id="dEye" class="btn" type="button"><img class="uic" src="assets/x-ui-eye.png" alt="">千里眼 ×<b id="eyesD">0</b></button>
           <button id="dBack" class="btn" type="button">← 依頼にもどる</button>
@@ -569,7 +612,7 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
   <section class="view search" id="searchView" hidden>
     <div class="side">
       <div class="mission">
-        <h2><small>現場検証 ―― リストの品を探しだせ</small><span id="mTitle"></span><span class="san" id="san" title="正気度：まちがいや千里眼で減る">SAN 100</span></h2>
+        <h2><small>現場検証 ―― リストの品を探しだせ</small><span id="mTitle"></span><span class="san gauge r3" id="san"></span></h2>
         <div class="finds" id="finds"></div>
         <div class="mbtns">
           <button id="eyeBtn" class="btn" type="button"><img class="uic" src="assets/x-ui-eye.png" alt="">千里眼 ×<b id="eyesS">0</b></button>
@@ -675,6 +718,12 @@ const NPCS = [
   { e: '👮‍♀️', n: '保安官マーシュ', d: '町の保安官。よそ者には厳しいが、町の古い一族とのつながりを隠している。' },
   { e: '🧑‍🎨', n: '画家ウィルコックス', d: '夜ごと同じ夢を見る若い画家。夢で見た沈んだ都を、取りつかれたように描きつづけている。' },
   { e: '👩‍⚕️', n: '町医者ハリエット', d: '町でただ一人の医者。町の人々の顔つきが少しずつ変わっていくことに、気づいている。' },
+  { e: '', n: '灯台守エズラ', d: '岬の灯台をひとりで守る老人。夜の海に、灯りとは別の光が見えると言う。' },
+  { e: '', n: '古書店のアビゲイル', d: '港の裏通りの古書店の娘。父が遺した本の中に、読んではいけない一冊があるらしい。' },
+  { e: '', n: '聖歌隊のトビー', d: '教会の聖歌隊の少年。夜になると、聞いたことのない歌が頭から離れないという。' },
+  { e: '', n: '密輸船のブラック船長', d: '夜の海を知りつくした密輸船の船長。悪魔の暗礁にだけは、決して近づかない。' },
+  { e: '', n: '編集長ハーグレイヴ', d: '行方不明の記者の上司。記者が最後に送ってきた原稿を、まだ誰にも見せていない。' },
+  { e: '', n: '学生ピーズリー', d: 'ミスカトニック大学の学生。教授の助手として、インスマスの伝承を調べに来た。' },
 ];
 // What each client says when asking, and when you deliver.
 const LINES = {
@@ -684,6 +733,12 @@ const LINES = {
   '保安官マーシュ': [['町の決まりでね。これを出してもらう。', 'よそ者でも、役に立つなら使ってあげる。'], ['……まあ、いいでしょう。', '余計なことは嗅ぎまわらないことね。']],
   '画家ウィルコックス': [['夢で見たものを描くのに、これが要るんだ。', 'この形…夢に出てきた。どうか持ってきて。'], ['ああ、これだ！ 夢のとおりだ…', 'ありがとう。今夜はもっと深く描ける。']],
   '町医者ハリエット': [['診療に使うの。手を貸してくださる？', '町の人の具合が悪いの。これが要るわ。'], ['ありがとう。これで何人か助けられる。', 'あなたも、体には気をつけて。']],
+  '灯台守エズラ': [['灯りを絶やすわけにはいかん。これを頼めるか。', '沖の光の正体を確かめたい。これがいるんじゃ。'], ['助かった。今夜も灯りは守られる。', '……沖の光が、少し遠のいた気がするのう。']],
+  '古書店のアビゲイル': [['父の本を読み解くのに、これが必要なの。', 'お店の棚がひとつ空いてしまって。これを探してくれる？'], ['ありがとう。父も喜ぶと思う。', 'この本、あなたに読んでほしい気もするの……いいえ、やっぱりだめ。']],
+  '聖歌隊のトビー': [['神父さまに頼まれたんだ。これ、見つけてくれる？', 'あの歌を忘れたいんだ。これがあれば、きっと……'], ['ありがとう！ 今夜はぐっすり眠れそう。', 'ねえ、あなたにも聞こえる？ 海のほうから……ううん、なんでもない。']],
+  '密輸船のブラック船長': [['荷を一つ落としちまってな。代わりを探してくれ。', '口は堅いほうか？ なら、こいつを用意してくれ。'], ['上出来だ。分け前ははずむぜ。', '暗礁には近づくなよ。あそこで泳いでるのは、魚じゃねえ。']],
+  '編集長ハーグレイヴ': [['記者の原稿を確かめたい。これが手がかりになる。', '記事にできるかどうか、これを見てから決める。'], ['ふむ……やはりあいつの書いたことは本当だったのか。', '助かる。だが、このことはまだ記事にはできん。']],
+  '学生ピーズリー': [['教授に頼まれた資料なんです。お願いできますか？', '伝承の裏づけに、これがどうしても必要で。'], ['ありがとうございます！ 論文が一歩進みました。', 'この町の人たち、ぼくのこと、ずっと見てる気がするんです。']],
 };
 // Portraits: townsfolk x-p<n>, climax clients x-b<chapter> (x-b6 for the endless chapters), the dealer x-shop.
 const MERCHANT = { n: '骨董商ラバン', d: '港の裏通りで店をひらく骨董商。どこから仕入れたのか、だれも知らない品ばかり並べている。' };
@@ -741,7 +796,42 @@ const MYTHOS = [
   { ch: 5, n: '夢の国', d: 'ラヴクラフトは、人が夢の中で訪れる別の世界「ドリームランド」も描いた。クトゥルフもまた、夢を通して人に語りかける。' },
   { ch: 5, n: '宇宙的恐怖', d: '怪物の恐ろしさより、人の常識がまったく通じない広い宇宙そのものが恐ろしい、という考え方。ラヴクラフトが残した、いちばん大きな遺産。' },
 ];
+// Story fragments found only as page scraps (ch 99 = never opened by a chapter).
+MYTHOS.push(
+  { ch: 99, n: '断章：記者の手記 その一', d: 'インスマス行きのバスは、私ひとりを乗せて走った。運転手は一度も振り向かなかった。窓の外の湿地を、何かがバスと並んで走っている気がした。' },
+  { ch: 99, n: '断章：記者の手記 その二', d: '宿の壁ごしに、夜どおし低い祈りの声が聞こえる。言葉はわからない。ただ、その節まわしを、私はなぜか知っている。' },
+  { ch: 99, n: '断章：老漁師の昔語り', d: 'わしが若いころ、オーベッド船長が南の島から帰ってきた。それからじゃ、網が魚であふれるようになったのは。かわりに毎年、だれかが海へ帰っていった。' },
+  { ch: 99, n: '断章：灯台の日誌', d: '三月十二日。沖に灯り。船ではない。灯りは水の下から浮かんできて、灯台の光と同じ間隔でまたたいた。まるで、合図を返すように。' },
+  { ch: 99, n: '断章：古書店の帳簿', d: '『無名祭祀書』一冊、買い手不明。代金のかわりに、濡れた金貨が一枚、カウンターに置かれていた。金貨には、見たことのない魚の紋。' },
+  { ch: 99, n: '断章：記者の手記 最後の頁', d: 'わかった。あれは夢ではない。彼らは待っている。星がそろうその日まで。もしこれを読む者がいるなら――窓の外を、見てはいけない。' },
+);
 const mythOpen = i => MYTHOS[i].ch <= S.ch || (S.myth || []).includes(i);
+// Page scraps: picked up while playing; every third one opens the next closed page of the guide.
+function findScrap(chance, where) {
+  if (Math.random() >= chance * (1 + .5 * resLv('luck'))) return;
+  S.scraps = (S.scraps || 0) + 1;
+  const n = S.scraps % 3;
+  if (n === 0) {
+    const closed = MYTHOS.map((_, i) => i).filter(i => !mythOpen(i)).sort((a, b) => MYTHOS[a].ch - MYTHOS[b].ch);
+    if (closed.length) {
+      (S.myth = S.myth || []).push(closed[0]);
+      setTimeout(() => { sfx.discover(); toast(`頁の切れ端がそろった。手帳で「${MYTHOS[closed[0]].n}」が読める`); }, 900);
+      return;
+    }
+  }
+  setTimeout(() => toast(`${where}で頁の切れ端を見つけた（${n || 3} / 3）`), 700);
+}
+
+/* ---- Research: donations to Miskatonic University buy lasting upgrades (the long-term use for coins) ---- */
+const RESEARCH = [
+  { id: 'gen', n: '道具の改良', d: '道具から素材が2つ出ることがある（1段階ごとに +8%）', cost: [200, 500, 1000, 2000, 4000] },
+  { id: 'order', n: '町の信頼', d: '依頼をこなすと、★がひとつ多くもらえることがある（+12%ずつ）', cost: [400, 1200, 3000] },
+  { id: 'chest', n: '目利き', d: '宝箱から、ひとつ上の段階の品が出やすくなる（+12%ずつ）', cost: [500, 1500, 3500] },
+  { id: 'eye', n: '千里眼の研鑽', d: '千里眼で減る正気度が小さくなる（12 → 9 → 6 → 3）', cost: [300, 900, 2400] },
+  { id: 'san', n: '鋼の精神', d: 'まちがえたタップで減る正気度が小さくなる（6 → 5 → 4）', cost: [600, 2000] },
+  { id: 'luck', n: '頁の嗅覚', d: '頁の切れ端が見つかりやすくなる（+50%ずつ）', cost: [300, 900, 2500] },
+];
+const resLv = id => (S && S.res && S.res[id]) || 0;
 const STORY = [
   { title: '霧の港町',
     intro: '行方不明になった記者を追って、あなたは寂れた港町インスマスへやって来た。町の人々はよそ者に冷たい。まずは依頼をこなして、信頼を集めよう。',
@@ -789,7 +879,7 @@ const BOSSES = [
   { n: 'クトゥルフの影', say: '……ふんぐるい　むぐるうなふ……（深海・書物・儀式、三つの封印の品を捧げ、我を眠りへ還せ）', d: 'ルルイエの館で夢見る、旧支配者の大祭司。その影が、星辰の刻に目覚めかけている。' },
 ];
 const bossOf = ch => BOSSES[ch] || { n: '深淵の声', say: 'より深きものを捧げよ。', d: '夢と現実の境目から聞こえる声。どこから響くのか、だれにもわからない。' };
-const bossT = ch => Math.min(3 + Math.floor(ch * .75), 6);
+const bossT = ch => Math.min(4 + Math.floor(ch * .75), 6);
 // Chapter twists on the board, from chapter 2 on.
 const GIMMICKS = {
   fog: { n: '霧', d: '霧の中に品が眠っている。となりのマスで合体すると、霧が晴れる。' },
@@ -798,7 +888,8 @@ const GIMMICKS = {
 };
 const gimmicksOf = ch => [[], ['fog'], ['stone'], ['tent'], ['fog', 'tent'], ['stone', 'tent']][ch] || [['fog', 'stone'], ['fog', 'tent'], ['stone', 'tent']][ch % 3];
 // Seek-and-find rating: misses and the clairvoyant eye cost sanity; how much is left sets the stars.
-const sanOf = s => Math.max(0, 100 - 6 * (s.miss || 0) - 12 * (s.eyes || 0));
+const missCost = () => 6 - resLv('san'), eyeCost = () => 12 - 3 * resLv('eye');
+const sanOf = s => Math.max(0, 100 - missCost() * (s.miss || 0) - eyeCost() * (s.eyes || 0));
 const rateOf = san => san >= 75 ? 3 : san >= 45 ? 2 : 1;
 const RATE_COINS = ch => [0, 0, 20 + 10 * ch, 50 + 25 * ch].map(v => v * (modOn('dream') ? 2 : 1));
 const starsText = n => '★'.repeat(n) + '☆'.repeat(3 - n);
@@ -828,6 +919,8 @@ const ACHS = [
   { id: 'ch6', n: 'ルルイエへの到達', d: '第6章を解決する', p: () => [S.ch, 6], c: 600, e: 2 },
   { id: 'ch10', n: '終わらない調査', d: '第10章を解決する', p: () => [S.ch, 10], c: 1500, e: 3 },
   { id: 'end', n: '封印者', d: '最終章を解決し、都を眠りへ還す', p: () => [S.cleared ? 1 : 0, 1], c: 500, e: 2 },
+  { id: 'res10', n: '大学の後援者', d: '研究を合わせて10段すすめる', p: () => [Object.values(S.res || {}).reduce((a, b) => a + b, 0), 10], c: 800, e: 2 },
+  { id: 'scrap', n: '断章の収集家', d: '断章をすべて読む', p: () => [MYTHOS.filter((m, i) => m.ch > 50 && mythOpen(i)).length, 6], c: 600, e: 2 },
   { id: 'd7', n: '七日の観測', d: '今日の異変を7日つづけて調べる', p: () => [(S.daily || {}).streak || 0, 7], c: 500, e: 2 },
   { id: 'dall10', n: '月の常連', d: '月の贈りものを10回受けとる', p: () => [tot('moon'), 10], c: 800, e: 2 },
   { id: 'myth', n: '神話学者', d: '神話の手引きをすべて読む', p: () => [MYTHOS.filter((_, i) => mythOpen(i)).length, MYTHOS.length], c: 300 },
@@ -896,6 +989,7 @@ function showDaily() {
     t.got = true; S.coins += pay; sfx.coin();
     if (!D.all && D.tasks.every(x => x.got)) {
       D.all = true; bumpTot('moon', 1); S.eyes += 1;
+      findScrap(1, '月の贈りもの');
       giveGift([{ k: 'chest', n: 3, lv: 4 + Math.min(2, Math.floor(ch / 2)) }]);
       setTimeout(() => { sfx.relic(); toast('月の贈りものが盤面に届いた　👁️+1'); }, 400);
     }
@@ -1474,7 +1568,8 @@ function makeBoss() {
   const avail = [0, 1, 2].filter(g => S.gens[g]);
   const t = bossT(S.ch), a = pick(avail), rest = avail.filter(g => g !== a);
   // The last chapter asks for the three seals: the seventh stage of every chain.
-  const need = S.ch === FINAL_CH ? [0, 1, 2].map(c => ({ c, t: 6 })) : [{ c: a, t }, { c: rest.length ? pick(rest) : a, t: t - 1 }];
+  const others = shuffle(avail.filter(g => g !== a));
+  const need = S.ch === FINAL_CH ? [0, 1, 2].map(c => ({ c, t: 6 })) : [{ c: a, t }, { c: others[0] ?? a, t: t - 1 }, { c: others[1] ?? others[0] ?? a, t: t - 1 }];
   S.boss = { id: S.nextId++, npc: { n: bossOf(S.ch).n }, need, coins: 60 + 40 * S.ch, stars: 0, eyes: 1, boss: true };
   if (S.orders.length > 2) S.orders.length = 2;
 }
@@ -1583,9 +1678,12 @@ function renderTop() {
   $('mute').classList.toggle('off', muted);
   $('dayBtn').classList.toggle('glow', !!dailyReady());
   const ready = S.search || (lastStage() ? S.bossDone : S.stars >= g);
-  if (S.stars >= g && !ready) $('ptext').textContent = `${g} / ${g}　山場の依頼`;
+  // What to do next, in words, and the three seals of this chapter's searches (lit = solved, pulsing = next).
+  const st0 = stageOf();
+  $("ptext").textContent = S.search ? `${Math.min(S.stars, g)} / ${g}　現場検証の途中` : ready ? `${g} / ${g}　現場検証へ進める` : S.stars >= g ? `${g} / ${g}　山場の依頼を果たすと最後の現場検証` : `${S.stars} / ${g}　あと★${g - S.stars}で現場検証`;
+  $("seals").innerHTML = [0, 1, 2].map(i => `<i class="sm${i < st0 ? " done" : i === st0 ? " now" : ""}" title="${STAGE_NAMES[i]}"></i>`).join("");
   $('goSearch').hidden = !ready;
-  $('goSearch').textContent = S.search ? (S.search.replay ? '🔎 再調査のつづき' : '🔎 現場検証のつづき') : `🔎 現場検証へ（${stageOf() + 1} / ${STAGES}）`;
+  $('goSearch').textContent = S.search ? (S.search.replay ? '🔎 再調査のつづき' : '🔎 現場検証のつづき') : `🔎 現場検証へ ―― ${STAGE_NAMES[stageOf()]}`;
 }
 
 /* ================= merge board ================= */
@@ -1710,6 +1808,9 @@ function produce(i) {
   bumpTot('p', 1);
   const j = empties[0];
   S.cells[j] = { k: 'item', c: g.g, t };
+  // Research: sometimes a second piece comes out.
+  const j2 = empties[1];
+  if (j2 !== undefined && Math.random() < .08 * resLv('gen')) { S.cells[j2] = { k: 'item', c: g.g, t }; paintM(j2, 'pop'); }
   paintM(i, 'land');
   paintM(j, 'pop');
   sfx.spawn();
@@ -1946,10 +2047,11 @@ function maybeChest(i, t) {
 function openChest(i) {
   const c = S.cells[i];
   const avail = [0, 1, 2].filter(g => S.gens[g]);
-  const t = Math.min(MAXT, rnd(2) + (c.lv - 3) + rnd(2));
+  const t = Math.min(MAXT, rnd(2) + (c.lv - 3) + rnd(2) + (Math.random() < .12 * resLv('chest') ? 1 : 0));
   const item = { k: 'item', c: pick(avail), t: Math.max(0, t) };
   c.n--;
   bumpTot('c', 1);
+  findScrap(.08, '宝箱の底');
   if (c.n <= 0) {
     S.cells[i] = item;
     sel = -1;
@@ -1995,6 +2097,9 @@ function itemIndex() {
 function renderOrders() {
   const idx = itemIndex();
   wantSet = new Set();
+  // A normal request that would use up something the climax request needs gets flagged.
+  const bossKeys = new Set(S.boss ? S.boss.need.map(n => key(n.c, n.t)) : []);
+  const clash = o => !o.boss && o.need.some(n => bossKeys.has(key(n.c, n.t)));
   const html = [S.boss, ...S.orders].filter(Boolean).map(o => {
     const used = {};
     let ready = true;
@@ -2006,7 +2111,7 @@ function renderOrders() {
       (idx[k] || []).forEach(i => wantSet.add(i));
       return `<span class="need" title="${ITEM(n.c, n.t)[1]}">${ITEM(n.c, n.t)[0]}${ok ? '<i>✓</i>' : ''}</span>`;
     }).join('');
-    return `<div class="order${ready ? ' ready' : ''}${o.sp ? ' special' : ''}${o.boss ? ' boss' : ''}" data-oid="${o.id}">
+    return `<div class="order${ready ? ' ready' : ''}${o.sp ? ' special' : ''}${o.boss ? ' boss' : ''}${clash(o) ? ' clash' : ''}" data-oid="${o.id}">
       <div class="npc" data-who="${o.npc.n}">${FACE(o.npc.n)}<div class="whot"><span class="nm">${o.npc.n}</span><span class="say">「${askOf(o)}」</span></div>${o.sp ? '<span class="sp-tag">特別</span>' : o.boss ? '<span class="sp-tag boss-tag">山場</span>' : ''}</div>
       <div class="needs">${needs}</div>
       <div class="foot"><span class="rew">🪙${orderCoins(o)}${o.stars ? ' ★' + o.stars : ''}${o.eyes ? ' 👁️' + o.eyes : ''}</span><button class="btn tiny gold" type="button" data-deliver="${o.id}" ${ready ? '' : 'disabled'}>納品</button></div>
@@ -2023,7 +2128,9 @@ $('orders').addEventListener('click', e => {
   const w = e.target.closest('[data-who]');
   if (w && whoIs(w.dataset.who)) {
     select(-1);
-    $('info').innerHTML = `<div class="big">${FACE(w.dataset.who)}</div><div class="txt"><b>${w.dataset.who}<small>依頼主</small></b><p>${whoIs(w.dataset.who)}</p></div>`;
+    const card = w.closest(".order"), oid = card ? +card.dataset.oid : -1;
+    const o = S.boss && S.boss.id === oid ? S.boss : S.orders.find(x => x.id === oid);
+    $("info").innerHTML = `<div class="big">${FACE(w.dataset.who)}</div><div class="txt"><b>${w.dataset.who}<small>依頼主</small></b>${o ? `<p class="ask">「${askOf(o)}」</p>` : ""}<p class="muted">${whoIs(w.dataset.who)}</p></div>`;
   }
 });
 
@@ -2041,6 +2148,8 @@ function deliver(id) {
   const coins = orderCoins(o);
   S.coins += coins;
   S.stars += o.stars;
+  if (o.stars && Math.random() < .12 * resLv('order')) { S.stars++; setTimeout(() => toast('町の信頼が厚い。★がひとつ多くもらえた'), 1500); }
+  if (!o.boss) findScrap(.05, '依頼主の荷物');
   if (o.eyes) S.eyes += o.eyes;
   S.orders = S.orders.filter(x => x.id !== id);
   S.cs = S.cs || {}; S.cs.o = (S.cs.o || 0) + 1; bumpTot('o', 1);
@@ -2183,8 +2292,22 @@ function showShop(line) {
     <p class="muted">手持ち 🪙${S.coins}</p>
     <div class="goods">${goods.map(g => `<div class="good"><span class="gart">${g.art}</span><div><b>${g.n}</b><small>${g.d}</small></div>
       <button class="btn tiny gold" type="button" data-buy="${g.id}" ${S.coins < g.cost ? 'disabled' : ''}>🪙${g.cost}</button></div>`).join('')}</div>
+    <p class="kicker">ミスカトニック大学への寄付</p>
+    <p class="muted">寄付をすると研究が進み、<b>ずっと効く力</b>が手に入る。段階が上がるほど高くつく。</p>
+    <div class="goods">${RESEARCH.map(r => { const lv = resLv(r.id), max = r.cost.length, cost = r.cost[lv];
+      return `<div class="good res"><span class="gart"><img class="ic" src="assets/x-ui-book.png" alt=""></span><div><b>${r.n}<span class="rlv">${'◆'.repeat(lv)}${'◇'.repeat(max - lv)}</span></b><small>${r.d}</small></div>
+      ${lv >= max ? '<span class="rew">完成</span>' : `<button class="btn tiny gold" type="button" data-res="${r.id}" ${S.coins < cost ? 'disabled' : ''}>🪙${cost}</button>`}</div>`; }).join('')}</div>
     <button class="btn primary" type="button" data-go>店を出る</button>
   `, hideOverlay);
+  $('panel').querySelectorAll('[data-res]').forEach(b => b.addEventListener('click', () => {
+    const r = RESEARCH.find(x => x.id === b.dataset.res), lv = resLv(r.id), cost = r.cost[lv];
+    if (cost === undefined || S.coins < cost) return;
+    S.coins -= cost;
+    (S.res = S.res || {})[r.id] = lv + 1;
+    sfx.discover();
+    afterChange();
+    showShop(`「${r.n}」が一段すすんだ。大学の連中も、喜んでいるだろうよ。`);
+  }));
   $('panel').querySelectorAll('[data-buy]').forEach(b => b.addEventListener('click', () => {
     const g = shopGoods().find(x => x.id === b.dataset.buy);
     if (!g || S.coins < g.cost) return;
@@ -2589,7 +2712,8 @@ function tapWorld(wx, wy) {
     .sort((a, b) => a.d - b.d)[0];
   // A "find them all" copy counts once: tapping one already found again does nothing (not a miss, not its neighbour).
   if (near && got(near.t).includes(near.n)) return;
-  const hit = near;
+  // Outside "find them all", only the copy shown on the card counts; tapping a look-alike elsewhere is a miss.
+  const hit = near && (near.t.all || near.n === 0) ? near : null;
   if (hit) {
     const t = hit.t, at = Object.assign({}, t, { x: hit.p.x, y: hit.p.y, s: hit.p.s });
     s.parts[t.t] = got(t).concat(hit.n);   // which copy was tapped, so a reload colours the same one
@@ -2606,7 +2730,7 @@ function tapWorld(wx, wy) {
   } else {
     s.miss = (s.miss || 0) + 1;
     const m = inWorld('miss', wx, wy, 0, '×');
-    const f = inWorld('float sfloat bad', wx, wy - 30 / V.z, 0, 'SAN −6');
+    const f = inWorld('float sfloat bad', wx, wy - 30 / V.z, 0, `正気度 −${missCost()}`);
     setTimeout(() => f.remove(), 1000);
     renderFinds();
     save();
@@ -2615,14 +2739,24 @@ function tapWorld(wx, wy) {
   }
 }
 
+// Sanity as a draining gauge: green → amber → red; a drop shakes the scene, and below 45 the edges pulse like a heartbeat.
+function paintSan(el, san, scene) {
+  const prev = el.dataset.v === undefined ? san : +el.dataset.v, r = rateOf(san);
+  el.dataset.v = san;
+  el.className = 'san gauge r' + r;
+  el.innerHTML = `<b>正気度</b><span class="sbar"><i style="width:${san}%"></i></span><em>${san}</em><span class="srate">${starsText(r)}</span>`;
+  scene.classList.toggle('shaken', san < 45);
+  if (san < prev) {
+    [el, scene].forEach(x => { x.classList.remove('hit'); void x.offsetWidth; x.classList.add('hit'); });
+    if (san < 45) osc(55, { type: 'sine', vol: .12, dur: .35, slide: .7 });   // a low thump
+  }
+}
 function renderFinds() {
   if (!S.search || !scn) return;
   const s = S.search, T = scn.T.slice().sort((a, b) => (b.all ? 1 : 0) - (a.all ? 1 : 0) || a.t - b.t);   // "find them all" card first
-  $("mTitle").textContent = `${story(s.ch).mission}${s.replay ? "" : `（${(s.stage || 0) + 1}/${STAGES}）`}　${s.found.length} / ${T.length}`;
+  $("mTitle").textContent = `${story(s.ch).mission}　${s.found.length} / ${T.length}`;
   const san = sanOf(s);
-  $('san').textContent = `SAN ${san}　${starsText(rateOf(san))}`;
-  $('san').className = 'san r' + rateOf(san);
-  $('sview').classList.toggle('shaken', san < 45);
+  paintSan($('san'), san, $('sview'));
   $('finds').innerHTML = T.map(t => {
     const cnt = t.all ? `<b class="cnt">${((s.parts || {})[t.t] || []).length} / ${t.at.length}</b>` : '';
     return `<span class="find${t.all ? ' all' : ''}${t.blur ? ' blur' : ''}${s.found.includes(t.t) ? ' got' : ''}"><img src="${t.thumb || findSrc(t.e)}" alt="">${cnt}<span class="nm">${t.ja || FINDS[t.e]}</span></span>`;
@@ -2757,9 +2891,8 @@ function renderDiffHead() {
   const s = S.search;
   if (!s || !dscn) return;
   const san = sanOf(s);
-  $('dTitle').textContent = `${DIFF_TITLES[s.ch % DIFF_TITLES.length]}（${(s.stage || 0) + 1}/${STAGES}）　${s.found.length} / ${dscn.pts.length}`;
-  $('dsan').textContent = `SAN ${san}　${starsText(rateOf(san))}`;
-  $('dsan').className = 'san r' + rateOf(san);
+  $('dTitle').textContent = `${DIFF_TITLES[s.ch % DIFF_TITLES.length]}　${s.found.length} / ${dscn.pts.length}`;
+  paintSan($('dsan'), san, $('dpanes'));
   $('eyesD').textContent = S.eyes;
   $('dEye').disabled = S.eyes <= 0;
 }
@@ -2881,6 +3014,8 @@ function searchClear() {
   const rates = S.rates.slice(), cr = Math.max(1, Math.round(rates.reduce((a, b) => a + b, 0) / rates.length));   // the chapter rating: all its searches
   S.log[ch] = { stars: cr, san, m: stats.m, o: stats.o, g: stats.g };
   const titleHtml = titleUp(list);
+  giveShard(ch, list);
+  findScrap(1, '現場');
   const row = unlockRow();
   if (row !== false) list.push('✴ 盤面の封印が一列とけた');
   const gift = [];
@@ -2919,8 +3054,8 @@ function searchClear() {
     ${titleHtml}
     <ul class="rewards">${list.map(x => `<li>${x}</li>`).join('')}</ul>
     <p class="muted">品や宝箱は、盤面の<b>贈りもの</b>に入っている。タップで開けよう。手帳に第${ch + 1}章の記録が残った。</p>
-    <button class="btn primary" type="button" data-go>${ending ? 'エンディングへ' : 'つづきへ'}</button>
-  `, ending ? () => { hideOverlay(); showEnding(); } : showIntro);
+    <button class="btn primary" type="button" data-go>${ending ? '祭壇へ向かう' : 'つづきへ'}</button>
+  `, ending ? () => { hideOverlay(); showAltar(); } : showIntro);
 }
 
 // An earlier search of the chapter: a smaller reward, and the chapter goes on to its next search.
@@ -2930,6 +3065,7 @@ function stageClear(s, san, r) {
   const coins = 20 + 15 * ch;
   const list = [`🪙 ${coins}`, '👁️ 千里眼 ×1'];
   S.coins += coins; S.eyes += 1;
+  findScrap(1, '現場');
   if (RATE_COINS(ch)[r]) { const b = Math.round(RATE_COINS(ch)[r] / 2); S.coins += b; list.push(`${starsText(r)} 評価ボーナス 🪙${b}`); }
   const avail = [0, 1, 2].filter(g => S.gens[g]), t = Math.min(1 + Math.floor(ch / 2), 4), c = pick(avail);
   list.push(`${ITEM(c, t)[0]} ${ITEM(c, t)[1]}`);
@@ -3010,6 +3146,55 @@ function showIntro() {
     if (!(S.seen || {}).merge) { (S.seen = S.seen || {}).merge = true; save(); showHelp('merge', true); }
     else if (gims.length && !(S.seen.gim)) { S.seen.gim = true; save(); showHelp('gim', true); }
   });
+}
+
+/* ================= seal shards: one per chapter, offered in order at the altar before the ending ================= */
+const SHARDS = [
+  { n: '錨の鍵', d: '記者が酒場に隠していた古い鍵。錆の下から、錨の印がのぞく。' },
+  { n: '金の冠', d: '人の頭には合わない、いびつな冠。海の神の頭上に置かれるべきもの。' },
+  { n: '教団の聖杯', d: '集会所の祭壇にあった杯。祈りの言葉で満たされるという。' },
+  { n: '暗礁の黒石', d: '悪魔の暗礁から欠け落ちた石。海を鎮める力が宿っている。' },
+  { n: '深きものの仮面', d: '祭りの夜に拾った仮面。顔を隠し、人ではないものに化けるための品。' },
+  { n: '記者の手帳', d: '行方不明の記者の手帳。最後のページは、まだ白いままだ。' },
+];
+const ALTAR_VERSE = '錨は扉をひらき　冠は頭上に戴かれ<br>杯は祈りに満ち　石は海を鎮める<br>仮面は顔を隠し　最後に言葉が記される';
+const shardArt = i => ICON(`assets/x-s${i}.png`);
+function giveShard(ch, list) {
+  if (ch >= SHARDS.length) return;
+  S.shards = S.shards || [];
+  if (S.shards.includes(ch)) return;
+  S.shards.push(ch);
+  list.push(`${shardArt(ch)} 封印の欠片「${SHARDS[ch].n}」`);
+}
+// The offering: put the six shards on the altar in the order the verse tells. A wrong one costs a little sanity.
+function showAltar() {
+  const placed = [], order = SHARDS.map((_, i) => i);
+  let wrong = 0;
+  const pool = shuffle((S.shards || order).slice());
+  const draw = msg => {
+    showOverlay(`
+      <p class="kicker">星辰の祭壇</p>
+      <h2>封印の儀</h2>
+      <p class="lore verse">${ALTAR_VERSE}</p>
+      <div class="altar">${order.map(i => `<div class="pedestal${placed[i] !== undefined ? ' lit' : ''}">${placed[i] !== undefined ? shardArt(placed[i]) : `<span>${i + 1}</span>`}</div>`).join('')}</div>
+      <p class="muted">${msg || '詩のとおりの順に、欠片を選んで祭壇に捧げよ。'}${wrong ? `　（失った正気度 ${wrong * 10}）` : ''}</p>
+      <div class="shards">${pool.filter(i => !placed.includes(i)).map(i => `<button class="shard" type="button" data-sh="${i}">${shardArt(i)}<b>${SHARDS[i].n}</b><small>${SHARDS[i].d}</small></button>`).join('')}</div>
+      ${placed.length === order.length ? '<button class="btn primary" type="button" data-go>封印を完成させる</button>' : ''}
+    `, () => { hideOverlay(); showEnding(); });
+    $('panel').querySelectorAll('[data-sh]').forEach(b => b.addEventListener('click', () => {
+      const i = +b.dataset.sh, next = placed.length;
+      if (i === order[next]) {
+        placed.push(i); sfx.relic();
+        draw(placed.length === order.length ? '六つの欠片が光を放ち、祭壇の紋が目を覚ました。' : `「${SHARDS[i].n}」が祭壇に吸いこまれた。`);
+      } else {
+        wrong++; sfx.wrong();
+        b.classList.add('nope');
+        setTimeout(() => draw(`「${SHARDS[i].n}」は、まだその時ではないらしい。頭の奥がずきりと痛む。`), 500);
+      }
+    }));
+  };
+  sfx.seal();
+  draw();
 }
 
 /* ================= ending: story slides over the dawn picture, then the staff roll ================= */
@@ -3141,6 +3326,8 @@ function helpBody(k) {
   return [
     li(MERCHANT ? FACE(MERCHANT.n) : '', '<b>骨董商の店</b>：千里眼、素材の包み、宝箱、依頼の入れかえ、封印をとく、古文書の頁。'),
     li(CHAINS[1].gen.e, '道具の<b>強化</b>、封印の櫃の<b>拡張</b>にも使える。'),
+    li('<img class="uic" src="assets/x-ui-book.png" alt="">', '店の奥では<b>ミスカトニック大学への寄付</b>ができる。研究が進むと、道具・依頼・宝箱・正気度などに<b>ずっと効く力</b>がつく。'),
+    li('📜', '<b>頁の切れ端</b>は、現場検証や宝箱、依頼主の荷物から見つかる。3枚そろうと、手帳で神話の頁や<b>断章</b>が1つ読める。'),
   ];
 }
 function showHelp(topic, first, after) {
@@ -3186,9 +3373,10 @@ function showDex() {
     <p class="muted">評価の★ 合計 ${ratingSum()}${next ? `　／　次の称号「${next[1]}」まで あと${next[0] - ratingSum()}` : '　／　最高の称号'}</p>
     <div class="dex"><div><h3>捜索録 <small class="muted">再調査で★★★を狙える（よくなった分だけほうび）${S.search ? '　※進行中の現場検証を終えてから' : ''}</small></h3><div class="pages">${pages}</div></div>
       <div><h3>依頼主 <small class="muted">依頼カードの名前をタップしても見られる</small></h3><div class="pages">${people}</div></div>
-      <div><h3>神話の手引き <small class="muted">${MYTHOS.filter((_, i) => mythOpen(i)).length} / ${MYTHOS.length}　章が進むと読める（店の「古文書の頁」でも）</small></h3><div class="pages">${MYTHOS.map((m, i) => mythOpen(i)
+      <div><h3>封印の欠片 <small class="muted">${(S.shards || []).length} / ${SHARDS.length}　各章を解決すると手に入る。最後に祭壇で捧げる</small></h3><div class="pages">${SHARDS.map((x, i) => (S.shards || []).includes(i) ? `<div class="page"><span class="pshard">${shardArt(i)}</span><div><b>${x.n}</b><small class="desc">${x.d}</small></div></div>` : `<div class="page now"><div><b>？？？</b><small>第${i + 1}章で手に入る</small></div></div>`).join("")}</div></div>
+      <div><h3>神話の手引き <small class="muted">${MYTHOS.filter((_, i) => mythOpen(i)).length} / ${MYTHOS.length}　章が進むと読める。<b>頁の切れ端</b>を3枚集めても1頁読める（いま ${(S.scraps || 0) % 3} / 3）</small></h3><div class="pages">${MYTHOS.map((m, i) => mythOpen(i)
         ? `<details class="page myth"><summary><b>${m.n}</b></summary><p>${m.d}</p></details>`
-        : `<div class="page now"><div><b>？？？</b><small>第${m.ch + 1}章で読める</small></div></div>`).join('')}</div></div>
+        : `<div class="page now"><div><b>？？？</b><small>${m.ch > 50 ? "頁の切れ端を集めると読める" : `第${m.ch + 1}章で読める`}</small></div></div>`).join('')}</div></div>
       <div><h3>実績 <small class="muted">${(S.ach || []).length} / ${ACHS.length}　達成すると🪙や千里眼がもらえる</small></h3><div class="pages">${ACHS.map(a => { const [v, need] = a.p(), done = (S.ach || []).includes(a.id); return `<div class="page ach${done ? " done" : ""}"><div><b>${a.n}</b><small>${a.d}　${done ? "達成！" : `${Math.min(v, need)} / ${need}`}</small><i class="abar"><i style="width:${Math.min(100, v / need * 100)}%"></i></i></div><span class="rew">🪙${a.c}${a.e ? ` 👁️${a.e}` : ""}</span></div>`; }).join("")}</div></div></div>
     <h2 class="sub">図鑑 ${found} / ${total}</h2>
     <div class="lorebox" id="lorebox"><small>見つけた品をタップすると、クトゥルフ神話の解説が読める。</small></div>
@@ -3307,6 +3495,7 @@ function boot(data) {
   if (!S.search && lastStage() && S.stars >= goal(S.ch) && !S.bossDone && !S.boss) makeBoss();
   if (S.gimCh !== S.ch) placeGimmicks();
   ensureDaily();
+  if (!S.shards) S.shards = [...Array(Math.min(S.ch, SHARDS.length)).keys()];   // chapters solved before shards existed
   // Saves from before the help page already know how to play.
   if (!S.seen && S.introCh >= 0) S.seen = { merge: true, search: S.ch > 0, gim: S.ch > 1 };
   ensureVault();
