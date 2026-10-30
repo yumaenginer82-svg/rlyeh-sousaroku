@@ -337,6 +337,17 @@ img.uic{display:inline-block;width:26px;height:26px;object-fit:contain;vertical-
 .rollin .thanks{margin-top:60px;font-size:20px;letter-spacing:.2em;color:#cfeee2}
 .rollin .fin{margin:40px 0 10px;font-size:26px;letter-spacing:.4em}
 .rollin .after{font-size:13px;opacity:.85;margin-bottom:14px}
+/* Epilogue: the dawn picture drains away to a dim room-dark screen */
+.ending.wake .ebg{animation:none;transition:filter 4s ease,opacity 4s ease;filter:brightness(.12) saturate(.2) blur(3px);opacity:.6}
+.ending.wake .eshade{background:radial-gradient(ellipse at 50% 45%,rgba(20,30,28,.2),rgba(0,0,0,.9) 75%)}
+.ending.wake .etext{inset:0;min-height:0;bottom:auto;flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:24px}
+.wline{margin:0;max-width:28em;text-align:center;font-family:var(--f-display);font-size:clamp(15px,2.3vw,19px);line-height:1.9;color:#d9d2bf;opacity:0;
+  animation:wfade 2.4s ease forwards;text-shadow:0 1px 4px #000}
+@keyframes wfade{to{opacity:1}}
+.wline.whisper{margin-top:22px;color:#8fd9bd;letter-spacing:.18em;font-size:clamp(13px,1.9vw,16px);animation:whisper 5s ease forwards;filter:blur(.3px)}
+@keyframes whisper{0%{opacity:0;letter-spacing:.5em;filter:blur(4px)}35%{opacity:.95;letter-spacing:.18em;filter:blur(0)}70%{opacity:.9}100%{opacity:.6;filter:blur(.8px)}}
+.wbtn{margin-top:26px;animation:wfade 2s ease forwards;opacity:0}
+.ending.wake .after{margin:18px 0 0;font-size:13px;opacity:.75}
 .eskip{position:absolute;right:14px;top:calc(14px + env(safe-area-inset-top,0px));opacity:.7}
 .htabs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 .htabs .btn.on{background:var(--gold);color:var(--ink);border-color:#e3c77a}
@@ -3007,15 +3018,57 @@ const ENDING = [
   '「ルルイエの館にて、死せるクトゥルフ、夢見るままに待ちいたり」。その言葉の意味を、あなたはもう知っている。',
   '星はまた巡る。いつか必ず、次の刻が来る。そのときまで、調査は終わらない。',
 ];
+const EPILOGUE = [
+  '……目が覚めた。',
+  '見慣れた下宿の部屋。窓の外では、いつもの港町が朝を迎えている。',
+  'すべては、長い夢だったのだろうか。',
+  '机の上に、あの手帳が開いたまま置かれていた。',
+  '最後のページに、書いた覚えのない都の地図。インクは、まだ乾いていない。',
+  '窓の外を見る。港を行き交う人々が、いっせいに足を止め、こちらを見上げていた。',
+  'ふんぐるい　むぐるうなふ　くとぅるう　るるいえ　うがふなぐる　ふたぐん',
+];
 function showEnding(replay) {
   const E = $('ending'), T = $('etext'), R = $('eroll');
-  E.hidden = false; E.classList.remove('roll'); R.innerHTML = ''; T.innerHTML = '';
+  E.hidden = false; E.classList.remove('roll', 'wake'); R.innerHTML = ''; T.innerHTML = '';
   stopDrone();
-  let i = 0, timer = 0;
+  let i = 0, timer = 0, stage = 'story';
+  // After the credits: you wake up, and it isn't over. Lines appear one by one on a dark screen.
+  const epilogue = () => {
+    if (stage === 'epi') return;
+    stage = 'epi';
+    clearTimeout(timer);
+    E.classList.remove('roll'); E.classList.add('wake');
+    R.innerHTML = ''; T.innerHTML = '';
+    $('eskip').hidden = true;
+    let j = 0;
+    const step = () => {
+      clearTimeout(timer);
+      if (j < EPILOGUE.length) {
+        const last = j === EPILOGUE.length - 1;
+        T.insertAdjacentHTML('beforeend', `<p class="wline${last ? ' whisper' : ''}">${EPILOGUE[j++]}</p>`);
+        if (last) { sfx.abyss(); timer = setTimeout(step, 5200); } else { bubble(0, 300); timer = setTimeout(step, 3600); }
+        return;
+      }
+      T.onclick = null;
+      T.insertAdjacentHTML('beforeend', `${replay ? '' : '<p class="after">クリアのほうび：🪙1000　👁️5　実績「封印者」</p>'}
+        <button class="btn primary wbtn" type="button" id="eend">${replay ? 'とじる' : 'その後の調査へ'}</button>`);
+      $('eend').addEventListener('click', e => {
+        e.stopPropagation();
+        E.hidden = true; E.classList.remove('wake'); $('eskip').hidden = false;
+        if (!muted) startDrone();
+        if (!replay) showIntro();
+      });
+    };
+    T.onclick = step;
+    timer = setTimeout(step, 1800);
+  };
   const finish = () => {
+    if (stage !== 'story') { epilogue(); return; }
+    stage = 'roll';
     clearTimeout(timer);
     E.classList.add('roll');
     T.innerHTML = '';
+    T.onclick = null;
     R.innerHTML = `<div class="rollin">
       <h1>ルルイエ捜索録</h1><p class="rsub">― The R'lyeh Inquiry ―</p>
       <h3>企画</h3><p>yachi</p>
@@ -3024,17 +3077,9 @@ function showEnding(replay) {
       <h3>絵</h3><p>Gemini</p>
       <h3>依頼主</h3>${[...NPCS, ...BOSSES, MERCHANT].map(p => `<p>${p.n}</p>`).join('')}
       <h3>原典</h3><p>H・P・ラヴクラフト</p><p>『ダゴン』『クトゥルフの呼び声』</p><p>『インスマスを覆う影』『ダンウィッチの怪』</p>
-      <h3 class="thanks">遊んでくれて、ありがとう</h3>
-      <p class="fin">― 終 ―</p>
-      <p class="after">${replay ? '' : 'クリアのほうび：🪙1000　👁️5　称号「封印者」の実績'}</p>
-      <button class="btn primary" type="button" id="eend">${replay ? 'とじる' : 'その後の調査へ'}</button>
     </div>`;
-    $('eskip').hidden = true;
-    $('eend').addEventListener('click', () => {
-      E.hidden = true; $('eskip').hidden = false;
-      if (!muted) startDrone();
-      if (!replay) showIntro();
-    });
+    R.querySelector('.rollin').addEventListener('animationend', () => setTimeout(epilogue, 1500));
+    $('eskip').onclick = epilogue;
   };
   const next = () => {
     clearTimeout(timer);
