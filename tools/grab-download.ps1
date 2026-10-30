@@ -12,7 +12,8 @@ $since = (Get-Date).AddSeconds(-$SinceSeconds)
 $deadline = (Get-Date).AddSeconds($WaitSeconds)
 $pick = $null
 while (-not $pick -and (Get-Date) -lt $deadline) {
-  $cand = Get-ChildItem $dl -File | Where-Object { $_.LastWriteTime -gt $since -and $_.Length -gt 20KB } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+  # Only the browser's own downloads (*.tmp, or Gemini's file names): never pick up, or delete, a file the user saved.
+  $cand = Get-ChildItem $dl -File | Where-Object { $_.LastWriteTime -gt $since -and $_.Length -gt 20KB -and ($_.Extension -eq '.tmp' -or $_.Name -like 'Gemini*') } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
   if ($cand) {
     $len = $cand.Length; Start-Sleep -Milliseconds 1500
     $cand.Refresh()

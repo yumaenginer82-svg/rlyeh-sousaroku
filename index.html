@@ -302,6 +302,42 @@ img.uic{display:inline-block;width:26px;height:26px;object-fit:contain;vertical-
 .btn.hb.snd{position:relative}
 #eyeBtn img.uic{width:26px;height:26px}
 
+/* Star dice and the miniature shelf */
+.dicebtn{width:100%;gap:10px}
+.dicebtn .ic{width:30px;height:30px}
+.dice{display:flex;gap:22px;justify-content:center}
+.die{width:96px;height:96px;background:url(assets/x-die.png) center/contain no-repeat;display:grid;place-items:center;filter:drop-shadow(0 6px 8px rgba(0,0,0,.6))}
+.die.rolling{animation:dieroll .22s linear infinite}
+@keyframes dieroll{0%{transform:rotate(0) translateY(0)}25%{transform:rotate(12deg) translateY(-8px)}50%{transform:rotate(-8deg) translateY(0)}75%{transform:rotate(6deg) translateY(-5px)}100%{transform:rotate(0)}}
+.pips{display:grid;grid-template-columns:repeat(3,14px);grid-template-rows:repeat(3,14px);gap:5px}
+.pips i{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#b8ffe2,#2fae86 60%,#0b4a3a);box-shadow:0 0 8px rgba(114,224,178,.9)}
+.pips.p1 i{grid-area:2/2}
+.pips.p2 i:nth-child(1){grid-area:1/1}.pips.p2 i:nth-child(2){grid-area:3/3}
+.pips.p3 i:nth-child(1){grid-area:1/1}.pips.p3 i:nth-child(2){grid-area:2/2}.pips.p3 i:nth-child(3){grid-area:3/3}
+.pips.p4 i:nth-child(1){grid-area:1/1}.pips.p4 i:nth-child(2){grid-area:1/3}.pips.p4 i:nth-child(3){grid-area:3/1}.pips.p4 i:nth-child(4){grid-area:3/3}
+.pips.p5 i:nth-child(1){grid-area:1/1}.pips.p5 i:nth-child(2){grid-area:1/3}.pips.p5 i:nth-child(3){grid-area:2/2}.pips.p5 i:nth-child(4){grid-area:3/1}.pips.p5 i:nth-child(5){grid-area:3/3}
+.pips.p6 i:nth-child(1){grid-area:1/1}.pips.p6 i:nth-child(2){grid-area:2/1}.pips.p6 i:nth-child(3){grid-area:3/1}.pips.p6 i:nth-child(4){grid-area:1/3}.pips.p6 i:nth-child(5){grid-area:2/3}.pips.p6 i:nth-child(6){grid-area:3/3}
+b.t0{color:#c89a62}b.t1{color:#7fe0b0}b.t2{color:var(--gold)}
+.figcard{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 18px;border-radius:14px;border:2px solid var(--line);background:var(--panel2);animation:pop .5s ease}
+.figcard .ic{width:130px;height:130px}
+.figcard b{font-family:var(--f-display);font-size:20px}
+.figcard small{font-size:12px;opacity:.85}
+.figcard.bronze{border-color:#8a6a3a;box-shadow:0 0 14px rgba(200,150,90,.35)}
+.figcard.jade{border-color:#3fae86;box-shadow:0 0 22px rgba(114,224,178,.55)}
+.figcard.gold{border-color:var(--gold);box-shadow:0 0 30px rgba(232,196,104,.85);animation:pop .5s ease,beckon 2s ease-in-out infinite}
+.shelf{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.fig{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 2px;border-radius:10px;border:1px solid var(--line);background:linear-gradient(180deg,#132124,#0a1315);color:inherit;font:inherit;cursor:pointer;min-width:0}
+.fig .ic{width:100%;max-width:58px;aspect-ratio:1;height:auto}
+.fig small{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.fig.bronze{border-color:#6a5030}.fig.jade{border-color:#2f8a6a}.fig.gold{border-color:#a8873a}
+.fig.unknown .ic{filter:brightness(0) opacity(.45)}
+.fig.unknown{cursor:default;opacity:.8}
+.figbox{display:flex;gap:12px;align-items:flex-start;text-align:left;background:var(--panel2);border:1px solid var(--gold);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.figbox .lart .ic{width:64px;height:64px}
+.figbox b{display:block;font-family:var(--f-display);font-size:16px;color:var(--gold)}
+.figbox b small{font-family:var(--f-body);font-size:11px;color:var(--bone);opacity:.7;margin-left:6px}
+.figbox p{margin:4px 0 0;font-size:13px;line-height:1.65}
+
 /* Seals for the chapter's three searches */
 .seals{display:flex;gap:4px;flex:none}
 .sm{display:block;width:18px;height:18px;border-radius:50%;border:2px solid #3d5a56;background:radial-gradient(circle,#0b1517,#050b0d);position:relative}
@@ -550,6 +586,23 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
   .needs{gap:4px}
   .info .big{font-size:34px;width:42px}
   .card{width:44px;height:44px;font-size:28px}
+}
+/* Request cards: items and the delivery button share one row */
+.orow{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
+.orow .foot{flex-direction:column;align-items:flex-end;gap:3px;flex:none}
+/* Portrait (tablet or phone): squeeze the panels, not the controls, so the board and the scene get the height */
+@media not all and (orientation:landscape) and (min-width:860px){
+  .view{gap:8px}
+  .order{padding:6px 8px;gap:4px}
+  .npc img.face{width:34px;height:34px}
+  .info{height:86px;padding:6px 12px}
+  .info .big{width:48px}
+  .info .big .ic,.info .big img.face{width:46px;height:46px}
+  .mission{padding:8px 12px;gap:6px 12px}
+  .mission h2 small{display:none}
+  .find{width:80px;padding:3px}
+  .find .nm{font-size:11px}
+  .mbtns .btn{padding:6px 12px}
 }
 @media (orientation:landscape) and (min-width:860px){
   .merge{grid-template-columns:330px minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;grid-template-areas:"orders board" "info board"}
@@ -822,6 +875,76 @@ function findScrap(chance, where) {
   setTimeout(() => toast(`${where}で頁の切れ端を見つけた（${n || 3} / 3）`), 700);
 }
 
+/* ---- Miniatures: chess-piece figures of the mythos, won with the star dice; each comes with its story ---- */
+const FIG_TIERS = [{ n: '青銅', c: 'bronze' }, { n: '翡翠', c: 'jade' }, { n: '黄金', c: 'gold' }];
+const FIGS = [
+  { n: '深きもの', t: 0, d: 'インスマスの人々が行きつく姿。魚と蛙をまぜたような体で、海の底の都イハ＝ンスレイで永遠に生きる。年老いた者から順に、ある夜ふっと海へ帰っていく。' },
+  { n: 'ショゴス', t: 0, d: '古のものが働き手として造った、形の定まらない生き物。無数の目と口が泡のように浮かんでは消える。やがて主に背き、南極の都を滅ぼした（『狂気の山脈にて』）。鳴き声は「テケリ・リ」。' },
+  { n: '夜鬼', t: 0, d: '夢の国の夜空を舞う、顔のない黒い怪物。角と蝙蝠の翼を持ち、声もなく旅人をさらっていく。ラヴクラフトが子どものころに見た悪夢から生まれたという。' },
+  { n: 'グール', t: 0, d: '墓地の地下に住み、死者を喰らう犬のような顔の者たち。人がグールに変わることもある。画家ピックマンの絵には、彼らが生き生きと描かれていた（『ピックマンのモデル』）。' },
+  { n: 'ミ＝ゴ', t: 0, d: '冥王星ユゴスから来た、甲殻類と菌類をまぜたような翼ある種族。人の脳を銀の筒に入れて、宇宙へ運ぶという（『闇に囁くもの』）。' },
+  { n: '古のもの', t: 0, d: '人類よりはるか昔に星から来て、南極に都を築いた種族。樽のような胴に、ヒトデの頭。滅びたはずの彼らを、ある探検隊が見つけてしまう（『狂気の山脈にて』）。' },
+  { n: 'ダゴン', t: 1, d: '深きものたちが崇める父なる神。巨大な鱗の体で、海の底から姿を現す。初期の短編『ダゴン』で、漂流した男がその姿を目にし、正気を失っていった。' },
+  { n: 'ハイドラ', t: 1, d: 'ダゴンと並んで崇められる、深きものの母なる神。『インスマスを覆う影』では「父なるダゴンと母なるハイドラ」に祈りが捧げられる。' },
+  { n: 'ニャルラトホテプ', t: 1, d: '「這い寄る混沌」。千の姿を持ち、人の姿をとって人の前に現れる神。古代エジプトの王のような姿で、文明に狂気をまきちらすという。' },
+  { n: 'イグ', t: 1, d: '「蛇の父」。北米の伝承に残る蛇の神で、蛇を傷つけた者に恐ろしい呪いをかける（『イグの呪い』）。秋になると、その祈りの太鼓が聞こえるという。' },
+  { n: 'ハスター', t: 2, d: '「名状しがたきもの」。黄衣の王とも呼ばれ、遠い星の湖のほとりに住む。読んだ者を狂わせる戯曲『黄衣の王』とともに語られる。' },
+  { n: 'クトゥルフ', t: 2, d: 'ルルイエの館で夢見る旧支配者の大祭司。タコの頭に竜の翼、鱗の体。星がそろう日、夢から覚めて世界を取り戻すという。あなたは、その夢の一端に触れてしまった。' },
+];
+const DICE_COST = 150;
+const figArt = i => ICON(`assets/x-m${i}.png`);
+const pipsHtml = n => `<span class="pips p${n}">${'<i></i>'.repeat(n)}</span>`;
+// Roll two dice: the total picks the material (2-6 bronze, 7-10 jade, 11-12 gold) and doubles raise it one step.
+function rollFig() {
+  const a = 1 + rnd(6), b = 1 + rnd(6), sum = a + b;
+  let tier = sum >= 11 ? 2 : sum >= 7 ? 1 : 0;
+  if (a === b) tier = Math.min(2, tier + 1);
+  const pool = FIGS.map((f, i) => i).filter(i => FIGS[i].t === tier);
+  return { a, b, tier, fig: pick(pool) };
+}
+function showDice(msg) {
+  const can = S.coins >= DICE_COST;
+  showOverlay(`
+    <p class="kicker">星辰の賽</p>
+    <h2>賽を振る</h2>
+    <p class="lore">骨董商が古い骨の賽を差しだした。「出た目で、棚の奥から一体えらんでやろう」</p>
+    <div class="dice"><div class="die" id="dieA">${pipsHtml(6)}</div><div class="die" id="dieB">${pipsHtml(6)}</div></div>
+    <p class="muted" id="diceMsg">${msg || '合計 2〜6：青銅　7〜10：翡翠　11〜12：黄金　／　ぞろ目なら一段上の像'}</p>
+    <div id="figOut"></div>
+    <button class="btn primary" type="button" id="rollBtn" ${can ? '' : 'disabled'}>賽を振る　🪙${DICE_COST}</button>
+    <p class="muted" id="diceHave"></p>
+    <button class="btn tiny" type="button" data-go>とじる</button>
+  `, hideOverlay);
+  const paintHave = () => { $('diceHave').textContent = `手持ち 🪙${S.coins}　／　飾り棚 ${(S.figs || []).length} / ${FIGS.length}`; };
+  paintHave();
+  $('rollBtn').addEventListener('click', () => {
+    if (S.coins < DICE_COST) return;
+    S.coins -= DICE_COST;
+    const r = rollFig(), A = $('dieA'), B = $('dieB');
+    $('rollBtn').disabled = true;
+    A.classList.add('rolling'); B.classList.add('rolling');
+    let k = 0;
+    const spin = setInterval(() => { A.innerHTML = pipsHtml(1 + rnd(6)); B.innerHTML = pipsHtml(1 + rnd(6)); bubble(0, 300 + rnd(300)); if (++k > 11) settle(); }, 110);
+    const settle = () => {
+      clearInterval(spin);
+      A.classList.remove('rolling'); B.classList.remove('rolling');
+      A.innerHTML = pipsHtml(r.a); B.innerHTML = pipsHtml(r.b);
+      const F = FIGS[r.fig], have = (S.figs || []).includes(r.fig);
+      if (have) { S.coins += 30; findScrap(1, '賽の目'); } else (S.figs = S.figs || []).push(r.fig);
+      setTimeout(() => {
+        r.tier === 2 ? sfx.relic() : sfx.discover();
+        $('diceMsg').innerHTML = `合計 <b>${r.a + r.b}</b>${r.a === r.b ? '　ぞろ目！' : ''}　→　<b class="t${r.tier}">${FIG_TIERS[r.tier].n}の像</b>`;
+        $('figOut').innerHTML = `<div class="figcard ${FIG_TIERS[r.tier].c}">${figArt(r.fig)}<b>${F.n}</b><small>${have ? 'すでに飾り棚にある。かわりに 🪙30 と頁の切れ端を受けとった' : '飾り棚に加わった。手帳で、まつわる話が読める'}</small></div>`;
+        $('rollBtn').textContent = `もう一度振る　🪙${DICE_COST}`;
+        $('rollBtn').disabled = S.coins < DICE_COST;
+        paintHave();
+        afterChange();
+      }, 250);
+    };
+    afterChange();
+  });
+}
+
 /* ---- Research: donations to Miskatonic University buy lasting upgrades (the long-term use for coins) ---- */
 const RESEARCH = [
   { id: 'gen', n: '道具の改良', d: '道具から素材が2つ出ることがある（1段階ごとに +8%）', cost: [200, 500, 1000, 2000, 4000] },
@@ -919,6 +1042,7 @@ const ACHS = [
   { id: 'ch6', n: 'ルルイエへの到達', d: '第6章を解決する', p: () => [S.ch, 6], c: 600, e: 2 },
   { id: 'ch10', n: '終わらない調査', d: '第10章を解決する', p: () => [S.ch, 10], c: 1500, e: 3 },
   { id: 'end', n: '封印者', d: '最終章を解決し、都を眠りへ還す', p: () => [S.cleared ? 1 : 0, 1], c: 500, e: 2 },
+  { id: 'figs', n: '神々の蒐集家', d: 'ミニチュアの像を12体すべて集める', p: () => [(S.figs || []).length, FIGS.length], c: 1500, e: 3 },
   { id: 'res10', n: '大学の後援者', d: '研究を合わせて10段すすめる', p: () => [Object.values(S.res || {}).reduce((a, b) => a + b, 0), 10], c: 800, e: 2 },
   { id: 'scrap', n: '断章の収集家', d: '断章をすべて読む', p: () => [MYTHOS.filter((m, i) => m.ch > 50 && mythOpen(i)).length, 6], c: 600, e: 2 },
   { id: 'd7', n: '七日の観測', d: '今日の異変を7日つづけて調べる', p: () => [(S.daily || {}).streak || 0, 7], c: 500, e: 2 },
@@ -2113,8 +2237,8 @@ function renderOrders() {
     }).join('');
     return `<div class="order${ready ? ' ready' : ''}${o.sp ? ' special' : ''}${o.boss ? ' boss' : ''}${clash(o) ? ' clash' : ''}" data-oid="${o.id}">
       <div class="npc" data-who="${o.npc.n}">${FACE(o.npc.n)}<div class="whot"><span class="nm">${o.npc.n}</span><span class="say">「${askOf(o)}」</span></div>${o.sp ? '<span class="sp-tag">特別</span>' : o.boss ? '<span class="sp-tag boss-tag">山場</span>' : ''}</div>
-      <div class="needs">${needs}</div>
-      <div class="foot"><span class="rew">🪙${orderCoins(o)}${o.stars ? ' ★' + o.stars : ''}${o.eyes ? ' 👁️' + o.eyes : ''}</span><button class="btn tiny gold" type="button" data-deliver="${o.id}" ${ready ? '' : 'disabled'}>納品</button></div>
+      <div class="orow"><div class="needs">${needs}</div>
+      <div class="foot"><span class="rew">🪙${orderCoins(o)}${o.stars ? ' ★' + o.stars : ''}${o.eyes ? ' 👁️' + o.eyes : ''}</span><button class="btn tiny gold" type="button" data-deliver="${o.id}" ${ready ? '' : 'disabled'}>納品</button></div></div>
     </div>`;
   }).join('');
   $('orders').innerHTML = html || '<div class="empty-orders">新しい依頼を待っている…</div>';
@@ -2289,6 +2413,7 @@ function showShop(line) {
     <p class="kicker">骨董商の店</p>
     <h2>${MERCHANT.n}</h2>
     <p class="lore">「${line || SHOP_LINES[rnd(SHOP_LINES.length)]}」</p>
+    <button class="btn gold dicebtn" type="button" id="toDice"><img class="ic" src="assets/x-die.png" alt="">星辰の賽を振る（ミニチュアの像）</button>
     <p class="muted">手持ち 🪙${S.coins}</p>
     <div class="goods">${goods.map(g => `<div class="good"><span class="gart">${g.art}</span><div><b>${g.n}</b><small>${g.d}</small></div>
       <button class="btn tiny gold" type="button" data-buy="${g.id}" ${S.coins < g.cost ? 'disabled' : ''}>🪙${g.cost}</button></div>`).join('')}</div>
@@ -2299,6 +2424,7 @@ function showShop(line) {
       ${lv >= max ? '<span class="rew">完成</span>' : `<button class="btn tiny gold" type="button" data-res="${r.id}" ${S.coins < cost ? 'disabled' : ''}>🪙${cost}</button>`}</div>`; }).join('')}</div>
     <button class="btn primary" type="button" data-go>店を出る</button>
   `, hideOverlay);
+  $('toDice').addEventListener('click', () => showDice());
   $('panel').querySelectorAll('[data-res]').forEach(b => b.addEventListener('click', () => {
     const r = RESEARCH.find(x => x.id === b.dataset.res), lv = resLv(r.id), cost = r.cost[lv];
     if (cost === undefined || S.coins < cost) return;
@@ -3328,6 +3454,7 @@ function helpBody(k) {
     li(CHAINS[1].gen.e, '道具の<b>強化</b>、封印の櫃の<b>拡張</b>にも使える。'),
     li('<img class="uic" src="assets/x-ui-book.png" alt="">', '店の奥では<b>ミスカトニック大学への寄付</b>ができる。研究が進むと、道具・依頼・宝箱・正気度などに<b>ずっと効く力</b>がつく。'),
     li('📜', '<b>頁の切れ端</b>は、現場検証や宝箱、依頼主の荷物から見つかる。3枚そろうと、手帳で神話の頁や<b>断章</b>が1つ読める。'),
+    li('<img class="uic" src="assets/x-die.png" alt="">', '店の<b>星辰の賽</b>を振ると、出た目で<b>ミニチュアの像</b>が1体手に入る。合計11以上やぞろ目なら黄金の像のチャンス。集めた像は手帳の<b>飾り棚</b>で、まつわる話が読める。'),
   ];
 }
 function showHelp(topic, first, after) {
@@ -3374,6 +3501,7 @@ function showDex() {
     <div class="dex"><div><h3>捜索録 <small class="muted">再調査で★★★を狙える（よくなった分だけほうび）${S.search ? '　※進行中の現場検証を終えてから' : ''}</small></h3><div class="pages">${pages}</div></div>
       <div><h3>依頼主 <small class="muted">依頼カードの名前をタップしても見られる</small></h3><div class="pages">${people}</div></div>
       <div><h3>封印の欠片 <small class="muted">${(S.shards || []).length} / ${SHARDS.length}　各章を解決すると手に入る。最後に祭壇で捧げる</small></h3><div class="pages">${SHARDS.map((x, i) => (S.shards || []).includes(i) ? `<div class="page"><span class="pshard">${shardArt(i)}</span><div><b>${x.n}</b><small class="desc">${x.d}</small></div></div>` : `<div class="page now"><div><b>？？？</b><small>第${i + 1}章で手に入る</small></div></div>`).join("")}</div></div>
+      <div><h3>ミニチュアの飾り棚 <small class="muted">${(S.figs || []).length} / ${FIGS.length}　店の「星辰の賽」で集まる。像をタップすると話が読める</small></h3><div class="figbox" id="figbox"><small>集めた像をタップすると、まつわる話が読める。</small></div><div class="shelf">${FIGS.map((x, i) => (S.figs || []).includes(i) ? `<button class="fig ${FIG_TIERS[x.t].c}" type="button" data-fig="${i}">${figArt(i)}<small>${x.n}</small></button>` : `<div class="fig unknown ${FIG_TIERS[x.t].c}">${figArt(i)}<small>？？？</small></div>`).join('')}</div></div>
       <div><h3>神話の手引き <small class="muted">${MYTHOS.filter((_, i) => mythOpen(i)).length} / ${MYTHOS.length}　章が進むと読める。<b>頁の切れ端</b>を3枚集めても1頁読める（いま ${(S.scraps || 0) % 3} / 3）</small></h3><div class="pages">${MYTHOS.map((m, i) => mythOpen(i)
         ? `<details class="page myth"><summary><b>${m.n}</b></summary><p>${m.d}</p></details>`
         : `<div class="page now"><div><b>？？？</b><small>${m.ch > 50 ? "頁の切れ端を集めると読める" : `第${m.ch + 1}章で読める`}</small></div></div>`).join('')}</div></div>
@@ -3385,6 +3513,10 @@ function showDex() {
     <button class="btn tiny danger" type="button" id="resetBtn">データを消して最初から</button>
   `, hideOverlay);
   $('jHelp').addEventListener('click', () => showHelp('merge'));
+  $('panel').querySelectorAll('[data-fig]').forEach(b => b.addEventListener('click', () => {
+    const i = +b.dataset.fig, F = FIGS[i];
+    $('figbox').innerHTML = `<span class="lart">${figArt(i)}</span><div><b>${F.n}<small>${FIG_TIERS[F.t].n}の像</small></b><p>${F.d}</p></div>`;
+  }));
   if ($('jEnd')) $('jEnd').addEventListener('click', () => { hideOverlay(); showEnding(true); });
   $('panel').querySelectorAll('[data-lore]').forEach(b => b.addEventListener('click', () => {
     const [c, t] = b.dataset.lore.split('-').map(Number), it = ITEM(c, t);
