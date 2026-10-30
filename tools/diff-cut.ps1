@@ -9,7 +9,8 @@ param(
   [Parameter(Mandatory)][string]$Out,
   [int]$Thresh = 40,
   [int]$MinArea = 250,
-  [int]$Grow = 5
+  [int]$Grow = 5,
+  [int]$Low = 0      # with e.g. 16: let each clear change take in the fainter change it touches (whole objects)
 )
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
@@ -64,9 +65,17 @@ public static class DiffCut {
     }
     return d;
   }
-  // regions: threshold, grow by g px, label connected parts; returns label map (0 = none) and per-label raw area
-  public static int[] Regions(float[] d, int w, int h, int t, int g, out List<int> areas) {
+  // regions: threshold, grow by g px, label connected parts; returns label map (0 = none) and per-label raw area.
+  // With lo > 0, each clearly changed part (>= t) also takes in the fainter change (>= lo) it touches, so a dark
+  // object whose colour changed only a little at its edges still comes out whole (hysteresis, as in edge finding).
+  public static int[] Regions(float[] d, int w, int h, int t, int lo, int g, out List<int> areas) {
     var on = new bool[w * h]; for (int i = 0; i < w * h; i++) on[i] = d[i] >= t;
+    if (lo > 0) {
+      var q = new Stack<int>(); for (int i = 0; i < w * h; i++) if (on[i]) q.Push(i);
+      while (q.Count > 0) { int p = q.Pop(), x = p % w, y = p / w;
+        foreach (int n in new int[] { x > 0 ? p - 1 : -1, x < w - 1 ? p + 1 : -1, y > 0 ? p - w : -1, y < h - 1 ? p + w : -1 })
+          if (n >= 0 && !on[n] && d[n] >= lo) { on[n] = true; q.Push(n); } }
+    }
     var grown = new bool[w * h];
     for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) if (on[y * w + x])
       for (int yy = Math.Max(0, y - g); yy <= Math.Min(h - 1, y + g); yy++) for (int xx = Math.Max(0, x - g); xx <= Math.Min(w - 1, x + g); xx++) grown[yy * w + xx] = true;
@@ -120,7 +129,7 @@ Write-Output ("shift {0},{1}  mean diff after shift {2:N2}" -f $al[0], $al[1], (
 $pe = [DiffCut]::Shift($pe, $W, $H, $al[0], $al[1])
 $d = [DiffCut]::Change($pb, $pe, $W, $H)
 $areas = $null
-$lab = [DiffCut]::Regions($d, $W, $H, $Thresh, $Grow, [ref]$areas)
+$lab = [DiffCut]::Regions($d, $W, $H, $Thresh, $Low, $Grow, [ref]$areas)
 
 $outDir = Abs $Out
 if (Test-Path $outDir) { Remove-Item $outDir -Recurse -Force }

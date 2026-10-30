@@ -425,7 +425,7 @@ b.t0{color:#c89a62}b.t1{color:#7fe0b0}b.t2{color:var(--gold)}
 .dpane.off{display:none}
 .dzoom{position:absolute;right:8px;bottom:8px;z-index:3;display:flex;flex-direction:column;gap:6px}
 .dzoom .btn{width:46px;height:46px;padding:0;font-size:20px;background:rgba(10,24,27,.86)}
-.dpane[data-p="0"] canvas{filter:sepia(.18) brightness(.95)}
+/* Both pictures are shown exactly as they are: no tint on the memory, so nothing but the differences differs */
 .dlab{position:absolute;left:10px;top:8px;font-size:12px;font-weight:700;letter-spacing:.1em;padding:2px 10px;border-radius:999px;background:rgba(3,9,11,.75);pointer-events:none}
 .dmark{position:absolute;transform:translate(-50%,-50%);border:calc(4px * var(--inv,1)) solid var(--stripe);border-radius:50%;pointer-events:none;box-shadow:0 0 0 2px rgba(255,255,255,.75),0 0 12px rgba(192,53,61,.6)}
 .dmark.fresh{animation:markring .45s ease-out}
@@ -3114,80 +3114,85 @@ const diffTitle = ch => DIFF_TITLES[diffIdx(ch)];
 // kind of change → its name in the answers; lv: 1 easy (colour, gone/added), 2 medium (size, shape, count), 3 hard (position, fine detail)
 const DIFF_KIND = { color: '色', gone: '消えた', add: '増えた', size: '大きさ', shape: '形', count: '数', pos: '位置', detail: '模様' };
 // f: piece number, x/y/w/h: where it goes, k: kind, lv: difficulty, t: what changed (shown in the answers)
+// Bump when the pieces are rebuilt, so no cached copy of an older piece is used.
+const DIFF_BUILD = 2;
 const DIFF_SETS = [
-  [   // 0 tavern
-    { f: 0, x: 400, y: 713, w: 208, h: 175, k: 'size', lv: 2, t: 'クジラの置物が大きくなり、となりのドクロが消えた' },
-    { f: 1, x: 687, y: 652, w: 213, h: 153, k: 'color', lv: 1, t: '床のじゅうたんが赤から青に' },
-    { f: 2, x: 291, y: 770, w: 78, h: 82, k: 'color', lv: 1, t: 'フラスコの中身が赤から緑に' },
-    { f: 3, x: 771, y: 571, w: 109, h: 68, k: 'color', lv: 1, t: '眠っている猫が黒猫に' },
-    { f: 4, x: 148, y: 470, w: 88, h: 79, k: 'gone', lv: 2, t: 'ボトルシップの中の船が消えた' },
-    { f: 5, x: 1111, y: 212, w: 73, h: 130, k: 'color', lv: 1, t: '壁のタコの彫り物がオレンジから緑に' },
-    { f: 6, x: 849, y: 425, w: 57, h: 55, k: 'gone', lv: 3, t: 'ピアノの楽譜が消えた' },
-    { f: 7, x: 1038, y: 35, w: 69, h: 164, k: 'gone', lv: 1, t: '天井の大きな錨が消えた' },
-    { f: 8, x: 645, y: 275, w: 57, h: 60, k: 'shape', lv: 2, t: '振り子時計の文字盤が丸から四角に' },
-    { f: 9, x: 969, y: 182, w: 30, h: 71, k: 'count', lv: 3, t: '吊るした小魚が2匹から3匹に' },
+  [   // 0 tavern (built by tools/diff-build.ps1 from gen-raw/df0-final.json)
+    { f: 0, x: 681, y: 636, w: 237, h: 178, k: 'color', lv: 1, t: '床のじゅうたんが赤から青に' },
+    { f: 1, x: 767, y: 570, w: 129, h: 76, k: 'color', lv: 1, t: '眠っている猫が黒猫に' },
+    { f: 2, x: 1095, y: 210, w: 100, h: 152, k: 'color', lv: 1, t: '壁のタコの彫り物がオレンジから緑に' },
+    { f: 3, x: 289, y: 738, w: 84, h: 116, k: 'color', lv: 1, t: 'フラスコの中身が赤から緑に' },
+    { f: 4, x: 641, y: 274, w: 73, h: 111, k: 'shape', lv: 2, t: '振り子時計の文字盤が丸から四角に' },
+    { f: 5, x: 132, y: 469, w: 105, h: 81, k: 'gone', lv: 2, t: 'ボトルシップの中の船が消えた' },
+    { f: 6, x: 1038, y: 20, w: 101, h: 181, k: 'gone', lv: 1, t: '天井の大きな錨が消えた' },
+    { f: 7, x: 849, y: 426, w: 59, h: 59, k: 'gone', lv: 3, t: 'ピアノの楽譜が消えた' },
+    { f: 8, x: 954, y: 180, w: 56, h: 99, k: 'count', lv: 3, t: '吊るした小魚が2匹から3匹に' },
   ],
-  [   // 1 morning market
-    { f: 0, x: 756, y: 23, w: 98, h: 200, k: 'gone', lv: 1, t: '上に吊るした大きなランタンが消えた' },
-    { f: 1, x: 884, y: 144, w: 198, h: 141, k: 'color', lv: 1, t: '右上の日よけが赤から青に' },
-    { f: 2, x: 183, y: 547, w: 176, h: 110, k: 'color', lv: 1, t: '屋台のカニが赤から青に' },
-    { f: 3, x: 853, y: 587, w: 141, h: 89, k: 'shape', lv: 2, t: '台の上の丸い木鉢が四角い木箱に' },
-    { f: 4, x: 210, y: 35, w: 80, h: 109, k: 'color', lv: 1, t: '杭の上の黒い鵜が白に' },
-    { f: 5, x: 23, y: 13, w: 108, h: 80, k: 'gone', lv: 2, t: '左上の柱のカモメが消えた' },
-    { f: 6, x: 185, y: 307, w: 76, h: 122, k: 'size', lv: 2, t: '左の屋台のランタンが大きくなった' },
-    { f: 7, x: 845, y: 755, w: 123, h: 126, k: 'size', lv: 2, t: '右下の錨が大きくなった' },
-    { f: 8, x: 751, y: 530, w: 89, h: 49, k: 'gone', lv: 3, t: 'てんびんの左の皿の魚が消えた' },
-    { f: 9, x: 99, y: 81, w: 87, h: 86, k: 'gone', lv: 3, t: '梁の上のカモメが消えた' },
-    { f: 10, x: 1097, y: 463, w: 52, h: 60, k: 'color', lv: 2, t: '右はしの赤い浮き玉が緑に' },
-    { f: 11, x: 1118, y: 325, w: 42, h: 78, k: 'color', lv: 3, t: '右はしの吊るし浮きが緑に' },
+  [   // 1 morning market (built by tools/diff-build.ps1 from gen-raw/df1-final.json)
+    { f: 0, x: 882, y: 73, w: 318, h: 214, k: 'color', lv: 1, t: '右上の日よけが赤から青に' },
+    { f: 1, x: 717, y: 0, w: 159, h: 230, k: 'gone', lv: 1, t: '上に吊るした大きなランタンが消えた' },
+    { f: 2, x: 166, y: 545, w: 213, h: 112, k: 'color', lv: 1, t: '屋台のカニが赤から青に' },
+    { f: 3, x: 853, y: 585, w: 143, h: 93, k: 'shape', lv: 2, t: '台の上の丸い木鉢が四角い木箱に（そばの小皿も消えた）' },
+    { f: 4, x: 184, y: 295, w: 79, h: 139, k: 'size', lv: 2, t: '左の屋台のランタンが大きくなった' },
+    { f: 5, x: 837, y: 755, w: 133, h: 141, k: 'size', lv: 2, t: '右下の錨が大きくなった' },
+    { f: 6, x: 22, y: 13, w: 113, h: 96, k: 'gone', lv: 2, t: '左上の柱のカモメが消えた' },
+    { f: 7, x: 208, y: 36, w: 83, h: 110, k: 'color', lv: 1, t: '杭の上の黒い鵜が白に' },
+    { f: 8, x: 735, y: 519, w: 107, h: 61, k: 'gone', lv: 3, t: 'てんびんの左の皿の魚が消えた' },
+    { f: 9, x: 98, y: 80, w: 92, h: 89, k: 'gone', lv: 3, t: '梁の上のカモメが消えた' },
+    { f: 10, x: 1096, y: 463, w: 57, h: 62, k: 'color', lv: 2, t: '右はしの赤い浮き玉が緑に' },
+    { f: 11, x: 1118, y: 319, w: 47, h: 87, k: 'color', lv: 3, t: '右はしの吊るし浮きが緑に' },
   ],
-  [   // 2 cult meeting hall
-    { f: 0, x: 1059, y: 554, w: 137, h: 285, k: 'size', lv: 2, t: '右下の魚の像が大きくなった' },
-    { f: 1, x: 36, y: 78, w: 195, h: 237, k: 'color', lv: 1, t: '左上の旗が緑から青に' },
-    { f: 2, x: 386, y: 368, w: 116, h: 84, k: 'gone', lv: 1, t: '祭壇の金の冠が消えた' },
-    { f: 3, x: 0, y: 366, w: 87, h: 87, k: 'gone', lv: 2, t: '左の壁のランタンが消えた' },
-    { f: 4, x: 865, y: 619, w: 112, h: 76, k: 'color', lv: 1, t: '机の右の本が赤茶から青に' },
-    { f: 5, x: 915, y: 330, w: 71, h: 49, k: 'gone', lv: 3, t: 'オルガンの楽譜が消えた' },
-    { f: 6, x: 1099, y: 84, w: 57, h: 106, k: 'color', lv: 2, t: '右上の旗が赤から緑に' },
-    { f: 7, x: 683, y: 527, w: 52, h: 74, k: 'color', lv: 3, t: '机の奥の杯が金から銀に' },
-    { f: 8, x: 855, y: 710, w: 74, h: 49, k: 'shape', lv: 3, t: '虫めがねのレンズが丸から四角に' },
+  [   // 2 cult meeting hall (built by tools/diff-build.ps1 from gen-raw/df2-final.json)
+    { f: 0, x: 32, y: 18, w: 120, h: 280, k: 'color', lv: 1, t: '左上の旗が緑から青に' },
+    { f: 1, x: 143, y: 163, w: 75, h: 135, k: 'gone', lv: 2, t: '旗の横の小さなランタンが消えた' },
+    { f: 2, x: 1053, y: 554, w: 147, h: 310, k: 'size', lv: 2, t: '右下の魚の像が大きくなった' },
+    { f: 3, x: 1087, y: 33, w: 95, h: 251, k: 'color', lv: 1, t: '右上の旗が赤から緑に' },
+    { f: 4, x: 0, y: 331, w: 100, h: 136, k: 'shape', lv: 2, t: '左の壁のランタンが鍵束に変わった' },
+    { f: 5, x: 377, y: 368, w: 131, h: 88, k: 'gone', lv: 1, t: '祭壇の金の冠が消えた' },
+    { f: 6, x: 864, y: 618, w: 115, h: 82, k: 'color', lv: 1, t: '机の右の本が赤茶から青に' },
+    { f: 7, x: 683, y: 523, w: 65, h: 84, k: 'color', lv: 3, t: '机の奥の杯が金から銀に' },
+    { f: 8, x: 911, y: 330, w: 76, h: 50, k: 'gone', lv: 3, t: 'オルガンの楽譜が消えた' },
+    { f: 9, x: 852, y: 711, w: 79, h: 50, k: 'shape', lv: 3, t: '虫めがねのレンズが丸から四角に' },
   ],
-  [   // 3 moonlit dock (p7, p8, p10 were stray cloud changes and are not used)
-    { f: 0, x: 522, y: 41, w: 345, h: 198, k: 'color', lv: 1, t: '満月が赤くなった' },
-    { f: 1, x: 1025, y: 614, w: 112, h: 138, k: 'color', lv: 1, t: '右下の浮き輪が赤白から青白に' },
-    { f: 2, x: 462, y: 318, w: 216, h: 112, k: 'color', lv: 1, t: '海の小舟が赤くぬられた' },
-    { f: 3, x: 921, y: 715, w: 130, h: 151, k: 'color', lv: 2, t: '木箱にかけた布が赤から緑に' },
-    { f: 4, x: 540, y: 650, w: 163, h: 72, k: 'add', lv: 2, t: 'カニが1匹増え、方位磁針が四角に' },
-    { f: 5, x: 832, y: 475, w: 79, h: 59, k: 'gone', lv: 3, t: '右の桟橋のカニが消えた' },
-    { f: 6, x: 1049, y: 264, w: 69, h: 131, k: 'gone', lv: 2, t: '柱に吊るした鐘が消えた' },
-    { f: 9, x: 201, y: 592, w: 34, h: 79, k: 'gone', lv: 3, t: '木箱の前の緑の瓶が消えた' },
+  [   // 3 moonlit dock (built by tools/diff-build.ps1 from gen-raw/df3-final.json)
+    { f: 0, x: 531, y: 0, w: 295, h: 243, k: 'color', lv: 1, t: '満月が赤くなった' },
+    { f: 1, x: 461, y: 316, w: 222, h: 130, k: 'color', lv: 1, t: '海の小舟が赤くぬられた' },
+    { f: 2, x: 921, y: 714, w: 132, h: 153, k: 'color', lv: 1, t: '木箱にかけた布が赤から緑に' },
+    { f: 3, x: 1026, y: 613, w: 114, h: 142, k: 'color', lv: 2, t: '右下の浮き輪が赤白から青白に' },
+    { f: 4, x: 1016, y: 414, w: 35, h: 47, k: 'color', lv: 3, t: '桟橋の小さな浮き輪が赤白から青白に' },
+    { f: 5, x: 540, y: 651, w: 98, h: 71, k: 'add', lv: 2, t: '甲板のカニが1匹増えた' },
+    { f: 6, x: 629, y: 656, w: 72, h: 57, k: 'shape', lv: 3, t: '甲板の方位磁針が四角になった' },
+    { f: 7, x: 832, y: 476, w: 78, h: 57, k: 'gone', lv: 3, t: '右の桟橋のカニが消えた' },
+    { f: 8, x: 1051, y: 264, w: 68, h: 135, k: 'gone', lv: 2, t: '柱に吊るした鐘が消えた' },
+    { f: 9, x: 199, y: 578, w: 35, h: 94, k: 'gone', lv: 3, t: '木箱の前の緑の瓶が消えた' },
   ],
-  [   // 4 night festival (p15 = accordion, p16 = jars: each one change that came out in two parts)
-    { f: 0, x: 693, y: 9, w: 177, h: 135, k: 'gone', lv: 1, t: '夜空の満月が消えた' },
-    { f: 1, x: 625, y: 354, w: 193, h: 82, k: 'color', lv: 1, t: 'ダゴンの旗が緑から赤に' },
-    { f: 2, x: 579, y: 779, w: 113, h: 105, k: 'add', lv: 2, t: '石だたみに赤いカニが増えた' },
-    { f: 3, x: 564, y: 159, w: 77, h: 115, k: 'gone', lv: 2, t: '上の段のちょうちんがひとつ消えた' },
-    { f: 4, x: 283, y: 490, w: 102, h: 102, k: 'color', lv: 1, t: '太鼓をたたく魚頭がオレンジから紫に' },
-    { f: 5, x: 660, y: 157, w: 77, h: 97, k: 'gone', lv: 3, t: 'まん中のちょうちんがひとつ消えた' },
-    { f: 6, x: 371, y: 615, w: 90, h: 100, k: 'gone', lv: 2, t: '2つめの太鼓が消えた' },
-    { f: 7, x: 599, y: 631, w: 71, h: 91, k: 'shape', lv: 2, t: '踊り手のちょうちんが丸から四角に' },
-    { f: 8, x: 1074, y: 524, w: 62, h: 65, k: 'color', lv: 2, t: '右の棚の大きな瓶が緑から紫に' },
-    { f: 9, x: 72, y: 335, w: 95, h: 84, k: 'size', lv: 2, t: '左の棚のホタテ貝が大きくなった' },
-    { f: 12, x: 494, y: 188, w: 42, h: 59, k: 'detail', lv: 3, t: 'ちょうちんの絵が消えた' },
-    { f: 15, x: 784, y: 603, w: 116, h: 94, k: 'color', lv: 1, t: 'カエルのアコーディオンが赤から青に' },
-    { f: 16, x: 1077, y: 448, w: 92, h: 64, k: 'color', lv: 3, t: '右の棚の上の瓶が紫に' },
+  [   // 4 night festival (built by tools/diff-build.ps1 from gen-raw/df4-final.json)
+    { f: 0, x: 670, y: 0, w: 220, h: 146, k: 'gone', lv: 1, t: '夜空の満月が消えた' },
+    { f: 1, x: 616, y: 345, w: 209, h: 99, k: 'color', lv: 1, t: 'ダゴンの旗が緑から赤に' },
+    { f: 2, x: 567, y: 779, w: 138, h: 109, k: 'add', lv: 2, t: '石だたみに赤いカニが増えた' },
+    { f: 3, x: 560, y: 157, w: 87, h: 126, k: 'gone', lv: 2, t: '上の段のちょうちんがひとつ消えた' },
+    { f: 4, x: 281, y: 487, w: 105, h: 115, k: 'color', lv: 1, t: '太鼓をたたく魚頭がオレンジから紫に' },
+    { f: 5, x: 372, y: 613, w: 89, h: 103, k: 'gone', lv: 2, t: '2つめの太鼓が消えた' },
+    { f: 6, x: 599, y: 630, w: 72, h: 96, k: 'shape', lv: 2, t: '踊り手のちょうちんが丸から四角に' },
+    { f: 7, x: 1116, y: 445, w: 56, h: 68, k: 'color', lv: 3, t: '右の棚の上の大きな瓶が紫に' },
+    { f: 8, x: 69, y: 332, w: 99, h: 88, k: 'size', lv: 2, t: '左の棚のホタテ貝が大きくなった' },
+    { f: 9, x: 1072, y: 512, w: 66, h: 82, k: 'color', lv: 2, t: '右の棚の大きな瓶が緑から紫に' },
+    { f: 10, x: 769, y: 601, w: 137, h: 98, k: 'color', lv: 1, t: 'カエルのアコーディオンが赤から青に' },
+    { f: 11, x: 487, y: 188, w: 51, h: 59, k: 'detail', lv: 3, t: 'ちょうちんの絵が消えた' },
   ],
-  [   // 5 sunken dream city (p11 = the added coins, which came out in three parts)
-    { f: 0, x: 941, y: 118, w: 92, h: 134, k: 'gone', lv: 2, t: '右上のクラゲが消えた' },
-    { f: 1, x: 713, y: 556, w: 93, h: 144, k: 'color', lv: 1, t: '潜水ヘルメットが銅色から銀に' },
-    { f: 2, x: 374, y: 738, w: 129, h: 151, k: 'size', lv: 2, t: '下の錨が大きくなった' },
-    { f: 3, x: 283, y: 289, w: 83, h: 91, k: 'gone', lv: 3, t: '左の塔の前のクラゲが消えた' },
-    { f: 4, x: 81, y: 148, w: 103, h: 70, k: 'color', lv: 1, t: '左上の魚が青からオレンジに' },
-    { f: 5, x: 687, y: 692, w: 67, h: 57, k: 'add', lv: 2, t: '階段にヒトデが増えた' },
-    { f: 6, x: 864, y: 448, w: 61, h: 151, k: 'gone', lv: 2, t: '右の像のそばの三つ叉の槍が消えた' },
-    { f: 7, x: 207, y: 472, w: 84, h: 55, k: 'detail', lv: 3, t: '左の像の目が赤く光った' },
-    { f: 11, x: 610, y: 614, w: 124, h: 128, k: 'count', lv: 3, t: '階段の金貨が増えた' },
-  ]
+  [   // 5 sunken dream city (built by tools/diff-build.ps1 from gen-raw/df5-final.json)
+    { f: 0, x: 942, y: 119, w: 90, h: 132, k: 'gone', lv: 2, t: '右上のクラゲが消えた' },
+    { f: 1, x: 722, y: 557, w: 83, h: 103, k: 'color', lv: 1, t: '潜水ヘルメットが銅色から銀に' },
+    { f: 2, x: 715, y: 649, w: 57, h: 50, k: 'add', lv: 3, t: 'ヘルメットの下に四角い時計が増えた' },
+    { f: 3, x: 372, y: 738, w: 133, h: 156, k: 'size', lv: 2, t: '下の錨が大きくなった' },
+    { f: 4, x: 282, y: 282, w: 87, h: 104, k: 'gone', lv: 3, t: '左の塔の前のクラゲが消えた' },
+    { f: 5, x: 80, y: 147, w: 104, h: 72, k: 'color', lv: 1, t: '左上の魚が青からオレンジに' },
+    { f: 6, x: 688, y: 693, w: 65, h: 55, k: 'add', lv: 2, t: '階段にヒトデが増えた' },
+    { f: 7, x: 864, y: 447, w: 62, h: 154, k: 'gone', lv: 2, t: '右の像のそばの三つ叉の槍が消えた' },
+    { f: 8, x: 200, y: 467, w: 101, h: 64, k: 'detail', lv: 3, t: '左の像の目が赤く光った' },
+    { f: 9, x: 611, y: 615, w: 122, h: 126, k: 'count', lv: 3, t: '階段の金貨が増えた' },
+    { f: 10, x: 498, y: 599, w: 84, h: 61, k: 'color', lv: 1, t: '階段の革かばんが赤くなった' },
+  ],
 ];
 // Choose `want` changes: fill the easy / medium / hard shares, keep kinds varied, spread them over the picture's thirds,
 // and never put two close together.
@@ -3217,7 +3222,7 @@ async function renderDiff() {
   try {
     im = await loadImg(diffImg(s.ch));
     chosen = pickDiffs(DIFF_SETS[idx], diffCount(s.ch), R, im.naturalHeight);
-    pieces = await Promise.all(chosen.map(d => loadImg(`assets/df${idx}/p${d.f}.png`)));
+    pieces = await Promise.all(chosen.map(d => loadImg(`assets/df${idx}/p${d.f}.png?b=${DIFF_BUILD}`)));
   } catch (e) { $('dload').textContent = '画像を読み込めませんでした。通信状態を確認して、もう一度開いてください。'; return; }
   if (!S.search || S.search.seed !== s.seed) return;
   const W = im.naturalWidth, H = im.naturalHeight;
@@ -3959,7 +3964,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.50';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.51';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
