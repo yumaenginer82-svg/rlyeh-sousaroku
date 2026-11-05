@@ -271,6 +271,14 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
 .rewards{list-style:none;margin:0;padding:12px 16px;display:grid;gap:6px;width:100%;background:var(--panel2);border:1px solid var(--gold);border-radius:12px;text-align:left;font-weight:700}
 .dex{display:grid;gap:12px;width:100%;text-align:left}
 .dex h3{margin:0 0 6px;font-size:14px;letter-spacing:.06em}
+/* a folding section of the journal: its heading is the handle */
+.dsec{border:1px solid var(--line);border-radius:12px;background:rgba(10,24,27,.35);padding:2px 12px}
+.dsec > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;min-height:44px}
+.dsec > summary::-webkit-details-marker{display:none}
+.dsec > summary::before{content:"▸";color:var(--gold);transition:transform .2s;flex:none}
+.dsec[open] > summary::before{transform:rotate(90deg)}
+.dsec > summary h3{margin:0}
+.dsec[open]{padding-bottom:10px}
 .dexrow{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px}
 .dexitem{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 2px;text-align:center;font-size:28px;line-height:1.1}
 .dexitem small{display:block;font-size:11px;margin-top:4px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -440,7 +448,6 @@ b.t0{color:#c89a62}b.t1{color:#7fe0b0}b.t2{color:var(--gold)}
 #dEye img.uic{width:26px;height:26px}
 
 /* Ending */
-/* The journal's pictures, tapped: one large on a dark veil, with its name (tap anywhere to close) */.zoomer{position:fixed;inset:0;z-index:68;display:grid;place-items:center;background:rgba(3,9,11,.92);touch-action:manipulation;animation:wfade .25s ease forwards;opacity:0;  padding:max(16px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px))}.zoomer figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:12px;max-width:100%}.zoomer img{width:min(78vw,62vh,520px);height:auto;aspect-ratio:1;object-fit:contain;filter:drop-shadow(0 0 30px rgba(114,224,178,.25));border-radius:12px}.zoomer img.photo{background:#fff8e8;padding:10px;box-sizing:border-box;border-radius:6px}.zoomer figcaption{font-family:var(--f-display);font-size:20px;color:var(--gold);letter-spacing:.08em;text-align:center}.zoomer .zhint{position:absolute;bottom:calc(18px + env(safe-area-inset-bottom,0px));margin:0;font-size:12px;opacity:.55}.lart,.apage .ic,.page img.face,.pshard{cursor:zoom-in}
 .ending{position:fixed;inset:0;z-index:70;overflow:hidden;background:#000;color:#f1e6c8}
 .ending[hidden]{display:none}
 .ebg{position:absolute;inset:-4%;background:url(assets/bg-ending.jpg) 40% 50%/cover no-repeat;animation:edawn 60s ease-out forwards}
@@ -833,7 +840,6 @@ body.focus .top{display:none}
   <button class="btn tiny eskip" id="eskip" type="button">とばす</button>
 </div>
 <div class="overlay" id="overlay" hidden><div class="panel" id="panel"></div></div>
-<div class="zoomer" id="zoomer" hidden><figure><img id="zoomImg" alt=""><figcaption id="zoomCap"></figcaption></figure><p class="zhint">タップでとじる</p></div>
 <div class="disc" id="disc" hidden></div>
 <div class="toast" id="toast" hidden></div>
 
@@ -3738,21 +3744,6 @@ function showOverlay(html, onGo) {
 }
 function hideOverlay() { $('overlay').hidden = true; }
 
-// The journal's pictures (items, miniatures, Sena's album, faces, shards) open large on a tap.
-const ZOOMABLE = '#lorebox .lart img, #figbox .lart img, .album .apage img, .pages .page img.face, .pshard img';
-$('panel').addEventListener('click', e => {
-  const img = e.target.closest(ZOOMABLE);
-  if (!img) return;
-  const box = img.closest('.lorebox, .figbox, .apage, .page');
-  const name = box && box.querySelector('b, figcaption b');
-  $('zoomImg').src = img.currentSrc || img.src;
-  $('zoomImg').className = img.closest('.apage') ? 'photo' : '';
-  $('zoomCap').textContent = name ? name.childNodes[0].textContent.trim() : '';
-  $('zoomer').hidden = false;
-  sfx.move();
-});
-$('zoomer').addEventListener('click', () => { $('zoomer').hidden = true; });
-
 function showIntro() {
   const st = story(S.ch), g = goal(S.ch);
   const first = S.ch === 0;
@@ -4019,18 +4010,31 @@ function showDex() {
       <div><h3>依頼主 <small class="muted">依頼カードの名前をタップしても見られる</small></h3><div class="pages">${people}</div></div>
       <div><h3>封印の欠片 <small class="muted">${(S.shards || []).length} / ${SHARDS.length}　各章を解決すると手に入る。最後に祭壇で捧げる</small></h3><div class="pages">${SHARDS.map((x, i) => (S.shards || []).includes(i) ? `<div class="page"><span class="pshard">${shardArt(i)}</span><div><b>${x.n}</b><small class="desc">${x.d}</small></div></div>` : `<div class="page now"><div><b>？？？</b><small>第${i + 1}章で手に入る</small></div></div>`).join("")}</div></div>
       ${S.sena ? `<div><h3 class="senah">セナのアルバム <small class="muted">${Math.min(S.sena, SENA_ALBUM.length)} / ${SENA_ALBUM.length}　ごく稀に現れるセナの依頼をこなすと増える</small></h3><div class="album">${SENA_ALBUM.map((a, i) => i < S.sena ? `<figure class="apage"><img class="ic" src="assets/x-sena${i}.png" alt=""><figcaption><b>${a.n}</b><small>${a.d}</small></figcaption></figure>` : `<figure class="apage locked"><span>？</span><figcaption><b>？？？</b></figcaption></figure>`).join('')}</div></div>` : ''}
-      <div><h3>ミニチュアの飾り棚 <small class="muted">${(S.figs || []).length} / ${FIGS.length}　店の「星辰の賽」で集まる。像をタップすると話が読める</small></h3><div class="figbox" id="figbox"><small>集めた像をタップすると、まつわる話が読める。絵をタップすると大きく見られる。</small></div><div class="shelf">${FIGS.map((x, i) => (S.figs || []).includes(i) ? `<button class="fig ${FIG_TIERS[x.t].c}" type="button" data-fig="${i}">${figArt(i)}<small>${x.n}</small></button>` : `<div class="fig unknown ${FIG_TIERS[x.t].c}">${figArt(i)}<small>？？？</small></div>`).join('')}</div></div>
+      <div><h3>ミニチュアの飾り棚 <small class="muted">${(S.figs || []).length} / ${FIGS.length}　店の「星辰の賽」で集まる。像をタップすると話が読める</small></h3><div class="figbox" id="figbox"><small>集めた像をタップすると、まつわる話が読める。</small></div><div class="shelf">${FIGS.map((x, i) => (S.figs || []).includes(i) ? `<button class="fig ${FIG_TIERS[x.t].c}" type="button" data-fig="${i}">${figArt(i)}<small>${x.n}</small></button>` : `<div class="fig unknown ${FIG_TIERS[x.t].c}">${figArt(i)}<small>？？？</small></div>`).join('')}</div></div>
       <div><h3>神話の手引き <small class="muted">${MYTHOS.filter((_, i) => mythOpen(i)).length} / ${MYTHOS.length}　章が進むと読める。<b>頁の切れ端</b>を3枚集めても1頁読める（いま ${(S.scraps || 0) % 3} / 3）</small></h3><div class="pages">${MYTHOS.map((m, i) => mythOpen(i)
         ? `<details class="page myth"><summary><b>${m.n}</b></summary><p>${m.d}</p></details>`
         : `<div class="page now"><div><b>？？？</b><small>${m.ch > 50 ? "頁の切れ端を集めると読める" : `第${m.ch + 1}章で読める`}</small></div></div>`).join('')}</div></div>
       <div><h3>実績 <small class="muted">${(S.ach || []).length} / ${ACHS.length}　達成すると🪙や千里眼がもらえる</small></h3><div class="pages">${ACHS.map(a => { const [v, need] = a.p(), done = (S.ach || []).includes(a.id); return `<div class="page ach${done ? " done" : ""}"><div><b>${a.n}</b><small>${a.d}　${done ? "達成！" : `${Math.min(v, need)} / ${need}`}</small><i class="abar"><i style="width:${Math.min(100, v / need * 100)}%"></i></i></div><span class="rew">🪙${a.c}${a.e ? ` 👁️${a.e}` : ""}</span></div>`; }).join("")}</div></div></div>
     <h2 class="sub">図鑑 ${found} / ${total}</h2>
-    <div class="lorebox" id="lorebox"><small>見つけた品をタップすると、クトゥルフ神話の解説が読める。絵をタップすると大きく見られる。</small></div>
+    <div class="lorebox" id="lorebox"><small>見つけた品をタップすると、クトゥルフ神話の解説が読める。</small></div>
     <div class="dex">${rows}</div>
     <button class="btn primary" type="button" data-go>とじる</button>
     <button class="btn tiny danger" type="button" id="resetBtn">データを消して最初から</button>
   `, hideOverlay);
   $('jHelp').addEventListener('click', () => showHelp('merge'));
+  // Each section of the record folds away (closed unless it was left open last time), so the journal stays short.
+  const DEX_OPEN = 'rlyeh-dex-open';
+  let open = {}; try { open = JSON.parse(localStorage.getItem(DEX_OPEN) || '{}'); } catch (e) {}
+  [...$('panel').querySelectorAll('.dex')].flatMap(x => [...x.querySelectorAll(':scope > div')]).forEach((d, i) => {
+    const h = d.querySelector(':scope > h3'); if (!h) return;
+    const det = document.createElement('details'), sum = document.createElement('summary');
+    det.className = 'dsec'; det.open = !!open[i];
+    sum.appendChild(h);
+    det.appendChild(sum);
+    while (d.firstChild) det.appendChild(d.firstChild);
+    d.replaceWith(det);
+    det.addEventListener('toggle', () => { open[i] = det.open; try { localStorage.setItem(DEX_OPEN, JSON.stringify(open)); } catch (e) {} });
+  });
   $('panel').querySelectorAll('[data-fig]').forEach(b => b.addEventListener('click', () => {
     const i = +b.dataset.fig, F = FIGS[i];
     $('figbox').innerHTML = `<span class="lart">${figArt(i)}</span><div><b>${F.n}<small>${FIG_TIERS[F.t].n}の像</small></b><p>${F.d}</p></div>`;
@@ -4095,7 +4099,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.64';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.65';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
