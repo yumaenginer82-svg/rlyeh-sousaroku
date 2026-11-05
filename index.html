@@ -3042,7 +3042,7 @@ const sv = $('sview'), ptrs = new Map();
 let gest = null;
 const local = e => { const r = sv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
 sv.addEventListener('pointerdown', e => {
-  if (!scn || S.view !== 'search' || !$('overlay').hidden || e.target.closest('button')) return;
+  if (!scn || S.view !== 'search' || !$('overlay').hidden || e.target.closest('button, .zoombar, .mbtns, .ptip')) return;   // the buttons and the gaps between them are not the picture
   e.preventDefault();
   try { sv.setPointerCapture(e.pointerId); } catch (err) {}
   const p = local(e);
@@ -3420,7 +3420,7 @@ function renderDiffHead() {
 const dptr = new Map();
 let dgest = null;
 $('dpanes').addEventListener('pointerdown', e => {
-  if (!e.target.closest('.dvp') || e.target.closest('button')) return;
+  if (!e.target.closest('.dvp') || e.target.closest('button, .dzoom, .mbtns')) return;
   dptr.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY });
   try { $('dpanes').setPointerCapture(e.pointerId); } catch (err) {}
   if (dptr.size === 2) {
@@ -3447,7 +3447,9 @@ const dEnd = e => {
   const had = dptr.has(e.pointerId), moved = dgest && dgest.moved;
   dptr.delete(e.pointerId);
   if (!dptr.size) dgest = null;
-  if (e.type === 'pointerup' && (!had || !moved)) diffTap(e);   // synthetic taps without a pointerdown still count
+  // a tap counts when it began on a picture and hardly moved; a lone pointerup counts only right on a picture
+  // (a tap on the zoom buttons, or between them, never reaches the picture underneath)
+  if (e.type === 'pointerup' && (had ? !moved : !!e.target.closest('canvas'))) diffTap(e);
 };
 $('dpanes').addEventListener('pointerup', dEnd);
 $('dpanes').addEventListener('pointercancel', dEnd);
@@ -4079,7 +4081,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.62';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.63';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
