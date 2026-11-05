@@ -109,7 +109,8 @@ window.PB = (() => {
     const all = many.length ? many[Math.floor(R() * many.length)] : null;
     if (all && !chosen.includes(all)) chosen[chosen.length - 1] = all;
     const sv = $('sview'), L = $('slayer');
-    const toScr = p => { const m = new DOMMatrix(L.style.transform), r = sv.getBoundingClientRect();   // the set view, not a glide caught mid-way return { x: r.left + m.e + p.x * m.a, y: r.top + m.f + p.y * m.a }; };
+    // the set view (inline style), not a glide caught mid-way
+    const toScr = p => { const m = new DOMMatrix(L.style.transform), r = sv.getBoundingClientRect(); return { x: r.left + m.e + p.x * m.a, y: r.top + m.f + p.y * m.a }; };
     for (const it of chosen) for (const [x, y] of (it === all ? it.at : [it.at[0]])) {
       const q = toScr({ x: x * k + ox, y: y * k + oy }); pid++;
       sv.dispatchEvent(new PointerEvent('pointerdown', { clientX: q.x, clientY: q.y, pointerId: pid, bubbles: true, isPrimary: true }));

@@ -439,6 +439,7 @@ b.t0{color:#c89a62}b.t1{color:#7fe0b0}b.t2{color:var(--gold)}
 #dEye img.uic{width:26px;height:26px}
 
 /* Ending */
+/* The journal's pictures, tapped: one large on a dark veil, with its name (tap anywhere to close) */.zoomer{position:fixed;inset:0;z-index:68;display:grid;place-items:center;background:rgba(3,9,11,.92);touch-action:manipulation;animation:wfade .25s ease forwards;opacity:0;  padding:max(16px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px))}.zoomer figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:12px;max-width:100%}.zoomer img{width:min(78vw,62vh,520px);height:auto;aspect-ratio:1;object-fit:contain;filter:drop-shadow(0 0 30px rgba(114,224,178,.25));border-radius:12px}.zoomer img.photo{background:#fff8e8;padding:10px;box-sizing:border-box;border-radius:6px}.zoomer figcaption{font-family:var(--f-display);font-size:20px;color:var(--gold);letter-spacing:.08em;text-align:center}.zoomer .zhint{position:absolute;bottom:calc(18px + env(safe-area-inset-bottom,0px));margin:0;font-size:12px;opacity:.55}.lart,.apage .ic,.page img.face,.pshard{cursor:zoom-in}
 .ending{position:fixed;inset:0;z-index:70;overflow:hidden;background:#000;color:#f1e6c8}
 .ending[hidden]{display:none}
 .ebg{position:absolute;inset:-4%;background:url(assets/bg-ending.jpg) 40% 50%/cover no-repeat;animation:edawn 60s ease-out forwards}
@@ -572,6 +573,7 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
 .cell .tent .asks .ic{width:100%;height:100%}
 .cell .tent .e{animation:sway 3s ease-in-out infinite}
 .cell .gift::before{border-color:rgba(232,196,104,.6);background:radial-gradient(circle,rgba(232,196,104,.25),transparent 70%)}
+.cell .cookie .e{filter:drop-shadow(0 0 5px rgba(240,200,96,.55))}   /* a bone cookie on the board */
 .cell .vault::before{border-color:rgba(160,120,200,.55);background:radial-gradient(circle,rgba(160,120,200,.22),transparent 70%);animation:none}
 .info .dz.hint{border-style:solid;opacity:.85}
 .info .dz.hint .ic{width:40px;height:40px}
@@ -830,6 +832,7 @@ body.focus .top{display:none}
   <button class="btn tiny eskip" id="eskip" type="button">とばす</button>
 </div>
 <div class="overlay" id="overlay" hidden><div class="panel" id="panel"></div></div>
+<div class="zoomer" id="zoomer" hidden><figure><img id="zoomImg" alt=""><figcaption id="zoomCap"></figcaption></figure><p class="zhint">タップでとじる</p></div>
 <div class="disc" id="disc" hidden></div>
 <div class="toast" id="toast" hidden></div>
 
@@ -904,7 +907,7 @@ CHAINS.forEach((ch, c) => {
   ch.items.forEach((it, t) => { it[0] = ICON(`assets/m-${c}-${t}.png`); });
 });
 const CHEST = ICON('assets/x-chest.png');
-const TENT = ICON('assets/x-tent.png'), GIFT = ICON('assets/x-gift.png'), VAULT = ICON('assets/x-vault.png');
+const TENT = ICON('assets/x-tent.png'), GIFT = ICON('assets/x-gift.png'), VAULT = ICON('assets/x-vault.png'), COOKIE = ICON('assets/x-cookie.png');
 const MAXT = 7;   // 8 stages per chain (0..7)
 const COLS = 7, ROWS = 9;
 const SELL = [1, 2, 4, 8, 16, 32, 64, 128];
@@ -1069,6 +1072,7 @@ function rollFig() {
   return { a, b, tier, fig: pick(pool) };
 }
 function showDice(msg) {
+  if ((S.tips = S.tips || {}).dice === 1) { S.tips.dice = 2; save(); }   // the shop stops glowing once the dice are seen
   const can = S.coins >= DICE_COST;
   showOverlay(`
     <p class="kicker">星辰の賽</p>
@@ -1860,8 +1864,9 @@ function makeOrder() {
   const used = S.orders.map(o => o.npc.n);
   // Very rarely, Sena turns up with a small request and a big reward (never two at once). Not in chapter 1:
   // she first has to be hinted at (the dog with big ears at the fish market, chapter 2's opening).
-  if (S.ch >= 1 && !S.orders.some(o => o.rare) && Math.random() < .025) {
+  if (S.ch >= 1 && !S.orders.some(o => o.rare) && Math.random() < .025 + COOKIE_ODDS * Math.min(COOKIE_MAX, cookieCells().length)) {
     const t = Math.max(1, minT);
+    setTimeout(senaNibbles, 700);
     return { id: S.nextId++, npc: { n: SENA.n }, need: [{ c: pick(avail), t }, { c: pick(avail), t: Math.max(0, t - 1) }], coins: 200 + 40 * S.ch, stars: 2, eyes: 1, rare: true };
   }
   const npc = pick(NPCS.filter(p => !used.includes(p.n)));
@@ -2022,6 +2027,9 @@ function renderTop() {
   $('storeBtn').hidden = S.cells.some(c => c && c.k === 'vault');
   $('mute').classList.toggle('off', muted);
   $('dayBtn').classList.toggle('glow', !!dailyReady());
+  // The journal glows while it holds something not yet looked at; the shop, once, when the dice are worth a try.
+  $('dexBtn').classList.toggle('glow', dexCount() > (S.dexSeen || 0));
+  $('shopBtn').classList.toggle('glow', (S.tips || {}).dice === 1);
   const ready = S.search || (lastStage() ? S.bossDone : S.stars >= g);
   // What to do next, in words, and the three seals of this chapter's searches (lit = solved, pulsing = next).
   const st0 = stageOf();
@@ -2052,6 +2060,7 @@ function paintM(i, anim) {
   else if (c && c.k === 'stone') html = `<div class="p stone"><span class="e">${ITEM(c.c, c.t)[0]}</span></div>`;
   else if (c && c.k === 'tent') html = `<div class="p tent"><span class="e">${TENT}</span><span class="asks">${ITEM(c.need.c, c.need.t)[0]}</span></div>`;
   else if (c && c.k === 'gift') html = `<div class="p gen gift"><span class="e">${GIFT}</span><b class="lv">×${c.in.length}</b></div>`;
+  else if (c && c.k === 'cookie') html = `<div class="p cookie"><span class="e">${COOKIE}</span></div>`;
   else if (c && c.k === 'vault') html = `<div class="p gen vault"><span class="e">${VAULT}</span><b class="lv">${(S.store || []).length}/${storeCap()}</b></div>`;
   if (anim === 'puff') html += '<span class="dust"></span>';
   el.innerHTML = html;
@@ -2086,6 +2095,9 @@ function renderInfo() {
     box.innerHTML = `<div class="big">${CHEST}</div><div class="txt"><b>宝箱<small>あと${c.n}回</small></b><p>タップすると中身が飛び出す。高い段階の合体で、ときどき見つかる。宝箱どうしを重ねると、ひとつにまとまる。</p></div>`;
   } else if (c.k === 'gift') {
     box.innerHTML = `<div class="big">${GIFT}</div><div class="txt"><b>贈りもの<small>中身 ${c.in.length}つ</small></b><p>タップするたびに中身がひとつ出る。贈りものどうしを重ねると、ひとつにまとまって<b>おまけの品</b>が増える。</p></div>`;
+  } else if (c.k === 'cookie') {
+    const n = cookieCells().length;
+    box.innerHTML = `<div class="big">${COOKIE}</div><div class="txt"><b>骨のクッキー<small>盤面に ${n}枚</small></b><p>置いておくと、セナがほんの少し現れやすくなる（${COOKIE_MAX}枚まで）。セナが来ると1枚食べていく。</p></div>`;
   } else if (c.k === 'vault') {
     box.innerHTML = `<div class="big">${VAULT}</div><div class="txt"><b>封印の櫃<small>${(S.store || []).length} / ${storeCap()}</small></b><p>品や宝箱をドラッグして重ねると、しまっておける。タップで中を見て、出したり広げたりできる。</p></div>`;
   } else if (c.k === 'fog' || c.k === 'stone' || c.k === 'tent') {
@@ -2428,7 +2440,23 @@ function tapM(i) {
   else select(-1);
 }
 
+// Everything the journal keeps, counted: new entries make its button glow until it is opened.
+const dexCount = () => Object.keys(S.dex || {}).length + (S.figs || []).length + Math.min(S.sena || 0, SENA_ALBUM.length) + (S.shards || []).length;
+// Gentle nudges, each said once, when the board is quiet: the dice once there are coins to spare, the journal once
+// it first fills up. They wait while a window is open or a search is on.
+function nudges() {
+  const T = S.tips = S.tips || {};
+  if (!$('overlay').hidden || S.view !== 'merge' || S.search) return;
+  if (!T.dice && S.coins >= DICE_COST + 100 && !(S.figs || []).length) {
+    T.dice = 1;
+    setTimeout(() => { showThanks(MERCHANT.n, 'ちょいと店に寄っていかないかい。星辰の賽を振れば、棚の像をひとつ譲ろう', '店の「星辰の賽」'); }, 900);
+  } else if (!T.dex && S.ch >= 1 && dexCount() - (S.dexSeen || 0) >= 3) {
+    T.dex = 1;
+    setTimeout(() => toast('手帳が光っている。見つけた品の話や、集めた像が読めるようだ'), 900);
+  }
+}
 function afterChange() {
+  nudges();
   checkAchs();
   paintVault();
   renderOrders();
@@ -2540,7 +2568,7 @@ $('inboxBtn').addEventListener('click', placeGift);
 const STORE_CAP = [4, 6, 8, 10, 12], STORE_COST = [0, 80, 200, 500, 1200];
 const storeCap = () => STORE_CAP[S.storeLv || 0];
 const storeFull = () => (S.store || []).length >= storeCap();
-const cellArt = c => c.k === 'item' ? ITEM(c.c, c.t)[0] : c.k === 'gift' ? GIFT : CHEST;
+const cellArt = c => c.k === 'item' ? ITEM(c.c, c.t)[0] : c.k === 'gift' ? GIFT : c.k === 'cookie' ? COOKIE : CHEST;
 
 // While an item is dragged, the info panel turns into the abyss drop target (and the store, if its chest isn't on the board).
 function showDropZones(c) {
@@ -2614,6 +2642,26 @@ function showStore() {
 }
 $('storeBtn').addEventListener('click', showStore);
 
+/* ================= bone cookies: left on the board, they draw Sena a little more often ================= */
+const COOKIE_MAX = 2, COOKIE_ODDS = .01;   // each cookie on the board (up to 2) adds 1 point to Sena's 2.5%
+const cookieCells = () => S.cells.map((c, i) => c && c.k === 'cookie' ? i : -1).filter(i => i >= 0);
+function placeCookie() {
+  const j = emptyCellsNear(3 * COLS + 3)[0];
+  if (j === undefined) { toast('盤面に空きがない。場所をあけてから買おう'); sfx.bump(); return false; }
+  S.cells[j] = { k: 'cookie' };
+  if (mEls[j]) { paintM(j, 'pop'); setTimeout(() => floater($('mboard'), COLS, j, '骨のクッキー', 'gold'), 200); }
+  setTimeout(() => toast('盤面にクッキーを置いた。どこかで、小さな鼻がひくひくしている…'), 600);
+}
+// When Sena turns up, she has eaten one of the cookies.
+function senaNibbles() {
+  const j = cookieCells()[0];
+  if (j === undefined) return;
+  S.cells[j] = null;
+  if (mEls[j]) { paintM(j, 'puff'); floater($('mboard'), COLS, j, 'クッキーが消えた…', 'gold'); }
+  if (sel === j) sel = -1;
+  afterChange(); renderInfo();
+}
+
 /* ================= the dealer's shop: things to spend coins on ================= */
 const SHOP_LINES = ['いらっしゃい。どれも、ちょっと訳ありの品でね。', '値切りは聞かないよ。そのかわり、品は確かだ。', 'おや、また来たね。今日は珍しいのが入ってるよ。'];
 function shopGoods() {
@@ -2625,6 +2673,8 @@ function shopGoods() {
       buy: () => { const t = Math.min(1 + Math.floor(ch / 2), 4); giveGift([0, 1, 2].map(k => ({ k: 'item', c: pick(avail), t: t + (k === 0 ? 1 : 0) }))); } },
     { id: 'chest', art: CHEST, n: '古い宝箱', d: '何が出るかは開けてのお楽しみ。高い段階の品も入っている。', cost: 150 + 60 * ch,
       buy: () => giveGift([{ k: 'chest', n: 3, lv: 4 + Math.min(2, Math.floor(ch / 2)) }]) },
+    S.ch >= 1 && { id: 'cookie', art: COOKIE, n: '骨のクッキー', d: `骨の形をした犬用の焼き菓子。盤面に置いておくと、セナがほんの少しだけ現れやすくなる（${COOKIE_MAX}枚まで効く）。`, cost: 300,
+      buy: () => placeCookie() },
     { id: 'reroll', art: '✉️', n: '依頼の入れかえ', d: 'いまの依頼（山場はのぞく）をすべて新しいものに取りかえる。', cost: 20,
       buy: () => { S.orders = []; fillOrders(); } },
     locked && { id: 'unseal', art: '✴', n: '封印をとく', d: '盤面の封印を一列ぶん、今すぐとく。', cost: 400,
@@ -2667,7 +2717,7 @@ function showShop(line) {
     if (!g || S.coins < g.cost) return;
     S.coins -= g.cost;
     if (g.id === 'eye') S.eyes++;
-    else g.buy();
+    else if (g.buy() === false) { S.coins += g.cost; return; }   // could not be placed: no charge
     sfx.coin();
     afterChange();
     showShop('毎度あり。…使い方には、気をつけるんだね。');
@@ -2719,7 +2769,7 @@ mb.addEventListener('pointermove', e => {
     document.body.appendChild(g);
     drag.ghost = g;
     mEls[drag.i].classList.add('lift');
-    if (c.k !== 'gen' && c.k !== 'vault') showDropZones(c);
+    if (c.k !== 'gen' && c.k !== 'vault' && c.k !== 'cookie') showDropZones(c);
     if (c.k === 'item') S.cells.forEach((o, j) => { if (j !== drag.i && (sameItem(c, o) || (o && gimFits(c, o)))) mEls[j].classList.add('match'); });
   }
   drag.ghost.style.transform = `translate(${e.clientX}px,${e.clientY}px) translate(-50%,-70%) scale(1.15)`;
@@ -3672,6 +3722,21 @@ function showOverlay(html, onGo) {
 }
 function hideOverlay() { $('overlay').hidden = true; }
 
+// The journal's pictures (items, miniatures, Sena's album, faces, shards) open large on a tap.
+const ZOOMABLE = '#lorebox .lart img, #figbox .lart img, .album .apage img, .pages .page img.face, .pshard img';
+$('panel').addEventListener('click', e => {
+  const img = e.target.closest(ZOOMABLE);
+  if (!img) return;
+  const box = img.closest('.lorebox, .figbox, .apage, .page');
+  const name = box && box.querySelector('b, figcaption b');
+  $('zoomImg').src = img.currentSrc || img.src;
+  $('zoomImg').className = img.closest('.apage') ? 'photo' : '';
+  $('zoomCap').textContent = name ? name.childNodes[0].textContent.trim() : '';
+  $('zoomer').hidden = false;
+  sfx.move();
+});
+$('zoomer').addEventListener('click', () => { $('zoomer').hidden = true; });
+
 function showIntro() {
   const st = story(S.ch), g = goal(S.ch);
   const first = S.ch === 0;
@@ -3903,6 +3968,7 @@ function showHelp(topic, first, after) {
 }
 
 function showDex() {
+  S.dexSeen = dexCount(); save(); renderTop();   // everything in it now seen: the button stops glowing
   const total = CHAINS.length * (MAXT + 1);
   const found = Object.keys(S.dex).length;
   const rows = CHAINS.map((ch, c) => `<div><h3>${ch.gen.e} ${ch.name}</h3><div class="dexrow">${ch.items.map((it, t) =>
@@ -3937,13 +4003,13 @@ function showDex() {
       <div><h3>依頼主 <small class="muted">依頼カードの名前をタップしても見られる</small></h3><div class="pages">${people}</div></div>
       <div><h3>封印の欠片 <small class="muted">${(S.shards || []).length} / ${SHARDS.length}　各章を解決すると手に入る。最後に祭壇で捧げる</small></h3><div class="pages">${SHARDS.map((x, i) => (S.shards || []).includes(i) ? `<div class="page"><span class="pshard">${shardArt(i)}</span><div><b>${x.n}</b><small class="desc">${x.d}</small></div></div>` : `<div class="page now"><div><b>？？？</b><small>第${i + 1}章で手に入る</small></div></div>`).join("")}</div></div>
       ${S.sena ? `<div><h3 class="senah">セナのアルバム <small class="muted">${Math.min(S.sena, SENA_ALBUM.length)} / ${SENA_ALBUM.length}　ごく稀に現れるセナの依頼をこなすと増える</small></h3><div class="album">${SENA_ALBUM.map((a, i) => i < S.sena ? `<figure class="apage"><img class="ic" src="assets/x-sena${i}.png" alt=""><figcaption><b>${a.n}</b><small>${a.d}</small></figcaption></figure>` : `<figure class="apage locked"><span>？</span><figcaption><b>？？？</b></figcaption></figure>`).join('')}</div></div>` : ''}
-      <div><h3>ミニチュアの飾り棚 <small class="muted">${(S.figs || []).length} / ${FIGS.length}　店の「星辰の賽」で集まる。像をタップすると話が読める</small></h3><div class="figbox" id="figbox"><small>集めた像をタップすると、まつわる話が読める。</small></div><div class="shelf">${FIGS.map((x, i) => (S.figs || []).includes(i) ? `<button class="fig ${FIG_TIERS[x.t].c}" type="button" data-fig="${i}">${figArt(i)}<small>${x.n}</small></button>` : `<div class="fig unknown ${FIG_TIERS[x.t].c}">${figArt(i)}<small>？？？</small></div>`).join('')}</div></div>
+      <div><h3>ミニチュアの飾り棚 <small class="muted">${(S.figs || []).length} / ${FIGS.length}　店の「星辰の賽」で集まる。像をタップすると話が読める</small></h3><div class="figbox" id="figbox"><small>集めた像をタップすると、まつわる話が読める。絵をタップすると大きく見られる。</small></div><div class="shelf">${FIGS.map((x, i) => (S.figs || []).includes(i) ? `<button class="fig ${FIG_TIERS[x.t].c}" type="button" data-fig="${i}">${figArt(i)}<small>${x.n}</small></button>` : `<div class="fig unknown ${FIG_TIERS[x.t].c}">${figArt(i)}<small>？？？</small></div>`).join('')}</div></div>
       <div><h3>神話の手引き <small class="muted">${MYTHOS.filter((_, i) => mythOpen(i)).length} / ${MYTHOS.length}　章が進むと読める。<b>頁の切れ端</b>を3枚集めても1頁読める（いま ${(S.scraps || 0) % 3} / 3）</small></h3><div class="pages">${MYTHOS.map((m, i) => mythOpen(i)
         ? `<details class="page myth"><summary><b>${m.n}</b></summary><p>${m.d}</p></details>`
         : `<div class="page now"><div><b>？？？</b><small>${m.ch > 50 ? "頁の切れ端を集めると読める" : `第${m.ch + 1}章で読める`}</small></div></div>`).join('')}</div></div>
       <div><h3>実績 <small class="muted">${(S.ach || []).length} / ${ACHS.length}　達成すると🪙や千里眼がもらえる</small></h3><div class="pages">${ACHS.map(a => { const [v, need] = a.p(), done = (S.ach || []).includes(a.id); return `<div class="page ach${done ? " done" : ""}"><div><b>${a.n}</b><small>${a.d}　${done ? "達成！" : `${Math.min(v, need)} / ${need}`}</small><i class="abar"><i style="width:${Math.min(100, v / need * 100)}%"></i></i></div><span class="rew">🪙${a.c}${a.e ? ` 👁️${a.e}` : ""}</span></div>`; }).join("")}</div></div></div>
     <h2 class="sub">図鑑 ${found} / ${total}</h2>
-    <div class="lorebox" id="lorebox"><small>見つけた品をタップすると、クトゥルフ神話の解説が読める。</small></div>
+    <div class="lorebox" id="lorebox"><small>見つけた品をタップすると、クトゥルフ神話の解説が読める。絵をタップすると大きく見られる。</small></div>
     <div class="dex">${rows}</div>
     <button class="btn primary" type="button" data-go>とじる</button>
     <button class="btn tiny danger" type="button" id="resetBtn">データを消して最初から</button>
@@ -4013,7 +4079,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.60';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.61';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
@@ -4068,6 +4134,7 @@ function boot(data) {
   if (S.gimCh !== S.ch) placeGimmicks();
   ensureDaily();
   if (!S.shards) S.shards = [...Array(Math.min(S.ch, SHARDS.length)).keys()];   // chapters solved before shards existed
+  if (S.dexSeen === undefined) S.dexSeen = dexCount();   // saves from before the journal glow: what they hold counts as seen
   // Saves from before the help page already know how to play.
   if (!S.seen && S.introCh >= 0) S.seen = { merge: true, search: S.ch > 0, gim: S.ch > 1 };
   ensureVault();
