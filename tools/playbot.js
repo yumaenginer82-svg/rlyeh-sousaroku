@@ -100,15 +100,16 @@ window.PB = (() => {
     const s = st().search, H = await PB.scene(hsId);
     const SW = 2400, SH = 1600, R = mulberry(s.seed), ex = s.ex || [];
     const k = Math.max(SW / H.w, SH / H.h), ox = (SW - H.w * k) / 2, oy = (SH - H.h * k) / 2;
-    let pool = H.items.slice(); for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+    const v2 = s.hv === 2;   // the same rule as layoutHidden()
+    let pool = v2 ? H.items.filter(it => !it.amb) : H.items.slice(); for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
     pool = pool.filter(it => !ex.includes(it.id)).concat(pool.filter(it => ex.includes(it.id)));
     const chosen = pool.slice(0, Math.min(count, pool.length));
     const spread = it => it.at.every((a, i) => it.at.every((b, j) => i === j || Math.hypot(a[0] - b[0], a[1] - b[1]) > H.w * .08));
-    const many0 = pool.filter(it => it.at.length >= 3 && spread(it)), fresh = many0.filter(it => !ex.includes(it.id)), many = fresh.length ? fresh : many0;
+    const many0 = pool.filter(it => v2 ? it.ok : it.at.length >= 3 && spread(it)), fresh = many0.filter(it => !ex.includes(it.id)), many = fresh.length ? fresh : many0;
     const all = many.length ? many[Math.floor(R() * many.length)] : null;
     if (all && !chosen.includes(all)) chosen[chosen.length - 1] = all;
     const sv = $('sview'), L = $('slayer');
-    const toScr = p => { const m = new DOMMatrix(getComputedStyle(L).transform), r = sv.getBoundingClientRect(); return { x: r.left + m.e + p.x * m.a, y: r.top + m.f + p.y * m.a }; };
+    const toScr = p => { const m = new DOMMatrix(L.style.transform), r = sv.getBoundingClientRect();   // the set view, not a glide caught mid-way return { x: r.left + m.e + p.x * m.a, y: r.top + m.f + p.y * m.a }; };
     for (const it of chosen) for (const [x, y] of (it === all ? it.at : [it.at[0]])) {
       const q = toScr({ x: x * k + ox, y: y * k + oy }); pid++;
       sv.dispatchEvent(new PointerEvent('pointerdown', { clientX: q.x, clientY: q.y, pointerId: pid, bubbles: true, isPrimary: true }));

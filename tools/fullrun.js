@@ -90,15 +90,17 @@
     }
     await w(1700);
   }
-  // Tap a second copy of a listed (not "find all") item: by the rules that is a miss.
+  // A deliberate miss: tap a spot of the picture well away from every recorded item. (Another copy of a listed item
+  // counts as found now, so the old "second copy" miss would be a hit.)
   async function missLookalike(th, ch) {
-    const H = await PB.scene(th), s = st().search, names = [...document.querySelectorAll('#finds .find:not(.all) .nm')].map(e => e.textContent);
-    const it = H.items.find(i => names.includes(i.ja) && i.at.length > 1);
-    if (!it) { note('no look-alike copy to miss on'); return; }
+    const H = await PB.scene(th);
+    const all = H.items.flatMap(i => i.at);
+    let x = 0, y = 0;
+    for (let t = 0; t < 400; t++) { x = 80 + Math.random() * (H.w - 160); y = 80 + Math.random() * (H.h - 160); if (all.every(([a, b, r]) => Math.hypot(a - x, b - y) > r + 70)) break; }
     $('zfit').click(); await w(700);
     const SW = 2400, SH = 1600, k = Math.max(SW / H.w, SH / H.h), ox = (SW - H.w * k) / 2, oy = (SH - H.h * k) / 2;
-    const L = $('slayer'), sv = $('sview'), m = new DOMMatrix(getComputedStyle(L).transform), r = sv.getBoundingClientRect();
-    const [x, y] = it.at[1], q = { x: r.left + m.e + (x * k + ox) * m.a, y: r.top + m.f + (y * k + oy) * m.a };
+    const L = $('slayer'), sv = $('sview'), m = new DOMMatrix(L.style.transform), r = sv.getBoundingClientRect();
+    const it = { ja: '空いた所' }, q = { x: r.left + m.e + (x * k + ox) * m.a, y: r.top + m.f + (y * k + oy) * m.a };
     sv.dispatchEvent(new PointerEvent('pointerdown', { clientX: q.x, clientY: q.y, pointerId: 91, bubbles: true, isPrimary: true }));
     await w(40);
     sv.dispatchEvent(new PointerEvent('pointerup', { clientX: q.x, clientY: q.y, pointerId: 91, bubbles: true, isPrimary: true }));

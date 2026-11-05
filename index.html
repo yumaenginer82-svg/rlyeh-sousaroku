@@ -1432,10 +1432,13 @@ const FLY = new Set(['bat', 'feather', 'owl', 'moon', 'letter', 'jellyfish', 'ey
 const LONG = new Set(['bone', 'axe', 'hammer', 'telescope', 'feather', 'pipe', 'hook', 'scissors', 'key', 'oldkey', 'candle', 'trumpet']);
 // Seek-and-find pictures: the items are drawn into the illustration itself (assets/hs-<n>.jpg).
 // Each entry records where every copy of an item is, in image pixels [x, y, radius] (tools/scenes/*.json).
+// Seek pictures: each item and where its copies are drawn ([x, y, radius]).
+// ok: every drawn copy is recorded, so it can be a "find them all" item.  amb: the picture holds more look-alikes
+// than are recorded (candles, skulls, shells...), so it is not asked for at all - a player could not tell which one.
 const HIDDEN = {
   'hs-0b': { w: 1264, h: 848, items: [
     { id: 'skull', ja: 'ドクロ', at: [[130,128,22],[200,370,22]] },
-    { id: 'cap', ja: '船長帽', at: [[230,155,28],[172,531,28],[783,531,28]] },
+    { id: 'cap', ja: '船長帽', at: [[230,155,28],[172,531,28],[783,531,28]], ok: 1 },
     { id: 'rat', ja: 'ネズミ', at: [[258,268,18],[215,778,28]] },
     { id: 'teapot', ja: 'ティーポット', at: [[100,365,25]] },
     { id: 'spyglass', ja: '望遠鏡', at: [[160,92,40],[561,408,25]] },
@@ -1450,9 +1453,9 @@ const HIDDEN = {
     { id: 'owl', ja: 'フクロウ', at: [[987,150,25]] },
     { id: 'chest', ja: '宝箱', at: [[1189,118,30]] },
     { id: 'grinder', ja: 'コーヒーミル', at: [[1072,252,25],[87,506,28]] },
-    { id: 'clock', ja: '置き時計', at: [[1162,235,30]] },
+    { id: 'clock', ja: '置き時計', at: [[1162,235,30]], amb: 1 },
     { id: 'cheese', ja: 'チーズ', at: [[1062,367,22]] },
-    { id: 'violin', ja: 'バイオリン', at: [[990,420,40],[678,599,35],[821,644,40]] },
+    { id: 'violin', ja: 'バイオリン', at: [[990,420,40],[678,599,35],[821,644,40]], ok: 1 },
     { id: 'cat', ja: 'ねこ', at: [[666,466,25]] },
     { id: 'blocks', ja: '積み木', at: [[563,634,35]] },
     { id: 'accordion', ja: 'アコーディオン', at: [[701,704,40],[1162,494,35]] },
@@ -1461,149 +1464,149 @@ const HIDDEN = {
     { id: 'hammer', ja: 'ハンマー', at: [[716,656,20],[1192,611,25]] },
     { id: 'quill', ja: '羽根ペン', at: [[1105,520,35]] },
     { id: 'coins', ja: '金貨', at: [[1067,549,30]] },
-    { id: 'boots', ja: 'ブーツ', at: [[1032,744,45]] },
+    { id: 'boots', ja: 'ブーツ', at: [[1032,744,45]], amb: 1 },
     { id: 'harmonica', ja: 'ハーモニカ', at: [[1162,539,25]] },
     { id: 'candlestick', ja: '燭台', at: [[874,604,25]] },
     { id: 'bone', ja: '骨', at: [[280,621,15]] },
-    { id: 'sack', ja: '袋', at: [[90,704,45],[551,509,30]] },
-    { id: 'rope', ja: 'ロープ', at: [[390,762,40]] },
+    { id: 'sack', ja: '袋', at: [[90,704,45],[551,509,30]], amb: 1 },
+    { id: 'rope', ja: 'ロープ', at: [[390,762,40]], amb: 1 },
   ] },
   'hs-1': { w: 1264, h: 848, items: [
-    { id: 'fish', ja: '吊るし魚', at: [[478,205,20],[505,205,20],[535,205,20],[560,205,20],[728,210,20],[757,210,20],[780,210,20],[850,210,22]] },
-    { id: 'netbag', ja: '網袋', at: [[197,237,32]] },
-    { id: 'pan', ja: 'フライパン', at: [[340,213,22]] },
+    { id: 'fish', ja: '吊るし魚', at: [[478,205,20],[505,205,20],[535,205,20],[560,205,20],[728,210,20],[757,210,20],[780,210,20],[850,210,22]], amb: 1 },
+    { id: 'netbag', ja: '網袋', at: [[197,237,32]], amb: 1 },
+    { id: 'pan', ja: 'フライパン', at: [[340,213,22]], amb: 1 },
     { id: 'lobster', ja: 'ロブスター', at: [[635,205,22]] },
     { id: 'scale', ja: '吊りばかり', at: [[699,183,20]] },
-    { id: 'hat', ja: '帽子', at: [[470,297,25]] },
+    { id: 'hat', ja: '帽子', at: [[470,297,25]], amb: 1 },
     { id: 'ship', ja: '帆船の模型', at: [[540,537,32]] },
     { id: 'doll', ja: '人形', at: [[590,544,15]] },
     { id: 'clock', ja: '置き時計', at: [[447,481,16],[875,474,18]] },
     { id: 'barrow', ja: '手押し車', at: [[347,724,35]] },
-    { id: 'bucket', ja: 'バケツ', at: [[437,691,32],[742,621,30]] },
+    { id: 'bucket', ja: 'バケツ', at: [[437,691,32],[742,621,30]], amb: 1 },
     { id: 'map', ja: '地図', at: [[460,771,22]] },
     { id: 'watch', ja: '懐中時計', at: [[73,704,18]] },
     { id: 'dice', ja: 'サイコロ', at: [[400,507,10],[480,501,10],[752,687,10]] },
     { id: 'shoes', ja: '革靴', at: [[802,724,38]] },
-    { id: 'sack', ja: '袋', at: [[992,591,32]] },
+    { id: 'sack', ja: '袋', at: [[992,591,32]], amb: 1 },
     { id: 'anchor', ja: 'いかり', at: [[1079,507,30]] },
     { id: 'onion', ja: 'たまねぎ', at: [[1099,777,20]] },
     { id: 'carrot', ja: 'にんじん', at: [[1052,771,30]] },
     { id: 'shovel', ja: 'スコップ', at: [[645,655,28]] },
-    { id: 'jug', ja: '水差し', at: [[467,347,22]] },
-    { id: 'bottle', ja: 'ワインの瓶', at: [[375,455,22],[410,455,22]] },
+    { id: 'jug', ja: '水差し', at: [[467,347,22]], amb: 1 },
+    { id: 'bottle', ja: 'ワインの瓶', at: [[375,455,22],[410,455,22]], amb: 1 },
     { id: 'float', ja: '浮き', at: [[403,153,22]] },
     { id: 'garlic', ja: 'ニンニク', at: [[410,267,28]] },
-    { id: 'pot', ja: '鍋', at: [[590,293,22]] },
-    { id: 'basket', ja: '編みかご', at: [[433,611,38]] },
+    { id: 'pot', ja: '鍋', at: [[590,293,22]], amb: 1 },
+    { id: 'basket', ja: '編みかご', at: [[433,611,38]], amb: 1 },
     { id: 'bread', ja: 'パンかご', at: [[315,430,32]] },
   ] },
   'hs-2': { w: 1264, h: 848, items: [
-    { id: 'skull', ja: 'ドクロ', at: [[153,207,20],[1132,257,22],[677,395,20]] },
-    { id: 'hourglass', ja: '砂時計', at: [[263,230,25],[77,454,25],[799,373,20]] },
-    { id: 'bell', ja: 'ベル', at: [[220,247,15],[117,574,15],[213,737,25]] },
-    { id: 'keys', ja: '鍵束', at: [[340,220,25],[93,313,25],[233,584,20]] },
-    { id: 'feather', ja: '羽根', at: [[413,187,25]] },
-    { id: 'quill', ja: '羽根ペン', at: [[895,671,35]] },
+    { id: 'skull', ja: 'ドクロ', at: [[153,207,20],[1132,257,22],[677,395,20]], amb: 1 },
+    { id: 'hourglass', ja: '砂時計', at: [[263,230,25],[77,454,25],[799,373,20]], ok: 1 },
+    { id: 'bell', ja: 'ベル', at: [[220,247,15],[117,574,15],[213,737,25]], ok: 1 },
+    { id: 'keys', ja: '鍵束', at: [[340,220,25],[93,313,25],[233,584,20]], amb: 1 },
+    { id: 'feather', ja: '羽根', at: [[413,187,25]], amb: 1 },
+    { id: 'quill', ja: '羽根ペン', at: [[895,671,35]], amb: 1 },
     { id: 'herbs', ja: '薬草の束', at: [[507,160,25]] },
-    { id: 'cobweb', ja: 'クモの巣', at: [[580,127,20],[1185,73,20]] },
-    { id: 'spider', ja: 'クモ', at: [[367,100,12]] },
+    { id: 'cobweb', ja: 'クモの巣', at: [[580,127,20],[1185,73,20]], amb: 1 },
+    { id: 'spider', ja: 'クモ', at: [[367,100,12]], amb: 1 },
     { id: 'owl', ja: 'フクロウ', at: [[802,160,30]] },
     { id: 'bat', ja: 'コウモリ', at: [[775,80,30],[879,80,30]] },
-    { id: 'astro', ja: '羅針盤', at: [[719,257,25]] },
+    { id: 'astro', ja: '羅針盤', at: [[719,257,25]], amb: 1 },
     { id: 'clock', ja: '置き時計', at: [[1112,410,35]] },
     { id: 'eyejar', ja: '目玉のびん', at: [[992,347,25]] },
     { id: 'dagger', ja: '短剣', at: [[905,273,25]] },
-    { id: 'sack', ja: '袋', at: [[979,557,25]] },
+    { id: 'sack', ja: '袋', at: [[979,557,25]], amb: 1 },
     { id: 'tarot', ja: 'タロットカード', at: [[792,597,25]] },
     { id: 'ink', ja: 'インク壺', at: [[849,734,15]] },
     { id: 'portrait', ja: '肖像画', at: [[959,651,40]] },
     { id: 'cat', ja: 'ねこ', at: [[1165,717,30],[73,584,20]] },
-    { id: 'flask', ja: 'フラスコ', at: [[1085,744,25]] },
-    { id: 'crystal', ja: '水晶', at: [[852,517,30]] },
+    { id: 'flask', ja: 'フラスコ', at: [[1085,744,25]], amb: 1 },
+    { id: 'crystal', ja: '水晶', at: [[852,517,30]], amb: 1 },
     { id: 'globe', ja: '天球儀', at: [[153,721,30]] },
-    { id: 'candle', ja: 'ろうそく', at: [[513,524,25],[739,711,25],[333,343,22]] },
-    { id: 'coins', ja: 'コイン', at: [[507,757,25]] },
+    { id: 'candle', ja: 'ろうそく', at: [[513,524,25],[739,711,25],[333,343,22]], amb: 1 },
+    { id: 'coins', ja: 'コイン', at: [[507,757,25]], amb: 1 },
     { id: 'rat', ja: 'ネズミ', at: [[353,577,25],[607,617,25]] },
     { id: 'chest', ja: '宝箱', at: [[470,430,40]] },
-    { id: 'scroll', ja: '巻物', at: [[127,487,25]] },
+    { id: 'scroll', ja: '巻物', at: [[127,487,25]], amb: 1 },
     { id: 'octobook', ja: 'タコの本', at: [[692,564,30]] },
     { id: 'beast', ja: '動物の頭骨', at: [[739,451,20]] },
-    { id: 'potion', ja: '薬びん', at: [[879,604,22]] },
+    { id: 'potion', ja: '薬びん', at: [[879,604,22]], amb: 1 },
   ] },
   'hs-3': { w: 1264, h: 848, items: [
-    { id: 'gull', ja: 'カモメ', at: [[353,267,25],[979,93,22]] },
+    { id: 'gull', ja: 'カモメ', at: [[353,267,25],[979,93,22]], amb: 1 },
     { id: 'cat', ja: 'ねこ', at: [[257,287,22],[463,307,18]] },
     { id: 'owl', ja: 'フクロウ', at: [[603,360,22],[657,671,22]] },
-    { id: 'anchor', ja: 'いかり', at: [[63,347,30],[320,373,35],[453,644,35],[527,624,30],[177,574,25]] },
-    { id: 'barrel', ja: 'たる', at: [[143,360,35],[1179,691,40]] },
-    { id: 'boots', ja: '長靴', at: [[197,367,30],[1085,717,40],[530,467,25]] },
+    { id: 'anchor', ja: 'いかり', at: [[63,347,30],[320,373,35],[453,644,35],[527,624,30],[177,574,25]], ok: 1 },
+    { id: 'barrel', ja: 'たる', at: [[143,360,35],[1179,691,40]], amb: 1 },
+    { id: 'boots', ja: '長靴', at: [[197,367,30],[1085,717,40],[530,467,25]], ok: 1 },
     { id: 'hook', ja: 'クレーンのフック', at: [[187,210,18]] },
     { id: 'lantern', ja: 'カンテラ', at: [[772,320,22],[240,541,28]] },
-    { id: 'pipe', ja: 'パイプ', at: [[809,340,15]] },
+    { id: 'pipe', ja: 'パイプ', at: [[809,340,15]], amb: 1 },
     { id: 'hat', ja: '帽子', at: [[972,343,28],[260,611,35]] },
-    { id: 'fish', ja: '干し魚', at: [[1045,247,25],[1176,250,25],[1000,235,22]] },
-    { id: 'rope', ja: 'ロープの束', at: [[1172,120,35],[147,517,30]] },
-    { id: 'bottle', ja: '瓶', at: [[732,393,22],[1205,751,30]] },
+    { id: 'fish', ja: '干し魚', at: [[1045,247,25],[1176,250,25],[1000,235,22]], amb: 1 },
+    { id: 'rope', ja: 'ロープの束', at: [[1172,120,35],[147,517,30]], amb: 1 },
+    { id: 'bottle', ja: '瓶', at: [[732,393,22],[1205,751,30]], amb: 1 },
     { id: 'saw', ja: 'のこぎり', at: [[320,464,35]] },
-    { id: 'spyglass', ja: '望遠鏡', at: [[500,717,35],[825,601,25]] },
-    { id: 'crab', ja: 'カニ', at: [[655,557,25]] },
-    { id: 'star', ja: 'ヒトデ', at: [[909,704,30],[417,353,20],[600,757,25]] },
-    { id: 'shell', ja: 'ホタテ貝', at: [[340,751,20]] },
-    { id: 'bucket', ja: 'バケツ', at: [[387,611,30],[593,657,30]] },
+    { id: 'spyglass', ja: '望遠鏡', at: [[500,717,35],[825,601,25]], amb: 1 },
+    { id: 'crab', ja: 'カニ', at: [[655,557,25]], amb: 1 },
+    { id: 'star', ja: 'ヒトデ', at: [[909,704,30],[417,353,20],[600,757,25]], ok: 1 },
+    { id: 'shell', ja: 'ホタテ貝', at: [[340,751,20]], amb: 1 },
+    { id: 'bucket', ja: 'バケツ', at: [[387,611,30],[593,657,30]], amb: 1 },
     { id: 'compass', ja: '羅針盤', at: [[540,771,22],[362,425,18]] },
-    { id: 'buoy', ja: 'ブイ', at: [[765,691,40],[732,531,22]] },
+    { id: 'buoy', ja: 'ブイ', at: [[765,691,40],[732,531,22]], amb: 1 },
     { id: 'hammer', ja: 'ハンマー', at: [[999,764,25]] },
     { id: 'sack', ja: '袋', at: [[932,614,30]] },
   ] },
   'hs-4': { w: 1264, h: 848, items: [
-    { id: 'paperlamp', ja: 'ちょうちん', at: [[417,90,30],[480,127,25],[557,150,20]] },
+    { id: 'paperlamp', ja: 'ちょうちん', at: [[417,90,30],[480,127,25],[557,150,20]], ok: 1 },
     { id: 'hanglamp', ja: '吊りランプ', at: [[719,100,25],[635,130,25]] },
-    { id: 'drum', ja: '太鼓', at: [[280,180,30],[732,514,30],[805,534,30]] },
-    { id: 'horn', ja: 'ラッパ', at: [[320,167,25],[447,707,35],[879,407,25]] },
+    { id: 'drum', ja: '太鼓', at: [[280,180,30],[732,514,30],[805,534,30]], amb: 1 },
+    { id: 'horn', ja: 'ラッパ', at: [[320,167,25],[447,707,35],[879,407,25]], amb: 1 },
     { id: 'tambourine', ja: 'タンバリン', at: [[353,207,25]] },
-    { id: 'tophat', ja: 'シルクハット', at: [[705,237,25],[440,654,28],[865,197,25]] },
+    { id: 'tophat', ja: 'シルクハット', at: [[705,237,25],[440,654,28],[865,197,25]], amb: 1 },
     { id: 'crown', ja: '王冠', at: [[779,177,22],[705,734,30]] },
-    { id: 'bat', ja: 'コウモリ', at: [[649,220,20]] },
+    { id: 'bat', ja: 'コウモリ', at: [[649,220,20]], amb: 1 },
     { id: 'mirror', ja: '手鏡', at: [[989,243,30],[77,484,22]] },
     { id: 'spyglass', ja: '望遠鏡', at: [[882,313,30],[692,627,30]] },
-    { id: 'candle', ja: 'ろうそく', at: [[775,367,20],[1015,343,20]] },
-    { id: 'mug', ja: 'マグカップ', at: [[1205,313,18]] },
-    { id: 'feather', ja: '羽根', at: [[1185,200,30]] },
+    { id: 'candle', ja: 'ろうそく', at: [[775,367,20],[1015,343,20]], amb: 1 },
+    { id: 'mug', ja: 'マグカップ', at: [[1205,313,18]], amb: 1 },
+    { id: 'feather', ja: '羽根', at: [[1185,200,30]], amb: 1 },
     { id: 'beakmask', ja: '長い鼻の仮面', at: [[110,280,25]] },
     { id: 'skull', ja: 'ドクロの飾り', at: [[945,177,18]] },
-    { id: 'dice', ja: 'サイコロ', at: [[287,674,15],[603,614,15]] },
-    { id: 'cards', ja: 'トランプ', at: [[527,667,22],[383,774,25]] },
+    { id: 'dice', ja: 'サイコロ', at: [[287,674,15],[603,614,15]], amb: 1 },
+    { id: 'cards', ja: 'トランプ', at: [[527,667,22],[383,774,25]], amb: 1 },
     { id: 'cane', ja: '杖', at: [[133,591,35]] },
     { id: 'chest', ja: '宝箱', at: [[367,584,50],[985,644,55]] },
-    { id: 'vase', ja: '花びん', at: [[130,471,20]] },
-    { id: 'boots', ja: 'ブーツ', at: [[785,604,35]] },
+    { id: 'vase', ja: '花びん', at: [[130,471,20]], amb: 1 },
+    { id: 'boots', ja: 'ブーツ', at: [[785,604,35]], amb: 1 },
     { id: 'clock', ja: '置き時計', at: [[1189,724,25]] },
-    { id: 'goblet', ja: 'さかずき', at: [[1089,691,22]] },
+    { id: 'goblet', ja: 'さかずき', at: [[1089,691,22]], amb: 1 },
     { id: 'cat', ja: 'ねこ', at: [[575,480,22],[630,468,22]] },
     { id: 'lantern', ja: 'ランタン', at: [[500,551,25],[63,370,25]] },
   ] },
   'hs-5': { w: 1264, h: 848, items: [
-    { id: 'scallop', ja: 'ホタテ貝', at: [[67,67,25],[413,60,22],[417,624,25],[1209,571,22]] },
-    { id: 'conch', ja: '巻き貝', at: [[133,73,30],[63,751,25]] },
-    { id: 'star', ja: 'ヒトデ', at: [[397,107,25],[253,123,12],[872,47,12]] },
-    { id: 'eye', ja: '目玉', at: [[547,70,15],[298,407,15],[417,567,15],[1095,50,15]] },
-    { id: 'jelly', ja: 'クラゲ', at: [[480,133,25],[695,130,25],[899,477,25]] },
-    { id: 'octopus', ja: 'タコ', at: [[550,167,30],[809,487,18]] },
-    { id: 'hourglass', ja: '砂時計', at: [[293,213,28],[692,257,25],[140,497,30],[889,584,22]] },
+    { id: 'scallop', ja: 'ホタテ貝', at: [[67,67,25],[413,60,22],[417,624,25],[1209,571,22]], amb: 1 },
+    { id: 'conch', ja: '巻き貝', at: [[133,73,30],[63,751,25]], amb: 1 },
+    { id: 'star', ja: 'ヒトデ', at: [[397,107,25],[253,123,12],[872,47,12]], amb: 1 },
+    { id: 'eye', ja: '目玉', at: [[547,70,15],[298,407,15],[417,567,15],[1095,50,15]], amb: 1 },
+    { id: 'jelly', ja: 'クラゲ', at: [[480,133,25],[695,130,25],[899,477,25]], ok: 1 },
+    { id: 'octopus', ja: 'タコ', at: [[550,167,30],[809,487,18]], amb: 1 },
+    { id: 'hourglass', ja: '砂時計', at: [[293,213,28],[692,257,25],[140,497,30],[889,584,22]], ok: 1 },
     { id: 'idol', ja: '石像', at: [[437,243,30]] },
-    { id: 'crystal', ja: '水晶', at: [[490,273,25],[1212,697,30]] },
-    { id: 'key', ja: '鍵', at: [[273,373,18],[197,504,15]] },
-    { id: 'candle', ja: 'ろうそく', at: [[363,547,25],[965,110,25],[263,451,20]] },
-    { id: 'watch', ja: '懐中時計', at: [[273,707,25],[573,544,18]] },
-    { id: 'compass', ja: '羅針盤', at: [[227,774,22]] },
+    { id: 'crystal', ja: '水晶', at: [[490,273,25],[1212,697,30]], amb: 1 },
+    { id: 'key', ja: '鍵', at: [[273,373,18],[197,504,15]], amb: 1 },
+    { id: 'candle', ja: 'ろうそく', at: [[363,547,25],[965,110,25],[263,451,20]], amb: 1 },
+    { id: 'watch', ja: '懐中時計', at: [[273,707,25],[573,544,18]], amb: 1 },
+    { id: 'compass', ja: '羅針盤', at: [[227,774,22]], amb: 1 },
     { id: 'skull', ja: 'ドクロ', at: [[1112,477,25]] },
     { id: 'quill', ja: '羽根ペン', at: [[1099,711,30]] },
     { id: 'book', ja: '本', at: [[725,784,30],[320,451,20]] },
-    { id: 'fish', ja: '魚', at: [[1115,237,25],[1049,283,22],[752,70,18]] },
+    { id: 'fish', ja: '魚', at: [[1115,237,25],[1049,283,22],[752,70,18]], amb: 1 },
     { id: 'rose', ja: 'バラ', at: [[1192,47,18],[962,644,15]] },
-    { id: 'locket', ja: 'ペンダント', at: [[1175,157,25],[879,704,25]] },
-    { id: 'bone', ja: '骨', at: [[163,347,15],[1172,564,15]] },
-    { id: 'ring', ja: '指輪', at: [[527,751,15],[792,611,20]] },
+    { id: 'locket', ja: 'ペンダント', at: [[1175,157,25],[879,704,25]], amb: 1 },
+    { id: 'bone', ja: '骨', at: [[163,347,15],[1172,564,15]], amb: 1 },
+    { id: 'ring', ja: '指輪', at: [[527,751,15],[792,611,20]], amb: 1 },
     { id: 'anchor', ja: 'いかり', at: [[1015,377,20]] },
   ] },
 };
@@ -1614,7 +1617,10 @@ THEMES[0].hs = 'hs-0b';
 function layoutHidden(s, th) {
   const H = HIDDEN[th.hs], R = mulberry(s.seed);
   const k = Math.max(SW / H.w, SH / H.h), ox = (SW - H.w * k) / 2, oy = (SH - H.h * k) / 2;
-  let pool = H.items.slice();
+  // Searches begun from ver 1.60 on (hv 2) leave out items with unrecorded look-alikes and only take a fully recorded
+  // item for "find them all". A search already under way keeps the list it was begun with (its progress is by position).
+  const v2 = s.hv === 2;
+  let pool = v2 ? H.items.filter(it => !it.amb) : H.items.slice();
   for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
   // Later searches of a chapter look in the same picture for other things: items already asked for go to the back.
   const ex = s.ex || [];
@@ -1623,7 +1629,7 @@ function layoutHidden(s, th) {
   // One "find them all" item: something the picture holds several of; every copy must be found.
   // "Find them all" only for things scattered around the picture: copies bunched together can't be told apart by a finger.
   const spread = it => it.at.every((a, i) => it.at.every((b, j) => i === j || Math.hypot(a[0] - b[0], a[1] - b[1]) > H.w * .08));
-  const many0 = pool.filter(it => it.at.length >= 3 && spread(it)), fresh = many0.filter(it => !ex.includes(it.id)), many = fresh.length ? fresh : many0;
+  const many0 = pool.filter(it => v2 ? it.ok : it.at.length >= 3 && spread(it)), fresh = many0.filter(it => !ex.includes(it.id)), many = fresh.length ? fresh : many0;
   const all = many.length ? many[Math.floor(R() * many.length)] : null;
   if (all && !chosen.includes(all)) chosen[chosen.length - 1] = all;
   const T = chosen.map((it, n) => {
@@ -2763,7 +2769,7 @@ function mulberry(seed) {
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
   };
 }
-const newSearch = ch => ({ seed: (Math.random() * 1e9) | 0, ch, found: [], stage: stageOf(), ex: (S.used || []).slice(), mode: isDiffStage() ? 'diff' : undefined });
+const newSearch = ch => ({ seed: (Math.random() * 1e9) | 0, ch, found: [], stage: stageOf(), ex: (S.used || []).slice(), mode: isDiffStage() ? 'diff' : undefined, hv: 2 });
 
 // Everything about a scene comes from its seed, so a saved search redraws identically.
 // Listed items are hidden with hidden-object tricks: blending into busy areas, odd sizes,
@@ -3054,14 +3060,16 @@ function tapWorld(wx, wy) {
   const slop = Math.min(16 / V.z, 26);   // finger tolerance, capped so tapping zoomed-out isn't a free pass
   s.parts = s.parts || {};
   const got = t => s.parts[t.t] || [];
-  const near = scn.T.filter(t => !s.found.includes(t.t))
+  const near = scn.T
     .flatMap(t => (t.at || [t]).map((p, n) => ({ t, p, n, d: Math.hypot(p.x - wx, p.y - wy) })))
     .filter(o => o.d < o.p.s * .55 + slop)
     .sort((a, b) => a.d - b.d)[0];
-  // A "find them all" copy counts once: tapping one already found again does nothing (not a miss, not its neighbour).
-  if (near && got(near.t).includes(near.n)) return;
-  // Outside "find them all", only the copy shown on the card counts; tapping a look-alike elsewhere is a miss.
-  const hit = near && (near.t.all || near.n === 0) ? near : null;
+  // Tapping something already found - the same copy, or another copy of an item already ticked off - does nothing
+  // (not a miss): it is still the right thing.
+  if (near && (s.found.includes(near.t.t) || got(near.t).includes(near.n))) return;
+  // Any recorded copy of the item counts, not only the one on the card: the same thing drawn twice is the same thing.
+  // (A different thing that only looks alike is not in this item's copies, so tapping it is still a miss.)
+  const hit = near || null;
   if (hit) {
     const t = hit.t, at = Object.assign({}, t, { x: hit.p.x, y: hit.p.y, s: hit.p.s });
     s.parts[t.t] = got(t).concat(hit.n);   // which copy was tapped, so a reload colours the same one
@@ -4005,7 +4013,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.59';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.60';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
