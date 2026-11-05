@@ -257,6 +257,7 @@ img.ic.mult{mix-blend-mode:multiply;background:#e9dcbf;border-radius:6px}
   padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 .panel{position:relative;width:min(560px,100%);max-height:100%;overflow:auto;background:var(--paper);border:2px solid var(--line);border-radius:20px;
   box-shadow:0 6px 0 var(--ink),0 0 60px rgba(114,224,178,.15);padding:28px 24px 22px;display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center;touch-action:pan-y}
+/* the close button of a long window: stays at the top right while the window scrolls */.pclose{position:sticky;top:-14px;align-self:flex-end;margin:-14px -10px -54px 0;z-index:5;width:44px;height:44px;border-radius:50%;border:2px solid var(--line);  background:rgba(10,24,27,.92);color:var(--bone);font-size:24px;line-height:1;display:grid;place-items:center;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.5);flex-shrink:0}.pclose:active{transform:scale(.94)}
 .panel h1,.panel h2{font-family:var(--f-display);font-weight:800;margin:0;color:var(--glow);letter-spacing:.08em;text-shadow:0 0 14px rgba(114,224,178,.5),3px 3px 0 var(--ink);
   text-wrap:balance;line-height:1.2}
 .panel h1{font-size:clamp(32px,7vw,46px)}
@@ -1060,7 +1061,9 @@ const FIGS = [
   { n: 'ハスター', t: 2, d: '「名状しがたきもの」。黄衣の王とも呼ばれ、遠い星の湖のほとりに住む。読んだ者を狂わせる戯曲『黄衣の王』とともに語られる。' },
   { n: 'クトゥルフ', t: 2, d: 'ルルイエの館で夢見る旧支配者の大祭司。タコの頭に竜の翼、鱗の体。星がそろう日、夢から覚めて世界を取り戻すという。あなたは、その夢の一端に触れてしまった。' },
 ];
-const DICE_COST = 200;
+// The dice cost more as the chapters go on (coins come in faster later): 200 in chapter 1, 500 in the last.
+const DICE_COST_AT = ch => 200 + 50 * Math.min(ch, 6);
+let DICE_COST = 200;   // set from the chapter whenever the dice window opens
 const figArt = i => ICON(`assets/x-m${i}.png`);
 const pipsHtml = n => `<span class="pips p${n}">${'<i></i>'.repeat(n)}</span>`;
 // Roll two dice: the total picks the material (2-6 bronze, 7-10 jade, 11-12 gold) and doubles raise it one step.
@@ -1073,6 +1076,7 @@ function rollFig() {
 }
 function showDice(msg) {
   if ((S.tips = S.tips || {}).dice === 1) { S.tips.dice = 2; save(); }   // the shop stops glowing once the dice are seen
+  DICE_COST = Math.round(DICE_COST_AT(S.ch) * (modOn("market") ? .7 : 1));
   const can = S.coins >= DICE_COST;
   showOverlay(`
     <p class="kicker">星辰の賽</p>
@@ -2447,7 +2451,7 @@ const dexCount = () => Object.keys(S.dex || {}).length + (S.figs || []).length +
 function nudges() {
   const T = S.tips = S.tips || {};
   if (!$('overlay').hidden || S.view !== 'merge' || S.search) return;
-  if (!T.dice && S.coins >= DICE_COST + 100 && !(S.figs || []).length) {
+  if (!T.dice && S.coins >= DICE_COST_AT(S.ch) + 100 && !(S.figs || []).length) {
     T.dice = 1;
     setTimeout(() => { showThanks(MERCHANT.n, 'ちょいと店に寄っていかないかい。星辰の賽を振れば、棚の像をひとつ譲ろう', '店の「星辰の賽」'); }, 900);
   } else if (!T.dex && S.ch >= 1 && dexCount() - (S.dexSeen || 0) >= 3) {
@@ -2668,18 +2672,18 @@ function shopGoods() {
   const ch = S.ch, avail = [0, 1, 2].filter(g => S.gens[g]);
   const locked = S.cells.some(c => c && c.k === 'lock'), closed = MYTHOS.map((_, i) => i).filter(i => !mythOpen(i));
   return [
-    { id: 'eye', art: '👁️', n: '千里眼 ×1', d: '現場検証で、品のありかを教えてくれる。', cost: 80 },
-    { id: 'pack', art: GIFT, n: '素材の包み', d: `この章に合った品が3つ入った贈りもの（Lv${Math.min(2 + Math.floor(ch / 2), 5)}前後）。`, cost: 60 + 30 * ch,
+    { id: 'eye', art: '👁️', n: '千里眼 ×1', d: '現場検証で、品のありかを教えてくれる。', cost: 80 + 30 * ch },
+    { id: 'pack', art: GIFT, n: '素材の包み', d: `この章に合った品が3つ入った贈りもの（Lv${Math.min(2 + Math.floor(ch / 2), 5)}前後）。`, cost: 80 + 50 * ch,
       buy: () => { const t = Math.min(1 + Math.floor(ch / 2), 4); giveGift([0, 1, 2].map(k => ({ k: 'item', c: pick(avail), t: t + (k === 0 ? 1 : 0) }))); } },
-    { id: 'chest', art: CHEST, n: '古い宝箱', d: '何が出るかは開けてのお楽しみ。高い段階の品も入っている。', cost: 150 + 60 * ch,
+    { id: 'chest', art: CHEST, n: '古い宝箱', d: '何が出るかは開けてのお楽しみ。高い段階の品も入っている。', cost: 150 + 100 * ch,
       buy: () => giveGift([{ k: 'chest', n: 3, lv: 4 + Math.min(2, Math.floor(ch / 2)) }]) },
-    S.ch >= 1 && { id: 'cookie', art: COOKIE, n: '骨のクッキー', d: `骨の形をした犬用の焼き菓子。盤面に置いておくと、香ばしい匂いが霧の向こうまで届くという。…小さな鼻の持ち主が、気づくかもしれない。`, cost: 300,
+    S.ch >= 1 && { id: 'cookie', art: COOKIE, n: '骨のクッキー', d: `骨の形をした犬用の焼き菓子。盤面に置いておくと、香ばしい匂いが霧の向こうまで届くという。…小さな鼻の持ち主が、気づくかもしれない。`, cost: 250 + 50 * ch,
       buy: () => placeCookie() },
-    { id: 'reroll', art: '✉️', n: '依頼の入れかえ', d: 'いまの依頼（山場はのぞく）をすべて新しいものに取りかえる。', cost: 20,
+    { id: 'reroll', art: '✉️', n: '依頼の入れかえ', d: 'いまの依頼（山場はのぞく）をすべて新しいものに取りかえる。', cost: 20 + 15 * ch,
       buy: () => { S.orders = []; fillOrders(); } },
-    locked && { id: 'unseal', art: '✴', n: '封印をとく', d: '盤面の封印を一列ぶん、今すぐとく。', cost: 400,
+    locked && { id: 'unseal', art: '✴', n: '封印をとく', d: '盤面の封印を一列ぶん、今すぐとく。', cost: 400 + 100 * ch,
       buy: () => { const row = unlockRow(); if (row !== false) for (let c = 0; c < COLS; c++) paintM(row * COLS + c, 'puff'); } },
-    closed.length && { id: 'myth', art: '📜', n: '古文書の頁', d: `手帳の「神話の手引き」を一つ先に読める（残り${closed.length}）。`, cost: 120,
+    closed.length && { id: 'myth', art: '📜', n: '古文書の頁', d: `手帳の「神話の手引き」を一つ先に読める（残り${closed.length}）。`, cost: 120 + 40 * ch,
       buy: () => { const i = closed[0]; (S.myth = S.myth || []).push(i); setTimeout(() => toast(`手帳に「${MYTHOS[i].n}」の頁が加わった`), 300); } },
   ].filter(Boolean).map(g => Object.assign(g, { cost: Math.round(g.cost * (modOn('market') ? .7 : 1)) }));
 }
@@ -3721,6 +3725,16 @@ function showOverlay(html, onGo) {
   $('panel').scrollTop = 0;
   const go = $('panel').querySelector('[data-go]');
   if (go) { go.addEventListener('click', onGo); setTimeout(() => go.focus({ preventScroll: true }), 50); }
+  // A long window that just closes (journal, shop, help...) also gets a close button that stays at the top while
+  // it scrolls, so there is no need to scroll to the bottom to leave.
+  if (go && /とじる|店を出る/.test(go.textContent)) requestAnimationFrame(() => {
+    const P = $('panel');
+    if (P.scrollHeight <= P.clientHeight + 40 || P.querySelector('.pclose')) return;
+    const x = document.createElement('button');
+    x.className = 'pclose'; x.type = 'button'; x.setAttribute('aria-label', go.textContent.trim()); x.textContent = '×';
+    x.addEventListener('click', () => go.click());
+    P.prepend(x);
+  });
 }
 function hideOverlay() { $('overlay').hidden = true; }
 
@@ -4081,7 +4095,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.63';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.64';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
