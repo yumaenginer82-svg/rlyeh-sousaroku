@@ -2097,7 +2097,7 @@ function renderInfo() {
     box.innerHTML = `<div class="big">${GIFT}</div><div class="txt"><b>贈りもの<small>中身 ${c.in.length}つ</small></b><p>タップするたびに中身がひとつ出る。贈りものどうしを重ねると、ひとつにまとまって<b>おまけの品</b>が増える。</p></div>`;
   } else if (c.k === 'cookie') {
     const n = cookieCells().length;
-    box.innerHTML = `<div class="big">${COOKIE}</div><div class="txt"><b>骨のクッキー<small>盤面に ${n}枚</small></b><p>置いておくと、セナがほんの少し現れやすくなる（${COOKIE_MAX}枚まで）。セナが来ると1枚食べていく。</p></div>`;
+    box.innerHTML = `<div class="big">${COOKIE}</div><div class="txt"><b>骨のクッキー<small>盤面に ${n}枚</small></b><p>香ばしい匂いが、霧の向こうまで漂っていく。ときどき、小さな足音が近づいてくる気がする。</p></div>`;
   } else if (c.k === 'vault') {
     box.innerHTML = `<div class="big">${VAULT}</div><div class="txt"><b>封印の櫃<small>${(S.store || []).length} / ${storeCap()}</small></b><p>品や宝箱をドラッグして重ねると、しまっておける。タップで中を見て、出したり広げたりできる。</p></div>`;
   } else if (c.k === 'fog' || c.k === 'stone' || c.k === 'tent') {
@@ -2673,7 +2673,7 @@ function shopGoods() {
       buy: () => { const t = Math.min(1 + Math.floor(ch / 2), 4); giveGift([0, 1, 2].map(k => ({ k: 'item', c: pick(avail), t: t + (k === 0 ? 1 : 0) }))); } },
     { id: 'chest', art: CHEST, n: '古い宝箱', d: '何が出るかは開けてのお楽しみ。高い段階の品も入っている。', cost: 150 + 60 * ch,
       buy: () => giveGift([{ k: 'chest', n: 3, lv: 4 + Math.min(2, Math.floor(ch / 2)) }]) },
-    S.ch >= 1 && { id: 'cookie', art: COOKIE, n: '骨のクッキー', d: `骨の形をした犬用の焼き菓子。盤面に置いておくと、セナがほんの少しだけ現れやすくなる（${COOKIE_MAX}枚まで効く）。`, cost: 300,
+    S.ch >= 1 && { id: 'cookie', art: COOKIE, n: '骨のクッキー', d: `骨の形をした犬用の焼き菓子。盤面に置いておくと、香ばしい匂いが霧の向こうまで届くという。…小さな鼻の持ち主が、気づくかもしれない。`, cost: 300,
       buy: () => placeCookie() },
     { id: 'reroll', art: '✉️', n: '依頼の入れかえ', d: 'いまの依頼（山場はのぞく）をすべて新しいものに取りかえる。', cost: 20,
       buy: () => { S.orders = []; fillOrders(); } },
@@ -4079,7 +4079,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.61';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.62';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
