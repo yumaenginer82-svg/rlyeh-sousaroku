@@ -523,6 +523,7 @@ b.t0{color:#c89a62}b.t1{color:#7fe0b0}b.t2{color:var(--gold)}
 .page.ach.done{border-color:var(--gold);background:linear-gradient(90deg,rgba(201,163,74,.18),var(--panel2) 70%)}
 .page.ach.done b{color:var(--gold)}
 .abar{display:block;height:5px;margin-top:4px;border-radius:999px;background:#071012;overflow:hidden}
+.soon{width:100%;box-sizing:border-box;text-align:left;border:1px solid var(--gold);border-radius:12px;padding:8px 12px;background:rgba(201,163,74,.08);display:grid;gap:6px}   /* the next goals, at the top of the journal */.soon > b{font-size:12px;color:var(--gold);letter-spacing:.1em}.soon span{font-size:13px}.soon em{font-style:normal;color:var(--gold);font-weight:700}
 .abar i{display:block;height:100%;background:linear-gradient(90deg,#8a6d2a,var(--gold))}
 img.uic.ach{width:48px;height:48px}
 
@@ -744,6 +745,7 @@ body.focus .top{display:none}
 .danslist{text-align:left;margin:0 0 14px;padding-left:1.6em;font-size:14px;line-height:1.7}
 .danslist .dkind{display:inline-block;min-width:3.6em;margin-right:8px;padding:0 6px;border-radius:6px;background:#3a2326;color:#ffb3a8;font-size:12px;font-weight:800;text-align:center}
 .panel > *{flex-shrink:0}   /* a long window scrolls; nothing in it gets squeezed */
+.tcode{width:100%;box-sizing:border-box;font:12px/1.4 ui-monospace,monospace;background:#0b1a1d;color:var(--bone);border:1px solid var(--line);border-radius:10px;padding:8px;resize:vertical;word-break:break-all;-webkit-user-select:text;user-select:text;touch-action:auto}   /* the transfer code */
 .panel > .btn.primary,.panel [data-later],.panel > .btn.pair{min-width:240px;height:56px;padding-top:0;padding-bottom:0;box-sizing:border-box}
 .panel [data-later],.panel > .btn.pair{font-family:var(--f-display);font-size:17px;letter-spacing:.06em;margin-top:8px}
 /* Frames only where they mean something: the board keeps its frame; the header, requests and info panel are plain
@@ -3221,7 +3223,7 @@ const diffTitle = ch => DIFF_TITLES[diffIdx(ch)];
 const DIFF_KIND = { color: '色', gone: '消えた', add: '増えた', size: '大きさ', shape: '形', count: '数', pos: '位置', detail: '模様' };
 // f: piece number, x/y/w/h: where it goes, k: kind, lv: difficulty, t: what changed (shown in the answers)
 // Bump when the pieces are rebuilt, so no cached copy of an older piece is used.
-const DIFF_BUILD = 3;
+const DIFF_BUILD = 4;
 const DIFF_SETS = [
   [   // 0 tavern (built by tools/diff-build.ps1 from gen-raw/df0-final.json)
     { f: 0, x: 681, y: 636, w: 237, h: 178, k: 'color', lv: 1, t: '床のじゅうたんが赤から青に' },
@@ -3973,6 +3975,15 @@ function showHelp(topic, first, after) {
   $('panel').querySelectorAll('[data-topic]').forEach(b => b.addEventListener('click', () => showHelp(b.dataset.topic, false, after)));
 }
 
+// Achievements, unfinished ones first and the nearest to done at the top; the done ones last.
+const achLeft = a => { const [v, need] = a.p(); return Math.max(0, need - v) / need; };
+const achOrder = () => ACHS.slice().sort((a, b) => ((S.ach || []).includes(a.id) - (S.ach || []).includes(b.id)) || achLeft(a) - achLeft(b));
+// The two nearest unfinished achievements, shown at the top of the journal as a next goal.
+function achSoonHtml() {
+  const soon = achOrder().filter(a => !(S.ach || []).includes(a.id) && a.p()[0] > 0).slice(0, 2);
+  if (!soon.length) return '';
+  return `<div class="soon"><b>もうすぐ達成</b>${soon.map(a => { const [v, need] = a.p(); return `<span>${a.n}　<em>あと${need - Math.min(v, need)}</em><i class="abar"><i style="width:${Math.min(100, v / need * 100)}%"></i></i></span>`; }).join('')}</div>`;
+}
 function showDex() {
   S.dexSeen = dexCount(); save(); renderTop();   // everything in it now seen: the button stops glowing
   const total = CHAINS.length * (MAXT + 1);
@@ -4003,7 +4014,8 @@ function showDex() {
   showOverlay(`
     <p class="kicker">調査手帳</p>
     <h2>${TITLES[lv][1]}</h2>
-    <div class="htabs"><button class="btn tiny" type="button" id="jHelp">遊び方</button>${S.cleared ? `<button class="btn tiny" type="button" id="jEnd">エンディングをもう一度見る</button>` : ""}</div>
+    <div class="htabs"><button class="btn tiny" type="button" id="jHelp">遊び方</button><button class="btn tiny" type="button" id="jMove">引き継ぎ</button>${S.cleared ? `<button class="btn tiny" type="button" id="jEnd">エンディングをもう一度見る</button>` : ""}</div>
+    ${achSoonHtml()}
     <p class="muted">評価の★ 合計 ${ratingSum()}${next ? `　／　次の称号「${next[1]}」まで あと${next[0] - ratingSum()}` : '　／　最高の称号'}</p>
     <div class="dex"><div><h3>捜索録 <small class="muted">再調査で★★★を狙える（よくなった分だけほうび）${S.search ? '　※進行中の現場検証を終えてから' : ''}</small></h3><div class="pages">${pages}</div></div>
       <div><h3>依頼主 <small class="muted">依頼カードの名前をタップしても見られる</small></h3><div class="pages">${people}</div></div>
@@ -4013,7 +4025,7 @@ function showDex() {
       <div><h3>神話の手引き <small class="muted">${MYTHOS.filter((_, i) => mythOpen(i)).length} / ${MYTHOS.length}　章が進むと読める。<b>頁の切れ端</b>を3枚集めても1頁読める（いま ${(S.scraps || 0) % 3} / 3）</small></h3><div class="pages">${MYTHOS.map((m, i) => mythOpen(i)
         ? `<details class="page myth"><summary><b>${m.n}</b></summary><p>${m.d}</p></details>`
         : `<div class="page now"><div><b>？？？</b><small>${m.ch > 50 ? "頁の切れ端を集めると読める" : `第${m.ch + 1}章で読める`}</small></div></div>`).join('')}</div></div>
-      <div><h3>実績 <small class="muted">${(S.ach || []).length} / ${ACHS.length}　達成すると🪙や千里眼がもらえる</small></h3><div class="pages">${ACHS.map(a => { const [v, need] = a.p(), done = (S.ach || []).includes(a.id); return `<div class="page ach${done ? " done" : ""}"><div><b>${a.n}</b><small>${a.d}　${done ? "達成！" : `${Math.min(v, need)} / ${need}`}</small><i class="abar"><i style="width:${Math.min(100, v / need * 100)}%"></i></i></div><span class="rew">🪙${a.c}${a.e ? ` 👁️${a.e}` : ""}</span></div>`; }).join("")}</div></div></div>
+      <div><h3>実績 <small class="muted">${(S.ach || []).length} / ${ACHS.length}　達成すると🪙や千里眼がもらえる</small></h3><div class="pages">${achOrder().map(a => { const [v, need] = a.p(), done = (S.ach || []).includes(a.id); return `<div class="page ach${done ? " done" : ""}"><div><b>${a.n}</b><small>${a.d}　${done ? "達成！" : `${Math.min(v, need)} / ${need}（あと${need - Math.min(v, need)}）`}</small><i class="abar"><i style="width:${Math.min(100, v / need * 100)}%"></i></i></div><span class="rew">🪙${a.c}${a.e ? ` 👁️${a.e}` : ""}</span></div>`; }).join("")}</div></div></div>
     <h2 class="sub">図鑑 ${found} / ${total}</h2>
     <div class="lorebox" id="lorebox"><small>見つけた品をタップすると、クトゥルフ神話の解説が読める。</small></div>
     <div class="dex">${rows}</div>
@@ -4021,6 +4033,7 @@ function showDex() {
     <button class="btn tiny danger" type="button" id="resetBtn">データを消して最初から</button>
   `, hideOverlay);
   $('jHelp').addEventListener('click', () => showHelp('merge'));
+  $('jMove').addEventListener('click', () => showTransfer());
   // Each section of the record folds away (closed unless it was left open last time), so the journal stays short.
   const DEX_OPEN = 'rlyeh-dex-open';
   let open = {}; try { open = JSON.parse(localStorage.getItem(DEX_OPEN) || '{}'); } catch (e) {}
@@ -4058,6 +4071,67 @@ function showDex() {
   $('resetBtn').addEventListener('click', () => {
     if (!armed) { armed = true; $('resetBtn').textContent = '本当に消す（もとに戻せません）'; return; }
     newGame();
+  });
+}
+/* ================= transfer code: the whole save as text, to keep or to carry to another device ================= */
+// RLYEH2: + base64 of the deflated JSON where the browser can deflate; RLYEH1: + base64 of the plain JSON otherwise.
+const b64 = bytes => { let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); };
+const unb64 = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+async function pipeBytes(bytes, stream) {
+  const out = await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer();
+  return new Uint8Array(out);
+}
+async function makeTransferCode() {
+  const json = new TextEncoder().encode(JSON.stringify(S));
+  if (window.CompressionStream) { try { return 'RLYEH2:' + b64(await pipeBytes(json, new CompressionStream('deflate-raw'))); } catch (e) {} }
+  return 'RLYEH1:' + b64(json);
+}
+async function readTransferCode(code) {
+  const t = String(code || '').replace(/\s+/g, '');
+  let bytes;
+  if (t.startsWith('RLYEH2:')) {
+    if (!window.DecompressionStream) throw new Error('この端末では読めない形式です');
+    try { bytes = await pipeBytes(unb64(t.slice(7)), new DecompressionStream('deflate-raw')); } catch (e) { bytes = null; }
+  } else if (t.startsWith('RLYEH1:')) { try { bytes = unb64(t.slice(7)); } catch (e) { bytes = null; } }
+  else throw new Error('引き継ぎコードではないようです');
+  let s = null;
+  try { if (bytes) s = JSON.parse(new TextDecoder().decode(bytes)); } catch (e) { s = null; }
+  if (!s || s.v !== 2 || !Array.isArray(s.cells) || typeof s.ch !== 'number') throw new Error('セーブデータとして読めませんでした');
+  return s;
+}
+function showTransfer() {
+  showOverlay(`
+    <p class="kicker">調査手帳</p>
+    <h2>引き継ぎ</h2>
+    <p class="lore">いまの調査の記録を、ひとつながりの「引き継ぎコード」にして持ち出せる。メモやメールに貼って残しておけば、データが消えたときや別の端末でも、続きから遊べる。</p>
+    <button class="btn gold pair" type="button" id="tMake">コードを書き出す</button>
+    <textarea class="tcode" id="tCode" rows="4" spellcheck="false" placeholder="ここに引き継ぎコードが出る。読み込むときは、ここに貼りつける"></textarea>
+    <p class="muted" id="tMsg"></p>
+    <button class="btn pair" type="button" id="tLoad">このコードを読み込む</button>
+    <p class="muted">読み込むと、いまの記録はコードの記録に置きかわる。</p>
+    <button class="btn primary" type="button" data-go>とじる</button>
+  `, showDex);
+  const msg = m => { $('tMsg').textContent = m; };
+  $('tMake').addEventListener('click', async () => {
+    save();
+    const code = await makeTransferCode();
+    $('tCode').value = code;
+    $('tCode').select();
+    let copied = false;
+    try { await navigator.clipboard.writeText(code); copied = true; } catch (e) {}
+    msg(copied ? `コピーした（${code.length}文字）。メモなどに貼って残しておこう` : `書き出した（${code.length}文字）。全部選んでコピーしておこう`);
+  });
+  let armed = false;
+  $('tLoad').addEventListener('click', async () => {
+    let s;
+    try { s = await readTransferCode($('tCode').value); } catch (e) { msg(e.message || '読み込めませんでした'); armed = false; return; }
+    const where = `${s.ch >= FINAL_CH ? '最終章' : `第${s.ch + 1}章`}・コイン ${s.coins}・図鑑 ${Object.keys(s.dex || {}).length}`;
+    if (!armed) { armed = true; $('tLoad').textContent = '本当に置きかえる'; msg(`コードの記録：${where}。もう一度押すと、いまの記録と置きかわる`); return; }
+    try {
+      localStorage.setItem(SAVE_KEY + '-before-transfer', localStorage.getItem(SAVE_KEY) || '');   // one step back, just in case
+      localStorage.setItem(SAVE_KEY, JSON.stringify(s));
+    } catch (e) { msg('保存できませんでした'); return; }
+    location.reload();
   });
 }
 $('dexBtn').addEventListener('click', showDex);
@@ -4098,7 +4172,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.67';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.68';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
