@@ -1648,7 +1648,7 @@ function layoutHidden(s, th) {
   if (all && !chosen.includes(all)) chosen[chosen.length - 1] = all;
   const T = chosen.map((it, n) => {
     const at = it.at.map(([x, y, r]) => ({ x: x * k + ox, y: y * k + oy, s: r * k / .55, src: [x, y, r] }));
-    return Object.assign({ t: n, e: it.id, ja: it.ja, at, all: it === all }, at[0]);
+    return Object.assign({ t: n, e: it.id, ja: it.ja, at, all: it === all, painted: true }, at[0]);
   });
   return { seed: s.seed, th, items: [], T, hidden: true };
 }
@@ -2948,18 +2948,21 @@ function drawItem(g, it) {
 }
 // A found item is coloured in with a watercolour wash, then its lines are re-inked on top.
 function drawFound(g, t) {
-  const col = WASH[(t.e.length * 7 + t.e.charCodeAt(0)) % WASH.length];
+  // The scenes are in full colour: a found thing gets a soft golden glow and a gold ring painted around it.
   const r = Math.max(30, t.s * .5);
   g.save();
-  g.globalCompositeOperation = 'multiply';
-  const gr = g.createRadialGradient(t.x, t.y, 0, t.x, t.y, r);
-  gr.addColorStop(0, col + '.8)');
-  gr.addColorStop(.65, col + '.55)');
-  gr.addColorStop(1, col + '0)');
+  const gr = g.createRadialGradient(t.x, t.y, r * .45, t.x, t.y, r * 1.15);
+  gr.addColorStop(0, 'rgba(255,214,120,0)');
+  gr.addColorStop(.7, 'rgba(255,214,120,.28)');
+  gr.addColorStop(1, 'rgba(255,214,120,0)');
   g.fillStyle = gr;
-  g.beginPath(); g.arc(t.x, t.y, r, 0, Math.PI * 2); g.fill();
+  g.beginPath(); g.arc(t.x, t.y, r * 1.15, 0, Math.PI * 2); g.fill();
+  g.lineWidth = Math.max(4, r * .09);
+  g.strokeStyle = 'rgba(40,24,6,.55)'; g.beginPath(); g.arc(t.x, t.y, r + g.lineWidth * .6, 0, Math.PI * 2); g.stroke();
+  g.strokeStyle = '#f0c860'; g.beginPath(); g.arc(t.x, t.y, r, 0, Math.PI * 2); g.stroke();
   g.restore();
-  drawItem(g, Object.assign({}, t, { a: 1 }));
+  // the painted scenes already hold the thing itself; re-inking the card's sprite on top would only blot it
+  if (!t.painted) drawItem(g, Object.assign({}, t, { a: 1 }));
 }
 
 let scn = null;
@@ -2972,7 +2975,7 @@ async function renderScene() {
   const ids = [...new Set(L.items.map(it => it.e))];
   let bg;
   try {
-    [bg] = await Promise.all([loadImg(`assets/${L.hidden ? L.th.hs : L.th.bg}.jpg`), ...ids.map(id => loadImg(findSrc(id)).then(im => { sprites[id] = im; }))]);
+    [bg] = await Promise.all([loadImg(`assets/${L.hidden ? L.th.hs : L.th.bg}.jpg?c=2`), ...ids.map(id => loadImg(findSrc(id)).then(im => { sprites[id] = im; }))]);
   } catch (e) {
     $('sload').textContent = '画像を読み込めませんでした。通信状態を確認して、もう一度開いてください。';
     return;
@@ -4099,7 +4102,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.65';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.66';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
