@@ -121,7 +121,7 @@
       const v = S.cells.findIndex(c => c && c.k === 'vault'), it = S.cells.findIndex(c => c && c.k === 'item' && c.t === 0);
       if (v >= 0 && it >= 0) { await PB.drag(it, v); await PB.tap(v); await w(200); click($('panel').querySelector('[data-take="0"]')); await w(200); await settle(); D.vault = 1; note('vault: stored and took out'); }
     }
-    for (const id of ['eye', 'reroll', 'pack', 'myth', 'chest', 'unseal']) if (!D['buy_' + id] && st().coins >= 450) { if (await shopBuy(id)) { D['buy_' + id] = 1; note('shop: bought ' + id); } break; }
+    for (const id of ['eye', 'reroll', 'pack', 'cookie', 'myth', 'chest', 'unseal']) if (!D['buy_' + id] && $('shopBtn') && st().coins >= 700) { if (await shopBuy(id)) { D['buy_' + id] = 1; note('shop: bought ' + id); } break; }
     if (!D.res && st().coins >= 500) { $('shopBtn').click(); await w(250); if (click($('panel').querySelector('[data-res]'))) { D.res = 1; note('research: one step'); } await w(250); await settle(); }
     if ((D.dice || 0) < 3 && st().coins >= 600) { $('shopBtn').click(); await w(250); $('toDice').click(); await w(250); $('rollBtn').click(); await w(1900); note('dice: ' + $('diceMsg').innerText + ' / ' + $('figOut').innerText.split('\n')[0]); D.dice = (D.dice || 0) + 1; await settle(); }
     if (!D.expand && st().coins >= 900) { const v = S.cells.findIndex(c => c && c.k === 'vault'); if (v >= 0) { await PB.tap(v); await w(200); if (click($('storeUp'))) { D.expand = 1; note('vault expanded'); } await w(200); await settle(); } }

@@ -598,8 +598,6 @@ details.myth p{margin:6px 0 2px;font-size:12px;line-height:1.7}
 .san.r2{color:#e0b060}
 .san.r1{color:#ff8a8f;border-color:var(--stripe)}
 .sview.shaken::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;box-shadow:inset 0 0 90px rgba(150,20,40,.55);animation:breathe 2.4s ease-in-out infinite}
-.find.blur:not(.got) img{filter:blur(6px) grayscale(.5)}
-.find.blur::before{content:'おぼろ';position:absolute;left:6px;top:6px;background:#5a4a7a;color:#fff;font-size:11px;font-weight:800;border-radius:5px;padding:0 5px;z-index:1}
 .rating{font-size:40px;letter-spacing:.12em;color:var(--gold);text-shadow:0 0 16px rgba(232,196,104,.6);line-height:1}
 .rating.r1{color:#c99}
 .title-up{background:linear-gradient(90deg,transparent,rgba(232,196,104,.2),transparent);padding:6px 16px;border-radius:10px}
@@ -1611,8 +1609,8 @@ const HIDDEN = {
     { id: 'crystal', ja: '水晶', at: [[490,273,25],[1212,697,30]], amb: 1 },
     { id: 'key', ja: '鍵', at: [[273,373,18],[197,504,15]], amb: 1 },
     { id: 'candle', ja: 'ろうそく', at: [[363,547,25],[965,110,25],[263,451,20]], amb: 1 },
-    { id: 'watch', ja: '懐中時計', at: [[273,707,25],[573,544,18]], amb: 1 },
-    { id: 'compass', ja: '羅針盤', at: [[227,774,22]], amb: 1 },
+    { id: 'watch', ja: '懐中時計', at: [[273,707,25],[573,544,18]] },
+    { id: 'compass', ja: '羅針盤', at: [[227,774,22]] },
     { id: 'skull', ja: 'ドクロ', at: [[1112,477,25]] },
     { id: 'quill', ja: '羽根ペン', at: [[1099,711,30]] },
     { id: 'book', ja: '本', at: [[725,784,30],[320,451,20]] },
@@ -1622,6 +1620,8 @@ const HIDDEN = {
     { id: 'bone', ja: '骨', at: [[163,347,15],[1172,564,15]], amb: 1 },
     { id: 'ring', ja: '指輪', at: [[527,751,15],[792,611,20]], amb: 1 },
     { id: 'anchor', ja: 'いかり', at: [[1015,377,20]] },
+    { id: 'medal', ja: 'メダル', at: [[454,338,24],[1112,526,24]] },
+    { id: 'box', ja: '小箱', at: [[548,602,20]] },
   ] },
 };
 THEMES[0].hs = 'hs-0b';
@@ -3001,9 +3001,6 @@ async function renderScene() {
     const parts = (s.parts || {})[t.t] || (s.found.includes(t.t) ? [0] : []);
     parts.forEach(n => { const p = t.at ? t.at[n] : t; if (!p) return; const at = Object.assign({}, t, { x: p.x, y: p.y, s: p.s }); drawFound(g, at); addMark(at); });
   });
-  // From chapter 3 on, a few cards show only a blurred picture (the name stays) until found.
-  const RB = mulberry(s.seed + 7), blurN = s.ch >= 2 ? Math.min(3, s.ch - 1) : 0;
-  L.T.filter(t => !t.all).map(t => [RB(), t]).sort((a, b) => a[0] - b[0]).slice(0, blurN).forEach(([, t]) => { t.blur = true; });
   scn = L;
   $('sload').hidden = true;
   fitView();
@@ -3179,7 +3176,7 @@ function renderFinds() {
   paintSan($('san'), san, $('sview'));
   $('finds').innerHTML = T.map(t => {
     const cnt = t.all ? `<b class="cnt">${((s.parts || {})[t.t] || []).length} / ${t.at.length}</b>` : '';
-    return `<span class="find${t.all ? ' all' : ''}${t.blur ? ' blur' : ''}${s.found.includes(t.t) ? ' got' : ''}"><img src="${t.thumb || findSrc(t.e)}" alt="">${cnt}<span class="nm">${t.ja || FINDS[t.e]}</span></span>`;
+    return `<span class="find${t.all ? ' all' : ''}${s.found.includes(t.t) ? ' got' : ''}"><img src="${t.thumb || findSrc(t.e)}" alt="">${cnt}<span class="nm">${t.ja || FINDS[t.e]}</span></span>`;
   }).join('');
   renderTop();
 }
@@ -3939,7 +3936,6 @@ function helpBody(k) {
   if (k === 'search') return [
     li('🔍', '細かく描かれた情景の中から、<b>手がかりの品</b>を探してタップ。見つけた品には色がつく。'),
     li('🔢', '「<b>全部</b>」の札の品は、絵の中にいくつもある。ぜんぶ見つけたら1つ完了。'),
-    li('🌀', '「<b>おぼろ</b>」の札の品は、絵がぼやけている。名前を手がかりに探そう。'),
     li('🤏', '<b>ピンチで拡大</b>、ドラッグで移動。＋ − ボタンでも拡大できる。そっくりな品（鍵と古い鍵など）にも気をつけて。'),
     li('<img class="uic" src="assets/x-ui-eye.png" alt="">', '困ったら<b>千里眼</b>。だいたいの場所まで連れていってくれる。'),
     li('🧠', '<b>正気度</b>：まちがえたタップで −6。最後に残った正気度で★評価が決まる（75以上で★★★）。千里眼は使っても正気度は減らない。'),
@@ -4102,7 +4098,7 @@ function hideTitle() {
   t.classList.add('gone');
   setTimeout(() => { t.hidden = true; }, 600);
 }
-const APP_VERSION = 'ver 1.66';   // shown on the title screen; bump with each release
+const APP_VERSION = 'ver 1.67';   // shown on the title screen; bump with each release
 function showTitle(hasSave) {
   $('tver').textContent = APP_VERSION;
   const t = $('title');
